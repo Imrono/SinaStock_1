@@ -16,13 +16,13 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{848e3a12-0d00-4e83-a2df-ad9921f0af99}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Common">
-      <UniqueIdentifier>{37431dfe-7a7c-408a-88fe-4c061437adb0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Data_sina">
       <UniqueIdentifier>{313feb26-99a2-469f-a9c3-fc665e848c09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Data_sina">
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{37431dfe-7a7c-408a-88fe-4c061437adb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data_sina">
       <UniqueIdentifier>{0b88fc11-2c52-4d0b-91ab-c5014453fa96}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -31,22 +31,22 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Common\stockData.cpp">
-      <Filter>Resource Files\Common</Filter>
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
     <ClCompile Include="Data_sina\DataStruct_sina.cpp">
-      <Filter>Resource Files\Data_sina</Filter>
+      <Filter>Source Files\Data_sina</Filter>
     </ClCompile>
     <ClCompile Include="Data_sina\getData_sina.cpp">
-      <Filter>Resource Files\Data_sina</Filter>
+      <Filter>Source Files\Data_sina</Filter>
     </ClCompile>
     <ClCompile Include="Common\stock2fpTable.cpp">
-      <Filter>Resource Files\Common</Filter>
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\HttpUrl.cpp">
-      <Filter>Resource Files\Common</Filter>
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\GlobalParam.cpp">
-      <Filter>Resource Files\Common</Filter>
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
