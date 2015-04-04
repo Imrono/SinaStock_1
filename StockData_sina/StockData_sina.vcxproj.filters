@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{848e3a12-0d00-4e83-a2df-ad9921f0af99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Common">
+      <UniqueIdentifier>{37431dfe-7a7c-408a-88fe-4c061437adb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Data_sina">
+      <UniqueIdentifier>{313feb26-99a2-469f-a9c3-fc665e848c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Data_sina">
+      <UniqueIdentifier>{0b88fc11-2c52-4d0b-91ab-c5014453fa96}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\stockData.cpp">
+      <Filter>Resource Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Data_sina\DataStruct_sina.cpp">
+      <Filter>Resource Files\Data_sina</Filter>
+    </ClCompile>
+    <ClCompile Include="Data_sina\getData_sina.cpp">
+      <Filter>Resource Files\Data_sina</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\stock2fpTable.cpp">
+      <Filter>Resource Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HttpUrl.cpp">
+      <Filter>Resource Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\GlobalParam.cpp">
+      <Filter>Resource Files\Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\stockData.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Data_sina\getData_sina.h">
+      <Filter>Header Files\Data_sina</Filter>
+    </ClInclude>
+    <ClInclude Include="Data_sina\DataStruct_sina.h">
+      <Filter>Header Files\Data_sina</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\stock2fpTable.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HttpUrl.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\GlobalParam.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
