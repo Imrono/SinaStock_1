@@ -10,9 +10,11 @@ using namespace std;
 #include "Common//stock2fpTable.h"
 #include "Common//HttpUrl.h"
 #include "Common//GlobalParam.h"
+#include "Common//TraceMicro.h"
 
 int main()
 {
+	STATIC_TRACE("/D \"STATIC_TRACE_OPEN\"%d,%f,%sstatic trace test!!\n",4,4.5,"hhh   ");
 	printf_s("######Now @ UrlAsynchronous branch######\n");
 //////////////////////////////////////////////////////////////////////
 	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036", "test.stk");
