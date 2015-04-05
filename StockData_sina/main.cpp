@@ -66,7 +66,7 @@ int main()
 	printf_s("#######%d\n", tb.getTableSize());
 
 	//urlopen_sina_TB(url_req.c_str(), tb);
-	urlopen_sina_TB_ex(url_req.c_str(), tb);
+// 	urlopen_sina_TB_ex(url_req.c_str(), tb);
 
 	// -- close ----------------------------
 	tb.closeAllFiles();
