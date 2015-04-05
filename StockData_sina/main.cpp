@@ -14,6 +14,11 @@ using namespace std;
 int main()
 {
 	printf_s("######Now @ UrlAsynchronous branch######\n");
+//////////////////////////////////////////////////////////////////////
+	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036", "test.stk");
+	AsyncWinINet::AsyncThread(asyn_test.getThreadInfo());
+
+//////////////////////////////////////////////////////////////////////
 	HttpUrlGetSyn Url_sina("stock_sina");
 	BYTE* tmp = Url_sina.GetBuf();
 	tmp[0] = '4';
