@@ -134,7 +134,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 			i_buf.dwBufferLength = 1024;
 	
 			//重置读数据事件
-			ResetEvent(p->hEvent[0]);
+			ResetEvent(p->hEvent[HANDLE_SUCCESS]);
 			if (FALSE == InternetReadFileEx(p->hFile, &i_buf, IRF_ASYNC, (DWORD)p)) {
 				if (ERROR_IO_PENDING == ::GetLastError())
 					if (WaitExitEvent(p)) break;
@@ -157,7 +157,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	}
 
 	//设置子线程退出事件，通知回调线程退出
-	SetEvent(p->hEvent[2]);
+	SetEvent(p->hEvent[THREAD_EXIT]);
   
 	//等待回调线程安全退出
 	//WaitForSingleObject(p->hCallbackThread, INFINITE);
@@ -177,11 +177,11 @@ DWORD WINAPI AsyncWinINet::AsyncCallbackThread(LPVOID lpParameter)
 	InternetSetStatusCallback(p->hInternet, AsyncWinINet::AsyncInternetCallback);
 
 	//通知子线程回调函数设置成功，子线程可以继续工作
-	SetEvent(p->hEvent[0]);
+	SetEvent(p->hEvent[HANDLE_SUCCESS]);
 
 	//等待用户终止事件或者子线程结束事件
 	//子线程结束前需要设置子线程结束事件，并等待回调线程结束
-	WaitForSingleObject(p->hEvent[2], INFINITE);
+	WaitForSingleObject(p->hEvent[THREAD_EXIT], INFINITE);
 
 	return 0;
 }
@@ -205,25 +205,21 @@ void CALLBACK AsyncWinINet::AsyncInternetCallback(HINTERNET hInternet,
   
 		//句柄被关闭
 		case INTERNET_STATUS_HANDLE_CLOSING:
-			SetEvent(p->hEvent[1]);
+			SetEvent(p->hEvent[HANDLE_CLOSE]);
 			break;
 
 		//一个请求完成，比如一次句柄创建的请求，或者一次读数据的请求
 		case INTERNET_STATUS_REQUEST_COMPLETE:
 			if (ERROR_SUCCESS == ((LPINTERNET_ASYNC_RESULT)(lpvStatusInformation))->dwError)
-			{
 				//设置句柄被创建事件或者读数据成功完成事件
-				SetEvent(p->hEvent[0]);
-			}
+				SetEvent(p->hEvent[HANDLE_SUCCESS]);
 			else
-			{
 				//如果发生错误，则设置子线程退出事件 这里也是一个陷阱，经常会忽视处理这个错误，
-				SetEvent(p->hEvent[2]);
-			}
+				SetEvent(p->hEvent[THREAD_EXIT]);
 			break;
 
 		case INTERNET_STATUS_CONNECTION_CLOSED:
-			SetEvent(p->hEvent[2]);
+			SetEvent(p->hEvent[THREAD_EXIT]);
 			break;
 	}
 }
