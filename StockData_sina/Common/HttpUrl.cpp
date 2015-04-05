@@ -90,9 +90,12 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 //	WaitForSingleObject(p->hEvent[0], INFINITE);//等待回调函数设置成功事件
 	InternetSetStatusCallback(p->hInternet, AsyncWinINet::AsyncInternetCallback);
 
+	FILE *fp = NULL;
+	fopen_s(&fp, p->saved_filename.c_str(), "w+");
+
+
 	ResetEvent(p->hEvent[HANDLE_SUCCESS]);	//重置句柄被创建事件
 	p->hFile = InternetOpenUrl(p->hInternet, p->url.c_str(), NULL, NULL, INTERNET_FLAG_DONT_CACHE|INTERNET_FLAG_RELOAD, (DWORD)p);
-	FILE *fp = NULL;
 
 	while(true) {
 		if (NULL == p->hFile) {
@@ -120,7 +123,6 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	
 		//f. 使用标记 IRF_ASYNC 读数据 InternetReadFileEx
 		//为了向主线程报告进度，我们设置每次读数据最多 1024 字节
-		fopen_s(&fp, p->saved_filename.c_str(), "w+");
 
 		char lpvBuffer[1024];
 		p->dwContentLength = 0; //Content-Length: 202749
