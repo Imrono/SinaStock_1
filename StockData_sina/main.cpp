@@ -13,8 +13,8 @@ using namespace std;
 
 int main()
 {
-
-	HttpUrlGet Url_sina("stock_sina");
+	printf_s("######Now @ UrlAsynchronous branch######\n");
+	HttpUrlGetSyn Url_sina("stock_sina");
 	BYTE* tmp = Url_sina.GetBuf();
 	tmp[0] = '4';
 	Url_sina.PrintBuf();
