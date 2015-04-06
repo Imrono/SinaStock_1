@@ -14,15 +14,14 @@ using namespace std;
 
 int main()
 {
-	printf_s("######Now @ TraceObject branch######\n");
 	printf_s("######Now @ master branch!!######\n");
 	getTraceConfigFromFile();
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
 	}
 
 //////////////////////////////////////////////////////////////////////
-	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036", "test.stk");
+	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036,sz000333", "test.stk");
 	AsyncWinINet::AsyncThread(asyn_test.getThreadInfo());
 
 //////////////////////////////////////////////////////////////////////
@@ -73,7 +72,7 @@ int main()
 	printf_s("#######%d\n", tb.getTableSize());
 
 	//urlopen_sina_TB(url_req.c_str(), tb);
-// 	urlopen_sina_TB_ex(url_req.c_str(), tb);
+	urlopen_sina_TB_ex(url_req.c_str(), tb);
 
 	// -- close ----------------------------
 	tb.closeAllFiles();

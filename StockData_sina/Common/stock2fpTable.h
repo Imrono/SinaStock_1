@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "..//Common//GlobalParam.h"
+#include "..//Common//TraceMicro.h"
 #include "..//Data_sina//DataStruct_sina.h"
 
 #define DEFAULT_TABLE_SIZE	10

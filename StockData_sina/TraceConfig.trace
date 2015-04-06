@@ -2,6 +2,9 @@
 #define URL_TRACE		    0
 #define CALLBACE_TRACE	1
 #define WAIT_TRACE		  2
+#define FILE_TRACE		  3
+#define ANALYZE_TRACE	  4
+#define PROGRESS_TRACE	5
 NUM: 0,1,2,3,4,5;
-VAL: 1,1,1,0,0,0;
+VAL: 1,1,1,1,1,1;
 

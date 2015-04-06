@@ -9,7 +9,7 @@ HttpUrlGetSyn::HttpUrlGetSyn(const char* HttpName, DWORD dwAccessType) {
 	bufSize = MAX_RECV_BUF_SIZE;
 	buf = new BYTE[bufSize];
 	memset(buf, 0, bufSize*sizeof(BYTE));
-	printf_s("hSession initialed.\n");
+	STATIC_TRACE(URL_TRACE, "URL: hSession initialed.\n");
 }
 HttpUrlGetSyn::~HttpUrlGetSyn() {
 	InternetCloseHandle(hSession);	hSession = NULL;
@@ -17,7 +17,7 @@ HttpUrlGetSyn::~HttpUrlGetSyn() {
 }
 HINTERNET HttpUrlGetSyn::OpenUrl(const char* url) {
 	hHttp = InternetOpenUrl(hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
-	if (NULL != hHttp) printf_s("successful opened:\n%s\n", url);
+	if (NULL != hHttp) STATIC_TRACE(URL_TRACE, "URL: successful opened:\n%s\n", url);
 	return hHttp;
 }
 void HttpUrlGetSyn::CloseUrl() {
@@ -57,7 +57,7 @@ HttpUrlGetAsyn::HttpUrlGetAsyn(const char* HttpName, DWORD dwAccessType) {
 	bufSize = MAX_RECV_BUF_SIZE;
 	buf = new BYTE[bufSize];
 	memset(buf, 0, bufSize*sizeof(BYTE));
-	printf_s("hSession initialed.\n");
+	STATIC_TRACE(URL_TRACE, "URL: hSession initialed.\n");
 }
 HttpUrlGetAsyn::~HttpUrlGetAsyn() {
 	InternetCloseHandle(hSession);	hSession = NULL;
@@ -91,7 +91,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	InternetSetStatusCallback(p->hInternet, AsyncWinINet::AsyncInternetCallback);
 
 	FILE *fp = NULL;
-	fopen_s(&fp, p->saved_filename.c_str(), "w+");
+	fopen_s(&fp, p->saved_filename.c_str(), "r+");
 
 
 	ResetEvent(p->hEvent[HANDLE_SUCCESS]);	//重置句柄被创建事件

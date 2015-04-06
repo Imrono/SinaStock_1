@@ -5,6 +5,10 @@
 #define URL_TRACE		0
 #define CALLBACE_TRACE	1
 #define WAIT_TRACE		2
+#define FILE_TRACE		3
+#define ANALYZE_TRACE	4
+#define PROGRESS_TRACE	5
+
 
 #define TRACE_CONFIG_BUF_SIZE	128
 
@@ -20,7 +24,9 @@
 #endif // STATIC_TRACE_OPEN | _DEBUG
 
 #define INFO(...) \
-	do { printf_s(__VA_ARGS__); } while (0)
+	do { printf_s("INFO: "); printf_s(__VA_ARGS__); } while (0)
+#define EROR(...) \
+	do { printf_s("ERROR: "); printf_s(__VA_ARGS__); } while (0)
 
 void getTraceConfigFromFile();
 

@@ -11,7 +11,7 @@ static const char* stock_identify = "var hq_str_";
 
 void urlopen_sina(const char* url, char* fileName, char* fileType)
 {
-	printf_s("%d,%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina));
+	INFO("sizeof(DataUpdate_sina):%d, sizeof(Data_sina):%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina));
 	HINTERNET hSession = InternetOpen(_T("UrlTest"), INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if(hSession != NULL)
 	{
@@ -19,7 +19,7 @@ void urlopen_sina(const char* url, char* fileName, char* fileType)
 
 		if (hHttp != NULL)
 		{
-			printf_s("%s\n", url);
+			STATIC_TRACE(URL_TRACE, "%s\n", url);
 			int DataSize = 2;
 			Data_sina *Out_data = new Data_sina[DataSize];
 			BYTE Temp[MAX_RECV_BUF_SIZE] = {0};
@@ -33,10 +33,10 @@ void urlopen_sina(const char* url, char* fileName, char* fileType)
 				if (Number) { 
 					if (Number == MAX_RECV_BUF_SIZE-1) {printf("not all read");}
 					NofStock = data_analyseAll((char*) Temp, Out_data, DataSize);
-					printf_s("%s", Temp);
+					STATIC_TRACE(ANALYZE_TRACE, "%s", Temp);
 					data_WriteAll(fileName, fileType, Out_data, DataSize <= NofStock ? DataSize : NofStock);
 // 					getchar();
-					printf_s("ReadTimes:%d, ReadNum:%d\n", ++ReadTimes, Number);
+					STATIC_TRACE(PROGRESS_TRACE, "ReadTimes:%d, ReadNum:%d\n", ++ReadTimes, Number);
 				}
 				else {break;}
 			} while (1);
@@ -108,13 +108,12 @@ int data_analyseAll(const char* const In_data, Data_sina *Out_data, int data_len
 	{
 		if (NULL != (tmp = data_analyseOne(tmp, Out_data[i])))
 			i++;
-		else
-		{
-			printf_s("Data_analyse All Finished!!!!\n");
+		else {
+			STATIC_TRACE(ANALYZE_TRACE, "Data_analyse All Finished!!!!\n");
 			break;
 		}
 	}
-	printf_s("%d stocks have been analyzed!!\n", i);
+	STATIC_TRACE(ANALYZE_TRACE, "%d stocks have been analyzed!!\n", i);
 	return i;
 }
 const char* data_analyseOne(const char* const In_data, Data_sina &Out_data)
@@ -132,7 +131,7 @@ const char* data_analyseOne(const char* const In_data, Data_sina &Out_data)
 		if		(strcmp(pIn_data+idx, "sh")) { Out_data.stockNavi.market = SH;	idx += 2;}
 		else if	(strcmp(pIn_data+idx, "sz")) { Out_data.stockNavi.market = SZ;	idx += 2;}
 		else if	(strcmp(pIn_data+idx, "hk")) { Out_data.stockNavi.market = HK;	idx += 2;}
-		else {	printf_s("Undefined Market!!");}
+		else {	EROR("Undefined Market!!");}
 		
 		sscanf_s(pIn_data+idx, "%d=\"%[^,],%f,%f,%f,%f,%f,%f,%f,%d,%lf,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d-%d-%d,%d:%d:%d,00\";",
 			&Out_data.stockNavi.symbol, Out_data.stockNavi.name, sizeof(Out_data.stockNavi.name), &Out_data.td_open, &Out_data.ysd_close,
@@ -257,7 +256,7 @@ string GetStrSymbol(const char* const In_data)
 
 void urlopen_sina_TB(const char* url, const stock2fpTable &tb)
 {
-	printf_s("%d,%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina));
+	INFO("sizeof(DataUpdate_sina):%d, sizeof(Data_sina):%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina));
 	HINTERNET hSession = InternetOpen(NULL, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if(hSession != NULL) {
 		int i = 0;
@@ -266,7 +265,7 @@ void urlopen_sina_TB(const char* url, const stock2fpTable &tb)
 			Sleep(time_step);
 
 			if (++i > times_get)	break;
-			else					printf_s("i=%d\n", i);
+			else					INFO("openURL_write times = %d\n", i);
 		}
 	}
 	InternetCloseHandle(hSession);	hSession = NULL;
@@ -278,7 +277,7 @@ int openURL_write(HINTERNET hSession, const char* url, const stock2fpTable &tb)
 	HINTERNET hHttp = InternetOpenUrl(hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
 
 	if (hHttp != NULL) {
-		printf_s("opened:\n%s\n", url);
+		STATIC_TRACE(URL_TRACE, "opened:\n%s\n", url);
 		string data_recv;
 
 		ReadDataFromInternet(hHttp, data_recv);
@@ -304,7 +303,7 @@ void ReadDataFromInternet(HINTERNET hHttp, string &data_recv)
 
 		if (Number) { 
 // 			printf_s("Temp:\n%s\ndata_recv:\n%s", Temp, data_recv.c_str());
-			printf_s("ReadTimes:%d, ReadNum:%d\n", ++ReadTimes, Number);
+			STATIC_TRACE(PROGRESS_TRACE, "ReadTimes:%d, ReadNum:%d\n", ++ReadTimes, Number);
 		}
 		else {break;}
 	}
@@ -313,24 +312,25 @@ int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
 {
 	Data_sina Out_data;
 	Data_Monitor Out_dataMonitor;
-	int i = 0, IsRecord = 0;
+	int i = 0, j = 0, IsRecord = 0;
 	const char* tmp = In_data;
 	while (1)
 	{
 		if (NULL != (tmp = data_analyseOne(tmp, Out_data))) {
 			data_WriteTableOne(tb, Out_data);
 			if (0 != (IsRecord = data_DeepAnalyseOne(Out_data, Out_dataMonitor))) {
-				printf_s("%s, Deep Analyze need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
+				STATIC_TRACE(ANALYZE_TRACE, "%s, Deep Analyze need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
 				tb.writeAttentionFile(Out_dataMonitor);
+				j++;
 			}
 			i++;
 		}
 		else {
-			printf_s("Data_analyse All Finished!!!!\n");
+			STATIC_TRACE(ANALYZE_TRACE, "Data_analyse All Finished!!!!\n");
 			break;
 		}
 	}
-	printf_s("%d stocks have been analyzed!!\n", i);
+	STATIC_TRACE(PROGRESS_TRACE, "%d stocks have been analyzed!! total %d should pay attention\n", i, j);
 	return i;
 }
 
@@ -342,14 +342,14 @@ void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb)
 
 		Sleep(time_step);
 		if (++i > times_get)	break;
-		else					printf_s("times_get=%d\n", i);
+		else					INFO("times_get=%d\n", i);
 	}
 }
 int openURL_write_ex(const char* url, const stock2fpTable &tb)
 {
 	HttpUrlGetSyn urlGet;
 	if (NULL != urlGet.OpenUrl(url)) {
-		printf_s("opened:\n%s\n", url);
+		STATIC_TRACE(URL_TRACE, "opened:\n%s\n", url);
 		string data_recv;
 		urlGet.ReadUrlAll(data_recv);
 		int NofStock = data_analyse2FileAll(data_recv.c_str(), tb);
