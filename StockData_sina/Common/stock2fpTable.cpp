@@ -117,19 +117,19 @@ int stock2fpTable::writeAttentionFile(const Data_Monitor& In_data) const
 		pTmp += strlen(pTmp);
 
 		if (In_data.need2Record & WEIMAI3_THRESHOLD_TOUCH) {
-			sprintf_s(pTmp, 128, "weimai3: large touch %.2f @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX], In_data.bTotalMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "weimai3: large touch %.2fw @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		if (In_data.need2Record & WEIMAI4_THRESHOLD_TOUCH) {
-			sprintf_s(pTmp, 128, "weimai4: large touch %.2f @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX], In_data.bTotalMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "weimai4: large touch %.2fw @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		if (In_data.need2Record & WEIMAI3_TOTAL_TOUCH) {
-			sprintf_s(pTmp, 128, "weimai3: total touch %.2f now @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX], In_data.bTotalMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "weimai3: total touch %.2fw now @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		if (In_data.need2Record & WEIMAI4_TOTAL_TOUCH) {
-			sprintf_s(pTmp, 128, "weimai4: total touch %.2f now @ price %.2f\n", In_data.sTotalMoneyIn5[MONEY_IDX], In_data.sTotalMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "weimai4: total touch %.2fw now @ price %.2f\n", In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 
