@@ -179,28 +179,37 @@ const char* data_analyseOne(const char* const In_data, Data_sina &Out_data)
 int data_DeepAnalyseOne(const Data_sina &In_data, Data_Monitor &Out_dataMonitor)
 {
 	//string can't use memset
-	Out_dataMonitor.bTotalMoneyIn5 = 0.0;
-	Out_dataMonitor.sTotalMoneyIn5 = 0.0;
-	Out_dataMonitor.bLargeMoneyIn5 = 0.0;
-	Out_dataMonitor.sLargeMoneyIn5 = 0.0;
+	Out_dataMonitor.bTotalMoneyIn5[MONEY_IDX] = 0.0;
+	Out_dataMonitor.sTotalMoneyIn5[MONEY_IDX] = 0.0;
+	Out_dataMonitor.bLargeMoneyIn5[MONEY_IDX] = 0.0;
+	Out_dataMonitor.sLargeMoneyIn5[MONEY_IDX] = 0.0;
 	Out_dataMonitor.need2Record = 0;
 	for (int i = 0; i < NUM_ORDERS; i++) {
-		Out_dataMonitor.bMoney[i] = In_data.dataUpdate.upOrder_price[i] * In_data.dataUpdate.upOrder_stock[i];
-		Out_dataMonitor.sMoney[i] = In_data.dataUpdate.downOrder_price[i] * In_data.dataUpdate.downOrder_stock[i];
-		Out_dataMonitor.bTotalMoneyIn5 += Out_dataMonitor.bMoney[i];
-		Out_dataMonitor.sTotalMoneyIn5 += Out_dataMonitor.sMoney[i];
+		Out_dataMonitor.bMoney[MONEY_IDX][i] = In_data.dataUpdate.upOrder_price[i] * In_data.dataUpdate.upOrder_stock[i];
+		Out_dataMonitor.sMoney[MONEY_IDX][i] = In_data.dataUpdate.downOrder_price[i] * In_data.dataUpdate.downOrder_stock[i];
+		Out_dataMonitor.bTotalMoneyIn5[MONEY_IDX] += Out_dataMonitor.bMoney[MONEY_IDX][i];
+		Out_dataMonitor.sTotalMoneyIn5[MONEY_IDX] += Out_dataMonitor.sMoney[MONEY_IDX][i];
 
-		Out_dataMonitor.bLargeMoneyIn5 = Out_dataMonitor.bMoney[i] > Out_dataMonitor.bLargeMoneyIn5 ? Out_dataMonitor.bMoney[i] : Out_dataMonitor.bLargeMoneyIn5;
-		Out_dataMonitor.sLargeMoneyIn5 = Out_dataMonitor.sMoney[i] > Out_dataMonitor.sLargeMoneyIn5 ? Out_dataMonitor.sMoney[i] : Out_dataMonitor.sLargeMoneyIn5;
+		if (Out_dataMonitor.bMoney[MONEY_IDX][i] > Out_dataMonitor.bLargeMoneyIn5[MONEY_IDX]) {
+			Out_dataMonitor.bLargeMoneyIn5[MONEY_IDX] = Out_dataMonitor.bMoney[MONEY_IDX][i];
+			Out_dataMonitor.bLargeMoneyIn5[PRICE_IDX] = In_data.dataUpdate.upOrder_price[i];
+		}
+		if (Out_dataMonitor.sMoney[MONEY_IDX][i] > Out_dataMonitor.sLargeMoneyIn5[MONEY_IDX]) {
+			Out_dataMonitor.sLargeMoneyIn5[MONEY_IDX] = Out_dataMonitor.sMoney[MONEY_IDX][i];
+			Out_dataMonitor.sLargeMoneyIn5[PRICE_IDX] = In_data.dataUpdate.downOrder_price[i];
+		}
 	}
-	Out_dataMonitor.diffMoneyIn5 = Out_dataMonitor.bTotalMoneyIn5 - Out_dataMonitor.sTotalMoneyIn5;
+	Out_dataMonitor.diffMoneyIn5[MONEY_IDX] = Out_dataMonitor.bTotalMoneyIn5[MONEY_IDX] - Out_dataMonitor.sTotalMoneyIn5[MONEY_IDX];
 	Out_dataMonitor.time = In_data.dataUpdate.time;
 	Out_dataMonitor.strSymbol = In_data.stockNavi.strSymbol;
+	Out_dataMonitor.date = In_data.date;
+	Out_dataMonitor.bTotalMoneyIn5[PRICE_IDX] = In_data.dataUpdate.upOrder_price[0];
+	Out_dataMonitor.sTotalMoneyIn5[PRICE_IDX] = In_data.dataUpdate.downOrder_price[0];
 
-	if (Out_dataMonitor.bLargeMoneyIn5 > upOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI3_THRESHOLD_TOUCH;
-	if (Out_dataMonitor.sLargeMoneyIn5 > downOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI4_THRESHOLD_TOUCH;
-	if (Out_dataMonitor.bTotalMoneyIn5 > upOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI3_TOTAL_TOUCH;
-	if (Out_dataMonitor.sTotalMoneyIn5 > downOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI4_TOTAL_TOUCH;
+	if (Out_dataMonitor.bLargeMoneyIn5[MONEY_IDX] > upOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI3_THRESHOLD_TOUCH;
+	if (Out_dataMonitor.sLargeMoneyIn5[MONEY_IDX] > downOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI4_THRESHOLD_TOUCH;
+	if (Out_dataMonitor.bTotalMoneyIn5[MONEY_IDX] > upOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI3_TOTAL_TOUCH;
+	if (Out_dataMonitor.sTotalMoneyIn5[MONEY_IDX] > downOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI4_TOTAL_TOUCH;
 
 	return Out_dataMonitor.need2Record;
 }
@@ -311,7 +320,8 @@ int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
 		if (NULL != (tmp = data_analyseOne(tmp, Out_data))) {
 			data_WriteTableOne(tb, Out_data);
 			if (0 != (IsRecord = data_DeepAnalyseOne(Out_data, Out_dataMonitor))) {
-				printf_s("%s, Deep Analyse need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
+				printf_s("%s, Deep Analyze need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
+				tb.writeAttentionFile(Out_dataMonitor);
 			}
 			i++;
 		}

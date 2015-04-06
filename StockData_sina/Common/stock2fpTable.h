@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "..//Common//GlobalParam.h"
+#include "..//Data_sina//DataStruct_sina.h"
 
 #define DEFAULT_TABLE_SIZE	10
 #define TABLE_SIZE_STEP		10
@@ -28,7 +29,7 @@ public:
 	bool open(string fileName, char* fileType = "a+", char* tp = ".stk");
 	void close();
 	int write();
-	int write(const char* str, int len) {
+	int write(const char* str, int len) const {
 		return fwrite(str, len, 1, file);
 	}
 	int read();
@@ -56,6 +57,8 @@ public:
 		return mapStockFile[strSymbol];
 	}
 
+	int writeAttentionFile(const Data_Monitor& In_data) const;
+
 	bool addStock2File(string strSymbol);
 	int removeStock2File(string strSymbol);
 	int getTableSize() { return mapStockFile.size();}
@@ -79,6 +82,7 @@ private:
 	int NofFiles;
 	int NofOpened;
 	stockFile *files;
+	stockFile AttentionFile;
 
 	void initial();
 	void clean();

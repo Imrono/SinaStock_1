@@ -8,6 +8,9 @@ using namespace std;
 #include "..//Common//GlobalParam.h"
 #define NUM_ORDERS	5
 
+#define PRICE_IDX	0
+#define MONEY_IDX	1
+
 enum RecordType {
 	NOT_NEED_RECORD = 0,
 	WEIMAI3_THRESHOLD_TOUCH = 0x01,
@@ -59,15 +62,16 @@ struct Data_sina
 
 struct Data_Monitor
 {
-	float sMoney[NUM_ORDERS];
-	float bMoney[NUM_ORDERS];
-	float sTotalMoneyIn5;
-	float bTotalMoneyIn5;
-	float sLargeMoneyIn5;
-	float bLargeMoneyIn5;
-	float diffMoneyIn5;
+	float sMoney[2][NUM_ORDERS];
+	float bMoney[2][NUM_ORDERS];
+	float sTotalMoneyIn5[2];
+	float bTotalMoneyIn5[2];
+	float sLargeMoneyIn5[2];
+	float bLargeMoneyIn5[2];
+	float diffMoneyIn5[2];
 	string strSymbol;
 	stockTime time;
+	stockDate date;
 
 	int need2Record;
 };
