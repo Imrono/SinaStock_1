@@ -25,6 +25,7 @@ void ReadDataFromInternet(HINTERNET hHttp, string &data_recv);
 
 int data_analyseAll(const char* const In_data, Data_sina *Out_data, int data_len);
 const char* data_analyseOne(const char* const In_data, Data_sina &Out_data);
+int data_DeepAnalyseOne(const Data_sina &In_data, Data_Monitor &Out_dataMonitor);
 
 void data_WriteAll(const char* fileName, char* fileType, const Data_sina *const In_data, int write_times);
 bool data_WriteOne(const char* fileName, char* fileType, const DataUpdate_sina & In_dataUpdate);

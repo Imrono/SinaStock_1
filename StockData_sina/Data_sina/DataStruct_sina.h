@@ -8,6 +8,16 @@ using namespace std;
 #include "..//Common//GlobalParam.h"
 #define NUM_ORDERS	5
 
+enum RecordType {
+	NOT_NEED_RECORD = 0,
+	WEIMAI3_THRESHOLD_TOUCH = 0x01,
+	WEIMAI4_THRESHOLD_TOUCH = 0x02,
+	WEIMAI3_TOTAL_TOUCH = 0x04,
+	WEIMAI4_TOTAL_TOUCH = 0x08
+};
+
+struct Data_Monitor;
+
 struct DataStockNavi_sina
 {
 	string strSymbol;
@@ -45,6 +55,21 @@ struct Data_sina
 	DataUpdate_sina dataUpdate;
 
 	stockDate date;
+};
+
+struct Data_Monitor
+{
+	float sMoney[NUM_ORDERS];
+	float bMoney[NUM_ORDERS];
+	float sTotalMoneyIn5;
+	float bTotalMoneyIn5;
+	float sLargeMoneyIn5;
+	float bLargeMoneyIn5;
+	float diffMoneyIn5;
+	string strSymbol;
+	stockTime time;
+
+	int need2Record;
 };
 
 #endif

@@ -13,7 +13,7 @@ using namespace std;
 
 int main()
 {
-
+	printf_s("######Now @ AnalyseInTime branch!!######\n");
 	HttpUrlGet Url_sina("stock_sina");
 	BYTE* tmp = Url_sina.GetBuf();
 	tmp[0] = '4';

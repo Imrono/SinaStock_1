@@ -176,6 +176,34 @@ const char* data_analyseOne(const char* const In_data, Data_sina &Out_data)
 		return NULL;
 	}
 }
+int data_DeepAnalyseOne(const Data_sina &In_data, Data_Monitor &Out_dataMonitor)
+{
+	//string can't use memset
+	Out_dataMonitor.bTotalMoneyIn5 = 0.0;
+	Out_dataMonitor.sTotalMoneyIn5 = 0.0;
+	Out_dataMonitor.bLargeMoneyIn5 = 0.0;
+	Out_dataMonitor.sLargeMoneyIn5 = 0.0;
+	Out_dataMonitor.need2Record = 0;
+	for (int i = 0; i < NUM_ORDERS; i++) {
+		Out_dataMonitor.bMoney[i] = In_data.dataUpdate.upOrder_price[i] * In_data.dataUpdate.upOrder_stock[i];
+		Out_dataMonitor.sMoney[i] = In_data.dataUpdate.downOrder_price[i] * In_data.dataUpdate.downOrder_stock[i];
+		Out_dataMonitor.bTotalMoneyIn5 += Out_dataMonitor.bMoney[i];
+		Out_dataMonitor.sTotalMoneyIn5 += Out_dataMonitor.sMoney[i];
+
+		Out_dataMonitor.bLargeMoneyIn5 = Out_dataMonitor.bMoney[i] > Out_dataMonitor.bLargeMoneyIn5 ? Out_dataMonitor.bMoney[i] : Out_dataMonitor.bLargeMoneyIn5;
+		Out_dataMonitor.sLargeMoneyIn5 = Out_dataMonitor.sMoney[i] > Out_dataMonitor.sLargeMoneyIn5 ? Out_dataMonitor.sMoney[i] : Out_dataMonitor.sLargeMoneyIn5;
+	}
+	Out_dataMonitor.diffMoneyIn5 = Out_dataMonitor.bTotalMoneyIn5 - Out_dataMonitor.sTotalMoneyIn5;
+	Out_dataMonitor.time = In_data.dataUpdate.time;
+	Out_dataMonitor.strSymbol = In_data.stockNavi.strSymbol;
+
+	if (Out_dataMonitor.bLargeMoneyIn5 > upOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI3_THRESHOLD_TOUCH;
+	if (Out_dataMonitor.sLargeMoneyIn5 > downOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI4_THRESHOLD_TOUCH;
+	if (Out_dataMonitor.bTotalMoneyIn5 > upOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI3_TOTAL_TOUCH;
+	if (Out_dataMonitor.sTotalMoneyIn5 > downOrderThreshold) Out_dataMonitor.need2Record |= WEIMAI4_TOTAL_TOUCH;
+
+	return Out_dataMonitor.need2Record;
+}
 
 ReceiveDataType GetDataType(char* data)
 {
@@ -275,12 +303,16 @@ void ReadDataFromInternet(HINTERNET hHttp, string &data_recv)
 int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
 {
 	Data_sina Out_data;
-	int i = 0;
+	Data_Monitor Out_dataMonitor;
+	int i = 0, IsRecord = 0;
 	const char* tmp = In_data;
 	while (1)
 	{
 		if (NULL != (tmp = data_analyseOne(tmp, Out_data))) {
 			data_WriteTableOne(tb, Out_data);
+			if (0 != (IsRecord = data_DeepAnalyseOne(Out_data, Out_dataMonitor))) {
+				printf_s("%s, Deep Analyse need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
+			}
 			i++;
 		}
 		else {
