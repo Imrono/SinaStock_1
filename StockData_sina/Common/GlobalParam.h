@@ -10,5 +10,7 @@ extern int times_get;
 
 extern float upOrderThreshold;
 extern float downOrderThreshold;
+extern unsigned int StaticTraceParam;
+extern unsigned int DynamicTraceParam;
 
 #endif

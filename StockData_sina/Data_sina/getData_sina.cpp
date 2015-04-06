@@ -347,7 +347,7 @@ void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb)
 }
 int openURL_write_ex(const char* url, const stock2fpTable &tb)
 {
-	HttpUrlGet urlGet;
+	HttpUrlGetSyn urlGet;
 	if (NULL != urlGet.OpenUrl(url)) {
 		printf_s("opened:\n%s\n", url);
 		string data_recv;

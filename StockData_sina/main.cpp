@@ -10,11 +10,23 @@ using namespace std;
 #include "Common//stock2fpTable.h"
 #include "Common//HttpUrl.h"
 #include "Common//GlobalParam.h"
+#include "Common//TraceMicro.h"
 
 int main()
 {
-	printf_s("######Now @ AnalyseInTime branch!!######\n");
-	HttpUrlGet Url_sina("stock_sina");
+	printf_s("######Now @ TraceObject branch######\n");
+	printf_s("######Now @ master branch!!######\n");
+	getTraceConfigFromFile();
+	for (int i = 0; i < 3; i++) {
+		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
+	}
+
+//////////////////////////////////////////////////////////////////////
+	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036", "test.stk");
+	AsyncWinINet::AsyncThread(asyn_test.getThreadInfo());
+
+//////////////////////////////////////////////////////////////////////
+	HttpUrlGetSyn Url_sina("stock_sina");
 	BYTE* tmp = Url_sina.GetBuf();
 	tmp[0] = '4';
 	Url_sina.PrintBuf();
@@ -61,7 +73,7 @@ int main()
 	printf_s("#######%d\n", tb.getTableSize());
 
 	//urlopen_sina_TB(url_req.c_str(), tb);
-	urlopen_sina_TB_ex(url_req.c_str(), tb);
+// 	urlopen_sina_TB_ex(url_req.c_str(), tb);
 
 	// -- close ----------------------------
 	tb.closeAllFiles();

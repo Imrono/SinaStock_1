@@ -3,5 +3,5 @@
 int time_step = 1000;
 int times_get = 10;
 
-float upOrderThreshold = THRESHOLD;
-float downOrderThreshold = THRESHOLD;
+unsigned int StaticTraceParam = 0;
+unsigned int DynamicTraceParam = 0;
