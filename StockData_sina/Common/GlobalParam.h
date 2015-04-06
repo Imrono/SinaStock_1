@@ -7,5 +7,7 @@
 extern int time_step;
 extern int times_get;
 
+extern unsigned int StaticTraceParam;
+extern unsigned int DynamicTraceParam;
 
 #endif

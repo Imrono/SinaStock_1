@@ -1,0 +1,7 @@
+[STATIC_TRACE]
+#define URL_TRACE		    0
+#define CALLBACE_TRACE	1
+#define WAIT_TRACE		  2
+NUM: 0,1,2,3,4,5;
+VAL: 1,1,1,0,0,0;
+

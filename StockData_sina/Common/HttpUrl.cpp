@@ -2,7 +2,7 @@
 using namespace std;
 
 #include "HttpUrl.h"
-
+#include "TraceMicro.h"
 
 HttpUrlGetSyn::HttpUrlGetSyn(const char* HttpName, DWORD dwAccessType) {
 	hSession = InternetOpen(HttpName, dwAccessType, NULL, NULL, 0);
@@ -79,7 +79,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 //	a. 使用标记 INTERNET_FLAG_ASYNC 初始化 InternetOpen
 /////////////////////////////////////////////////////////////////////
 	p->hInternet = InternetOpen(user_agent.c_str(), INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC);
-	printf_s("InternetOpen after asyn!!\n");
+	STATIC_TRACE(URL_TRACE, "ASYN: InternetOpen after!!\n");
 //	ResetEvent(p->hEvent[0]);
 //	p->hCallbackThread = CreateThread(NULL,
 //	0,
@@ -96,7 +96,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 
 	ResetEvent(p->hEvent[HANDLE_SUCCESS]);	//重置句柄被创建事件
 	p->hFile = InternetOpenUrl(p->hInternet, p->url.c_str(), NULL, NULL, INTERNET_FLAG_DONT_CACHE|INTERNET_FLAG_RELOAD, (DWORD)p);
-	printf_s("URL opened asyn!!\n");
+	STATIC_TRACE(URL_TRACE, "ASYN: URL opened!!\n");
 	while(true) {
 		if (NULL == p->hFile) {
 			DWORD dwError = ::GetLastError();
@@ -111,10 +111,10 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 		//e. 使用 HttpQueryInfo 分析头信息 HttpQueryInfo 使用非阻塞方式，所以不用等待
 		DWORD dwStatusSize = sizeof(p->dwStatusCode);
 		if (false == HttpQueryInfo(p->hFile, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &p->dwStatusCode, &dwStatusSize, NULL)) { break; }
-		printf_s("HttpQueryInfo asyn!!\n");
+		STATIC_TRACE(URL_TRACE, "ASYN: HttpQueryInfo!!\n");
 		//判断状态码是不是 200
 		if (HTTP_STATUS_OK != p->dwStatusCode) {
-			printf_s("HTTP_STATUS_OK is failed\n");
+			STATIC_TRACE(URL_TRACE, "ASYN: HTTP_STATUS_OK is failed\n");
 			break;
 		}
 	
@@ -138,21 +138,21 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	
 			//重置读数据事件
 			ResetEvent(p->hEvent[HANDLE_SUCCESS]);
-			printf_s("InternetReadFileEx before asyn!!\n");
+			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx before asyn!!\n");
 			if (false == InternetReadFileEx(p->hFile, &i_buf, IRF_ASYNC, (DWORD)p)) {
-				printf_s("InternetReadFileEx == FALSE asyn!!\n");
+				STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx == FALSE asyn!!\n");
 				if (ERROR_IO_PENDING == ::GetLastError())
 					if (WaitExitEvent(p)) break;
 				else break; 
 			}
-			printf_s("InternetReadFileEx ok, begin to write!!length=%d\n", i_buf.dwBufferLength);
+			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx ok, begin to write!!length=%d\n", i_buf.dwBufferLength);
 			if(fp) fwrite(i_buf.lpvBuffer, sizeof(char), i_buf.dwBufferLength, fp);
 			if (i_buf.dwBufferLength == 0) break;
 		}
 		break;
 	}
 
-	printf_s("ASYN: begin to CLOSE files!!\n");
+	STATIC_TRACE(URL_TRACE, "ASYN: begin to CLOSE files!!\n");
 	if(fp) { fflush(fp); fclose(fp); fp = NULL; }
 	if(p->hFile) {
 		InternetCloseHandle(p->hFile);	//关闭 m_hFile
@@ -206,29 +206,29 @@ void CALLBACK AsyncWinINet::AsyncInternetCallback(HINTERNET hInternet,
 		//句柄被创建
 		case INTERNET_STATUS_HANDLE_CREATED:
 			p->hFile = (HINTERNET)(((LPINTERNET_ASYNC_RESULT)(lpvStatusInformation))->dwResult);
-			printf_s("callback: HINTERNET created!!\n");
+			STATIC_TRACE(CALLBACE_TRACE, "callback: HINTERNET created!! no event set\n");
 			break;
   
 		//句柄被关闭
 		case INTERNET_STATUS_HANDLE_CLOSING:
-			printf_s("callback: HINTERNET closed!!\n");
+			STATIC_TRACE(CALLBACE_TRACE, "callback: HINTERNET closed!! event HANDLE_CLOSE set\n");
 			SetEvent(p->hEvent[HANDLE_CLOSE]);
 			break;
 
 		//一个请求完成，比如一次句柄创建的请求，或者一次读数据的请求
 		case INTERNET_STATUS_REQUEST_COMPLETE:
 			if (ERROR_SUCCESS == ((LPINTERNET_ASYNC_RESULT)(lpvStatusInformation))->dwError) {
-				printf_s("callback: 设置句柄被创建事件或者读数据成功完成事件\n");
+				STATIC_TRACE(CALLBACE_TRACE, "callback: 句柄被创建或读数据成功, event HANDLE_SUCCESS set\n");
 				SetEvent(p->hEvent[HANDLE_SUCCESS]);
 			}
 			else {
-				printf_s("callback: 如果发生错误，则设置子线程退出事件 这里也是一个陷阱，经常会忽视处理这个错误\n");
+				STATIC_TRACE(CALLBACE_TRACE, "callback: 如发生错误，则设置子线程退出, event THREAD_EXIT set\n");
 				SetEvent(p->hEvent[THREAD_EXIT]);
 			}
 			break;
 
 		case INTERNET_STATUS_CONNECTION_CLOSED:
-			printf_s("callback: HINTERNET connection closed!!\n");
+			STATIC_TRACE(CALLBACE_TRACE, "callback: HINTERNET connection closed!! event THREAD_EXIT set\n");
 			SetEvent(p->hEvent[THREAD_EXIT]);
 			break;
 	}
@@ -241,17 +241,17 @@ BOOL AsyncWinINet::WaitExitEvent(thread_info *p)
 
 	switch (dwRet)
 	{
-		case WAIT_OBJECT_0:		//句柄被创建事件或者读数据请求成功完成事件
-			printf_s("wait signal received: HANDLE CREATE/SUCCESS OPERATION!!\n");
+		case WAIT_OBJECT_0:		//句柄被创建或读数据请求成功完成
+			STATIC_TRACE(WAIT_TRACE, "wait: HANDLE CREATE/SUCCESS OPERATION!!\n");
 			break;
-		case WAIT_OBJECT_0+1:	//句柄被关闭事件
-			printf_s("wait signal received: HANDLE CLOSE!!\n");
+		case WAIT_OBJECT_0+1:	//句柄被关闭
+			STATIC_TRACE(WAIT_TRACE, "wait: HANDLE CLOSE!!\n");
 			break;
-		case WAIT_OBJECT_0+2:	//用户要求终止子线程事件或者发生错误事件
-			printf_s("wait signal received: THREAD EXIT!!\n");
+		case WAIT_OBJECT_0+2:	//终止子线程或发生错误
+			STATIC_TRACE(WAIT_TRACE, "wait: THREAD EXIT!!\n");
 			break;
 		default:
-			printf_s("ERROR: wait signal is unexpected!!\n");
+			STATIC_TRACE(WAIT_TRACE, "wait: (ERROR) wait signal is unexpected!!\n");
 	}
 	return WAIT_OBJECT_0 != dwRet;
 }

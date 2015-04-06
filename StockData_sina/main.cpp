@@ -14,8 +14,13 @@ using namespace std;
 
 int main()
 {
-	STATIC_TRACE("/D \"STATIC_TRACE_OPEN\"%d,%f,%sstatic trace test!!\n",4,4.5,"hhh   ");
-	printf_s("######Now @ UrlAsynchronous branch######\n");
+	printf_s("######Now @ TraceObject branch######\n");
+
+	getTraceConfigFromFile();
+	for (int i = 0; i < 3; i++) {
+		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
+	}
+
 //////////////////////////////////////////////////////////////////////
 	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036", "test.stk");
 	AsyncWinINet::AsyncThread(asyn_test.getThreadInfo());
