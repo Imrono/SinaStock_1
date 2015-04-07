@@ -13,7 +13,7 @@
 #define TRACE_CONFIG_BUF_SIZE	128
 
 #define TRACE_NAME_TABLE(n) ( \
-		0 == n ? "URL: " \
+		   0 == n ? "URL: " \
 		: (1 == n ? "CALLBACK: " \
 		: (2 == n ? "ASYN_WAIT: " \
 		: (3 == n ? "FILE: " \

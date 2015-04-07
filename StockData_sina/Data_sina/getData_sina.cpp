@@ -276,7 +276,7 @@ int openURL_write(HINTERNET hSession, const char* url, const stock2fpTable &tb)
 	HINTERNET hHttp = InternetOpenUrl(hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
 
 	if (hHttp != NULL) {
-		STATIC_TRACE(URL_TRACE, "opened:\n%s\n", url);
+		STATIC_TRACE(URL_TRACE, "opened: %s\n", url);
 		string data_recv;
 
 		ReadDataFromInternet(hHttp, data_recv);

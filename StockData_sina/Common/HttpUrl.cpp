@@ -9,7 +9,7 @@ HttpUrlGetSyn::HttpUrlGetSyn(const char* HttpName, DWORD dwAccessType) {
 	bufSize = MAX_RECV_BUF_SIZE;
 	buf = new BYTE[bufSize];
 	memset(buf, 0, bufSize*sizeof(BYTE));
-	STATIC_TRACE(URL_TRACE, "URL: hSession initialed.\n");
+	STATIC_TRACE(URL_TRACE, "hSession initialed.\n");
 }
 HttpUrlGetSyn::~HttpUrlGetSyn() {
 	InternetCloseHandle(hSession);	hSession = NULL;
@@ -17,7 +17,7 @@ HttpUrlGetSyn::~HttpUrlGetSyn() {
 }
 HINTERNET HttpUrlGetSyn::OpenUrl(const char* url) {
 	hHttp = InternetOpenUrl(hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
-	if (NULL != hHttp) STATIC_TRACE(URL_TRACE, "URL: successful opened:\n%s\n", url);
+	if (NULL != hHttp) STATIC_TRACE(URL_TRACE, "successful opened:\n%s\n", url);
 	return hHttp;
 }
 void HttpUrlGetSyn::CloseUrl() {
@@ -57,7 +57,7 @@ HttpUrlGetAsyn::HttpUrlGetAsyn(const char* HttpName, DWORD dwAccessType) {
 	bufSize = MAX_RECV_BUF_SIZE;
 	buf = new BYTE[bufSize];
 	memset(buf, 0, bufSize*sizeof(BYTE));
-	STATIC_TRACE(URL_TRACE, "URL: hSession initialed.\n");
+	STATIC_TRACE(URL_TRACE, "hSession initialed.\n");
 }
 HttpUrlGetAsyn::~HttpUrlGetAsyn() {
 	InternetCloseHandle(hSession);	hSession = NULL;
@@ -96,7 +96,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 
 	ResetEvent(p->hEvent[HANDLE_SUCCESS]);	//重置句柄被创建事件
 	p->hFile = InternetOpenUrl(p->hInternet, p->url.c_str(), NULL, NULL, INTERNET_FLAG_DONT_CACHE|INTERNET_FLAG_RELOAD, (DWORD)p);
-	STATIC_TRACE(URL_TRACE, "ASYN: URL opened!!\n");
+	STATIC_TRACE(URL_TRACE, "ASYN: to open %s\n", p->url);
 	while(true) {
 		if (NULL == p->hFile) {
 			DWORD dwError = ::GetLastError();
@@ -206,29 +206,29 @@ void CALLBACK AsyncWinINet::AsyncInternetCallback(HINTERNET hInternet,
 		//句柄被创建
 		case INTERNET_STATUS_HANDLE_CREATED:
 			p->hFile = (HINTERNET)(((LPINTERNET_ASYNC_RESULT)(lpvStatusInformation))->dwResult);
-			STATIC_TRACE(CALLBACE_TRACE, "callback: HINTERNET created!! no event set\n");
+			STATIC_TRACE(CALLBACE_TRACE, "HINTERNET created!! no event set\n");
 			break;
   
 		//句柄被关闭
 		case INTERNET_STATUS_HANDLE_CLOSING:
-			STATIC_TRACE(CALLBACE_TRACE, "callback: HINTERNET closed!! event HANDLE_CLOSE set\n");
+			STATIC_TRACE(CALLBACE_TRACE, "HINTERNET closed!! event HANDLE_CLOSE set\n");
 			SetEvent(p->hEvent[HANDLE_CLOSE]);
 			break;
 
 		//一个请求完成，比如一次句柄创建的请求，或者一次读数据的请求
 		case INTERNET_STATUS_REQUEST_COMPLETE:
 			if (ERROR_SUCCESS == ((LPINTERNET_ASYNC_RESULT)(lpvStatusInformation))->dwError) {
-				STATIC_TRACE(CALLBACE_TRACE, "callback: 句柄被创建或读数据成功, event HANDLE_SUCCESS set\n");
+				STATIC_TRACE(CALLBACE_TRACE, "句柄被创建或读数据成功, event HANDLE_SUCCESS set\n");
 				SetEvent(p->hEvent[HANDLE_SUCCESS]);
 			}
 			else {
-				STATIC_TRACE(CALLBACE_TRACE, "callback: 如发生错误，则设置子线程退出, event THREAD_EXIT set\n");
+				STATIC_TRACE(CALLBACE_TRACE, "如发生错误，则设置子线程退出, event THREAD_EXIT set\n");
 				SetEvent(p->hEvent[THREAD_EXIT]);
 			}
 			break;
 
 		case INTERNET_STATUS_CONNECTION_CLOSED:
-			STATIC_TRACE(CALLBACE_TRACE, "callback: HINTERNET connection closed!! event THREAD_EXIT set\n");
+			STATIC_TRACE(CALLBACE_TRACE, "HINTERNET connection closed!! event THREAD_EXIT set\n");
 			SetEvent(p->hEvent[THREAD_EXIT]);
 			break;
 	}
@@ -242,16 +242,16 @@ BOOL AsyncWinINet::WaitExitEvent(thread_info *p)
 	switch (dwRet)
 	{
 		case WAIT_OBJECT_0:		//句柄被创建或读数据请求成功完成
-			STATIC_TRACE(WAIT_TRACE, "wait: HANDLE CREATE/SUCCESS OPERATION!!\n");
+			STATIC_TRACE(WAIT_TRACE, "HANDLE CREATE/SUCCESS OPERATION!!\n");
 			break;
 		case WAIT_OBJECT_0+1:	//句柄被关闭
-			STATIC_TRACE(WAIT_TRACE, "wait: HANDLE CLOSE!!\n");
+			STATIC_TRACE(WAIT_TRACE, "HANDLE CLOSE!!\n");
 			break;
 		case WAIT_OBJECT_0+2:	//终止子线程或发生错误
-			STATIC_TRACE(WAIT_TRACE, "wait: THREAD EXIT!!\n");
+			STATIC_TRACE(WAIT_TRACE, "THREAD EXIT!!\n");
 			break;
 		default:
-			STATIC_TRACE(WAIT_TRACE, "wait: (ERROR) wait signal is unexpected!!\n");
+			STATIC_TRACE(WAIT_TRACE, "(ERROR) wait signal is unexpected!!\n");
 	}
 	return WAIT_OBJECT_0 != dwRet;
 }
