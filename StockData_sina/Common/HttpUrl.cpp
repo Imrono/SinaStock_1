@@ -36,13 +36,13 @@ void HttpUrlGetSyn::ReadUrlAll(string &data_recv) {
 	DWORD Number = 0;
 	while (1) {
 		if (!InternetReadFile(hHttp, buf, bufSize - 1, &Number))
-			printf_s("Read Internet File failure!!!!!\n");
+			STATIC_TRACE(URL_TRACE, "Read Internet File failure!!!!!\n");
 		buf[Number] = '\0';
 		data_recv += (char*)buf;
 		ReadTimes ++;
 		if (Number) { 
 // 			printf_s("Temp:\n%s\ndata_recv:\n%s", buf, data_recv.c_str());
-			printf_s("ReadTimes:%d, ReadNum:%d\n", ReadTimes, Number);
+			STATIC_TRACE(URL_TRACE, "ReadTimes:%d, ReadNum:%d\n", ReadTimes, Number);
 		}
 		else {break;}
 	}

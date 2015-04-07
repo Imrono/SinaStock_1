@@ -16,8 +16,9 @@ int main()
 {
 	printf_s("######Now @ master branch!!######\n");
 	getTraceConfigFromFile();
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < NUM_TRACES; i++) {
 		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
+		DYNAMIC_TRACE(i, "dynamic trace(%d) %s ok!!\n", i, "test");
 	}
 
 //////////////////////////////////////////////////////////////////////
@@ -45,7 +46,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	printf_s("#######%d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
 
 	// -- 2 ----------------------------
 	symbol = "sz000333";
@@ -53,7 +54,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	printf_s("#######%d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
 
 	// -- 3 ----------------------------
 	symbol = "sh600820";
@@ -61,7 +62,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	printf_s("#######%d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
 
 	// -- 4 ----------------------------
 	symbol = "sz000623";
@@ -69,7 +70,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	printf_s("#######%d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
 
 	//urlopen_sina_TB(url_req.c_str(), tb);
 	urlopen_sina_TB_ex(url_req.c_str(), tb);
@@ -78,7 +79,7 @@ int main()
 	tb.closeAllFiles();
 
 	int diff_time=(clock()-start)/CLOCKS_PER_SEC;
-	printf_s("total time used:%d s\n", diff_time);
+	INFO("total time used:%d s\n", diff_time);
 
 	getchar();
 	return 0;

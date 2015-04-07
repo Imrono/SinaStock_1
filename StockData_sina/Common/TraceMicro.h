@@ -9,7 +9,7 @@
 #define ANALYZE_TRACE	4
 #define PROGRESS_TRACE	5
 
-
+#define NUM_TRACES				9
 #define TRACE_CONFIG_BUF_SIZE	128
 
 #ifdef _DEBUG
@@ -20,8 +20,19 @@
 		} \
 	} while (0)
 #else
-#define STATIC_TRACE(...)
+#define STATIC_TRACE(n, ...)
 #endif // STATIC_TRACE_OPEN | _DEBUG
+
+#ifdef DYNAMIC_TRACE_OPEN
+#define DYNAMIC_TRACE(n, ...) \
+	do { \
+		if (0 != ((1u << n) & DynamicTraceParam)) { \
+			printf_s(__VA_ARGS__); \
+		} \
+	} while (0)
+#else
+#define DYNAMIC_TRACE(n, ...)
+#endif // DYNAMIC_TRACE_OPEN
 
 #define INFO(...) \
 	do { printf_s("INFO: "); printf_s(__VA_ARGS__); } while (0)

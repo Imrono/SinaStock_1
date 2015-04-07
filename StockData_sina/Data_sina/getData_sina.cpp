@@ -212,7 +212,6 @@ int data_DeepAnalyseOne(const Data_sina &In_data, Data_Monitor &Out_dataMonitor)
 
 	return Out_dataMonitor.need2Record;
 }
-
 ReceiveDataType GetDataType(char* data)
 {
 	const int NofComma1 = 32;
@@ -256,7 +255,7 @@ string GetStrSymbol(const char* const In_data)
 
 void urlopen_sina_TB(const char* url, const stock2fpTable &tb)
 {
-	INFO("sizeof(DataUpdate_sina):%d, sizeof(Data_sina):%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina));
+	INFO("sizeof(DataUpdate_sina):%d, sizeof(Data_sina):%d, sizeof(Data_Monitor):%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina), sizeof(Data_Monitor));
 	HINTERNET hSession = InternetOpen(NULL, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if(hSession != NULL) {
 		int i = 0;
@@ -342,7 +341,7 @@ void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb)
 
 		Sleep(time_step);
 		if (++i > times_get)	break;
-		else					INFO("times_get=%d\n", i);
+		else					STATIC_TRACE(PROGRESS_TRACE, "times_get=%d\n", i);
 	}
 }
 int openURL_write_ex(const char* url, const stock2fpTable &tb)

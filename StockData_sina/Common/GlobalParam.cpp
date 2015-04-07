@@ -1,7 +1,7 @@
 #include "GlobalParam.h"
 
-int time_step = 1000;
-int times_get = 10;
+int time_step = TIME_STEP;
+int times_get = TIMES_GET;
 
 unsigned int StaticTraceParam = 0;
 unsigned int DynamicTraceParam = 0;
