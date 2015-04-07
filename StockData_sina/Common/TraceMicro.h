@@ -5,7 +5,8 @@
 #define URL_TRACE		0
 #define CALLBACE_TRACE	1
 #define WAIT_TRACE		2
-#define FILE_TRACE		3
+#define 
+-3
 #define ANALYZE_TRACE	4
 #define PROGRESS_TRACE	5
 
