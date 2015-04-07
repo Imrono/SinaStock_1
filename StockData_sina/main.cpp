@@ -46,7 +46,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
 
 	// -- 2 ----------------------------
 	symbol = "sz000333";
@@ -54,7 +54,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
 
 	// -- 3 ----------------------------
 	symbol = "sh600820";
@@ -62,7 +62,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
 
 	// -- 4 ----------------------------
 	symbol = "sz000623";
@@ -70,7 +70,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d\n", tb.getTableSize());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
 
 	//urlopen_sina_TB(url_req.c_str(), tb);
 	urlopen_sina_TB_ex(url_req.c_str(), tb);

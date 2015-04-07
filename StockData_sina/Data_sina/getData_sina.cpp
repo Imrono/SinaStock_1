@@ -313,13 +313,14 @@ int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
 	Data_Monitor Out_dataMonitor;
 	int i = 0, j = 0, IsRecord = 0;
 	const char* tmp = In_data;
+	char AttentionStr[1024];
 	while (1)
 	{
 		if (NULL != (tmp = data_analyseOne(tmp, Out_data))) {
 			data_WriteTableOne(tb, Out_data);
 			if (0 != (IsRecord = data_DeepAnalyseOne(Out_data, Out_dataMonitor))) {
-				STATIC_TRACE(ANALYZE_TRACE, "%s, Deep Analyze need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
-				tb.writeAttentionFile(Out_dataMonitor);
+				INFO("%s, ATTENTION!!! Data need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
+				tb.writeAttentionFile(PrepareAttentionData(Out_dataMonitor, AttentionStr, 1024));
 				j++;
 			}
 			i++;
@@ -341,7 +342,7 @@ void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb)
 
 		Sleep(time_step);
 		if (++i > times_get)	break;
-		else					STATIC_TRACE(PROGRESS_TRACE, "times_get=%d\n", i);
+		else					DYNAMIC_TRACE(PROGRESS_TRACE, "times_get=%d\n", i);
 	}
 }
 int openURL_write_ex(const char* url, const stock2fpTable &tb)
@@ -356,4 +357,41 @@ int openURL_write_ex(const char* url, const stock2fpTable &tb)
 		return NofStock;
 	}
 	else return -1;
+}
+
+char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len)
+{
+	if (0 == In_data.need2Record)	return NULL;
+	else if (len < 1024)			return NULL;
+	else {
+		int idx = 0;
+		char* pTmp = Out_str;
+		sprintf_s(pTmp, 128, "$%s  %d-%d-%d %d:%d:%d\n", In_data.strSymbol.c_str(), In_data.date.year, In_data.date.month, In_data.date.day,
+			In_data.time.hour, In_data.time.minute, In_data.time.second);
+		pTmp += strlen(pTmp);
+		STATIC_TRACE(FILE_TRACE, "%s %d-%d-%d %d:%d:%d\n", In_data.strSymbol.c_str(), In_data.date.year, In_data.date.month, In_data.date.day,
+			In_data.time.hour, In_data.time.minute, In_data.time.second);
+
+		if (In_data.need2Record & WEIMAI3_THRESHOLD_TOUCH) {
+			sprintf_s(pTmp, 128, "委买: large touch %.2fw @ price %.2f\n", In_data.bLargeMoneyIn5[MONEY_IDX]/10000, In_data.bLargeMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s 委买: %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.bLargeMoneyIn5[MONEY_IDX]/10000, In_data.bLargeMoneyIn5[PRICE_IDX]);
+			pTmp += strlen(pTmp);
+		}
+		if (In_data.need2Record & WEIMAI4_THRESHOLD_TOUCH) {
+			sprintf_s(pTmp, 128, "委卖: large touch %.2fw @ price %.2f\n", In_data.sLargeMoneyIn5[MONEY_IDX]/10000, In_data.sLargeMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s 委卖: %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.sLargeMoneyIn5[MONEY_IDX]/10000, In_data.sLargeMoneyIn5[PRICE_IDX]);
+			pTmp += strlen(pTmp);
+		}
+		if (In_data.need2Record & WEIMAI3_TOTAL_TOUCH) {
+			sprintf_s(pTmp, 128, "委买: total touch %.2fw now @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s 委买: total %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
+			pTmp += strlen(pTmp);
+		}
+		if (In_data.need2Record & WEIMAI4_TOTAL_TOUCH) {
+			sprintf_s(pTmp, 128, "委卖: total touch %.2fw now @ price %.2f\n", In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s 委卖: total %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
+			pTmp += strlen(pTmp);
+		}
+		return Out_str;
+	}
 }

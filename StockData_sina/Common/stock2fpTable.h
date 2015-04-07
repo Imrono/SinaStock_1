@@ -8,7 +8,6 @@ using namespace std;
 
 #include "..//Common//GlobalParam.h"
 #include "..//Common//TraceMicro.h"
-#include "..//Data_sina//DataStruct_sina.h"
 
 #define DEFAULT_TABLE_SIZE	10
 #define TABLE_SIZE_STEP		10
@@ -58,7 +57,9 @@ public:
 		return mapStockFile[strSymbol];
 	}
 
-	int writeAttentionFile(const Data_Monitor& In_data) const;
+	int writeAttentionFile(const char* WriteData) const {
+		return AttentionFile.write(WriteData, strlen(WriteData));
+	}
 
 	bool addStock2File(string strSymbol);
 	int removeStock2File(string strSymbol);

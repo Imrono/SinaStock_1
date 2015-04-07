@@ -2,7 +2,7 @@
 #define GLOBAL_PARAM_H
 
 #define TIME_STEP	2700
-#define TIMES_GET	1200
+#define TIMES_GET	2
 #define THRESHOLD	5000000
 
 extern int time_step;

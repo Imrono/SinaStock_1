@@ -32,9 +32,11 @@ void getTraceConfigFromFile()
 			sscanf_s(tmp, "NUM: %d,%d,%d,%d,%d,%d,%d,%d,%d;", num, num+1, num+2, num+3, num+4, num+5, num+6, num+7, num+8);
 		else if (!strncmp(tmp, "VAL:", strlen("VAL:"))) {
 			sscanf_s(tmp, "VAL: %d,%d,%d,%d,%d,%d,%d,%d,%d;", val, val+1, val+2, val+3, val+4, val+5, val+6, val+7, val+8);
-			for (int i = 0; i < numSize; i++)
+			for (int i = 0; i < numSize; i++) {
 				if (0u == val[i] || 1u == val[i])
 					*tmpParam |= (val[i] << num[i]);
+				else EROR("TRACE DATA UNEXPECTED!!\n");
+			}
 		}
 		else if ('#' == tmp[0]) {}
 		else {}

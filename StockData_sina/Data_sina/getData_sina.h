@@ -39,4 +39,5 @@ int openURL_write(HINTERNET hSession, const char* url, const stock2fpTable &tb);
 int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb);
 void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb);
 int openURL_write_ex(const char* url, const stock2fpTable &tb);
+char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len);
 #endif
