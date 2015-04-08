@@ -96,7 +96,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 
 	ResetEvent(p->hEvent[HANDLE_SUCCESS]);	//重置句柄被创建事件
 	p->hFile = InternetOpenUrl(p->hInternet, p->url.c_str(), NULL, NULL, INTERNET_FLAG_DONT_CACHE|INTERNET_FLAG_RELOAD, (DWORD)p);
-	STATIC_TRACE(URL_TRACE, "ASYN: to open %s\n", p->url);
+	STATIC_TRACE(URL_TRACE, "ASYN: to open %s\n", p->url.c_str());
 	while(true) {
 		if (NULL == p->hFile) {
 			DWORD dwError = ::GetLastError();

@@ -22,9 +22,12 @@ int main()
 	}
 
 //////////////////////////////////////////////////////////////////////
+	string history = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/000333.phtml?year=2014&jidu=3";
 	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036,sz000333", "test.stk");
+// 	AsyncWinINet asyn_test(history.c_str(), "asyn.stk");
 	AsyncWinINet::AsyncThread(asyn_test.getThreadInfo());
-
+	getchar();
+	return 0;
 //////////////////////////////////////////////////////////////////////
 	HttpUrlGetSyn Url_sina("stock_sina");
 	BYTE* tmp = Url_sina.GetBuf();
