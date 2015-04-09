@@ -313,14 +313,14 @@ int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
 	Data_Monitor Out_dataMonitor;
 	int i = 0, j = 0, IsRecord = 0;
 	const char* tmp = In_data;
-	char AttentionStr[1024];
+	char AttentionStr[MAX_RECV_BUF_SIZE];
 	while (1)
 	{
 		if (NULL != (tmp = data_analyseOne(tmp, Out_data))) {
 			data_WriteTableOne(tb, Out_data);
 			if (0 != (IsRecord = data_DeepAnalyseOne(Out_data, Out_dataMonitor))) {
 				INFO("%s, ATTENTION!!! Data need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
-				tb.writeAttentionFile(PrepareAttentionData(Out_dataMonitor, AttentionStr, 1024));
+				tb.writeAttentionFile(PrepareAttentionData(Out_dataMonitor, AttentionStr, MAX_RECV_BUF_SIZE));
 				j++;
 			}
 			i++;
@@ -352,6 +352,7 @@ int openURL_write_ex(const char* url, const stock2fpTable &tb)
 		STATIC_TRACE(URL_TRACE, "opened:\n%s\n", url);
 		string data_recv;
 		urlGet.ReadUrlAll(data_recv);
+		DYNAMIC_TRACE(DATA_TRACE, "SYN: %s\n", data_recv.c_str());
 		int NofStock = data_analyse2FileAll(data_recv.c_str(), tb);
 
 		return NofStock;
@@ -361,8 +362,8 @@ int openURL_write_ex(const char* url, const stock2fpTable &tb)
 
 char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len)
 {
-	if (0 == In_data.need2Record)	return NULL;
-	else if (len < 1024)			return NULL;
+	if (0 == In_data.need2Record)		return NULL;
+	else if (len < MAX_RECV_BUF_SIZE)	return NULL;
 	else {
 		int idx = 0;
 		char* pTmp = Out_str;

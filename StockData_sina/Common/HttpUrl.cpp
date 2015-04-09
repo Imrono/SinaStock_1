@@ -75,7 +75,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 {
 	thread_info* p = (thread_info*)lpParameter;
 	string user_agent("asyn test!!");
-	
+	DWORD dwError;
 //	a. 使用标记 INTERNET_FLAG_ASYNC 初始化 InternetOpen
 /////////////////////////////////////////////////////////////////////
 	p->hInternet = InternetOpen(user_agent.c_str(), INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC);
@@ -91,7 +91,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	InternetSetStatusCallback(p->hInternet, AsyncWinINet::AsyncInternetCallback);
 
 	FILE *fp = NULL;
-	fopen_s(&fp, p->saved_filename.c_str(), "r+");
+	fopen_s(&fp, p->saved_filename.c_str(), "w+");
 
 
 	ResetEvent(p->hEvent[HANDLE_SUCCESS]);	//重置句柄被创建事件
@@ -99,7 +99,8 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	STATIC_TRACE(URL_TRACE, "ASYN: to open %s\n", p->url.c_str());
 	while(true) {
 		if (NULL == p->hFile) {
-			DWORD dwError = ::GetLastError();
+			dwError = ::GetLastError();
+			STATIC_TRACE(URL_TRACE, "ASYN: InternetOpenUrl ERROR: %d\n", dwError);
 			if (ERROR_IO_PENDING == dwError || ERROR_SUCCESS == dwError) {
 				if (WaitExitEvent(p)) { break; }
 			}
@@ -127,32 +128,37 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 		//f. 使用标记 IRF_ASYNC 读数据 InternetReadFileEx
 		//为了向主线程报告进度，我们设置每次读数据最多 1024 字节
 
-		char lpvBuffer[1024];
+		char lpvBuffer[MAX_RECV_BUF_SIZE] = {0};
 		p->dwContentLength = 0; //Content-Length: 202749
 		while(true)
 		{
 			INTERNET_BUFFERS i_buf = {0};
 			i_buf.dwStructSize = sizeof(INTERNET_BUFFERS);
 			i_buf.lpvBuffer = lpvBuffer;
-			i_buf.dwBufferLength = 1024;
+			i_buf.dwBufferLength = MAX_RECV_BUF_SIZE-1;
 	
 			//重置读数据事件
 			ResetEvent(p->hEvent[HANDLE_SUCCESS]);
 			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx before asyn!!\n");
 			if (false == InternetReadFileEx(p->hFile, &i_buf, IRF_ASYNC, (DWORD)p)) {
 				STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx == FALSE asyn!!\n");
-				if (ERROR_IO_PENDING == ::GetLastError())
+				if (ERROR_IO_PENDING == (dwError = ::GetLastError())) {
+					STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx ERROR: %d\n", dwError);
 					if (WaitExitEvent(p)) break;
+				}
 				else break; 
 			}
+			lpvBuffer[i_buf.dwBufferLength] = 0;
+			DYNAMIC_TRACE(DATA_TRACE, "ASYN: %s\n", lpvBuffer);
 			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx ok, begin to write!!length=%d\n", i_buf.dwBufferLength);
+
 			if(fp) fwrite(i_buf.lpvBuffer, sizeof(char), i_buf.dwBufferLength, fp);
 			if (i_buf.dwBufferLength == 0) break;
 		}
 		break;
 	}
 
-	STATIC_TRACE(URL_TRACE, "ASYN: begin to CLOSE files!!\n");
+	STATIC_TRACE(PROGRESS_TRACE, "ASYN: begin to CLOSE files!!\n");
 	if(fp) { fflush(fp); fclose(fp); fp = NULL; }
 	if(p->hFile) {
 		InternetCloseHandle(p->hFile);	//关闭 m_hFile

@@ -8,7 +8,8 @@
 using namespace std;
 
 #include "GlobalParam.h"
-#define MAX_RECV_BUF_SIZE 128
+#define MAX_RECV_BUF_SIZE 1024
+
 
 enum asyn_event
 {

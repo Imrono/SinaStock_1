@@ -22,9 +22,15 @@ int main()
 	}
 
 //////////////////////////////////////////////////////////////////////
-	string history = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/000333.phtml?year=2014&jidu=3";
-	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036,sz000333", "test.stk");
-// 	AsyncWinINet asyn_test(history.c_str(), "asyn.stk");
+	string history = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/000333.phtml";
+	string histor1 = "http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/600820.phtml?year=2015&judu=1";
+// 	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036,sz000333", "test.stk");
+	AsyncWinINet asyn_test(histor1.c_str(), "asyn.stk");
+	stock2fpTable tb1;
+
+// 	urlopen_sina_TB_ex(history.c_str(), tb1);
+
+// 	AsyncWinINet asyn_test(his2, "asyn1.stk");
 	AsyncWinINet::AsyncThread(asyn_test.getThreadInfo());
 	getchar();
 	return 0;

@@ -8,6 +8,7 @@
 #define FILE_TRACE		3
 #define ANALYZE_TRACE	4
 #define PROGRESS_TRACE	5
+#define DATA_TRACE		8
 
 #define NUM_TRACES				9
 #define TRACE_CONFIG_BUF_SIZE	128
