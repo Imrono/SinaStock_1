@@ -62,6 +62,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\ErrorCode2String.cpp" />
     <ClCompile Include="Common\GlobalParam.cpp" />
     <ClCompile Include="Common\HttpUrl.cpp" />
     <ClCompile Include="Common\stock2fpTable.cpp" />
@@ -72,6 +73,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\ErrorCode2String.h" />
     <ClInclude Include="Common\GlobalParam.h" />
     <ClInclude Include="Common\HttpUrl.h" />
     <ClInclude Include="Common\stock2fpTable.h" />

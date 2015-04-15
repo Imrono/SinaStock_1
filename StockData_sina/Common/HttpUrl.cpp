@@ -1,6 +1,6 @@
 #include <iostream>
 using namespace std;
-
+#include "ErrorCode2String.h"
 #include "HttpUrl.h"
 #include "TraceMicro.h"
 
@@ -100,7 +100,7 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 	while(true) {
 		if (NULL == p->hFile) {
 			dwError = ::GetLastError();
-			STATIC_TRACE(URL_TRACE, "ASYN: InternetOpenUrl ERROR: %d\n", dwError);
+			STATIC_TRACE(URL_TRACE, "ASYN: InternetOpenUrl ERROR: %d->%s\n", dwError, ErrorCode2Str(dwError));
 			if (ERROR_IO_PENDING == dwError || ERROR_SUCCESS == dwError) {
 				if (WaitExitEvent(p)) { break; }
 			}
@@ -130,25 +130,25 @@ DWORD WINAPI AsyncWinINet::AsyncThread(LPVOID lpParameter)
 
 		char lpvBuffer[MAX_RECV_BUF_SIZE] = {0};
 		p->dwContentLength = 0; //Content-Length: 202749
+		INTERNET_BUFFERS i_buf = {0};
+		i_buf.dwStructSize = sizeof(INTERNET_BUFFERS);
+		i_buf.lpvBuffer = lpvBuffer;
+		i_buf.dwBufferLength = MAX_RECV_BUF_SIZE-1;
 		while(true)
 		{
-			INTERNET_BUFFERS i_buf = {0};
-			i_buf.dwStructSize = sizeof(INTERNET_BUFFERS);
-			i_buf.lpvBuffer = lpvBuffer;
-			i_buf.dwBufferLength = MAX_RECV_BUF_SIZE-1;
 	
 			//重置读数据事件
 			ResetEvent(p->hEvent[HANDLE_SUCCESS]);
-			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx before asyn!!\n");
+			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx (before)!!\n");
 			if (false == InternetReadFileEx(p->hFile, &i_buf, IRF_ASYNC, (DWORD)p)) {
 				STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx == FALSE asyn!!\n");
 				if (ERROR_IO_PENDING == (dwError = ::GetLastError())) {
-					STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx ERROR: %d\n", dwError);
+					STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx ERROR: %d->%s\n", dwError, ErrorCode2Str(dwError));
 					if (WaitExitEvent(p)) break;
 				}
 				else break; 
 			}
-			lpvBuffer[i_buf.dwBufferLength] = 0;
+			((char*)i_buf.lpvBuffer)[i_buf.dwBufferLength] = 0;
 			DYNAMIC_TRACE(DATA_TRACE, "ASYN: %s\n", lpvBuffer);
 			STATIC_TRACE(URL_TRACE, "ASYN: InternetReadFileEx ok, begin to write!!length=%d\n", i_buf.dwBufferLength);
 
@@ -204,6 +204,7 @@ void CALLBACK AsyncWinINet::AsyncInternetCallback(HINTERNET hInternet,
 	LPVOID lpvStatusInformation,
 	DWORD dwStatusInformationLength)
 {
+// 	STATIC_TRACE(CALLBACE_TRACE, "dwContext:%d, dwInternetStatus:%d, dwStatusInformationLength:%d\n", dwContext, dwInternetStatus, dwStatusInformationLength);
 	thread_info* p = (thread_info*)dwContext;
 
 	//在我们的应用中，我们只关心下面三个状态
