@@ -8,22 +8,34 @@ using namespace std;
 
 #include "..//Common//GlobalParam.h"
 #include "..//Common//TraceMicro.h"
+#include "..//Data_sina//DataStruct_sina.h"
 
 #define DEFAULT_TABLE_SIZE	10
 #define TABLE_SIZE_STEP		10
 #define TABLE_MAX_SIZE		100
 
+#define L_HAND_IDX	0
+#define L_MONEY_IDX	1
+#define L_MAI3		0
+#define L_MAI4		1
+
+
 typedef map<string, int>::value_type StockType;
 
-class stock2fpTable;
+class stockTable;
+struct Data_Store
+{
+	float Price[2][2];
+	float HighWaterMark[2][2];
+};
+
 class stockFile
 {
 public:
 	stockFile();
 	~stockFile();
-	friend class stock2fpTable;
+	friend class stockTable;
 public:
-	FILE* file;
 	bool used;
 
 	bool open(string fileName, char* fileType = "a+", char* tp = ".stk");
@@ -37,17 +49,18 @@ public:
 	static int getNofOpenedFiles() { return openedFiles; }
 
 private:
-	static int openedFiles;
-
+	FILE* file;
 	bool IsOpened;
 	int counter;
+
+	static int openedFiles;
 };
 
-class stock2fpTable
+class stockTable
 {
 public:
-	stock2fpTable();
-	~stock2fpTable();
+	stockTable();
+	~stockTable();
 
 	FILE* getFPfromSambol(string strSymbol) {
 		return files[mapStockFile[strSymbol]].file;
@@ -63,7 +76,7 @@ public:
 
 	bool addStock2File(string strSymbol);
 	int removeStock2File(string strSymbol);
-	int getTableSize() { return mapStockFile.size();}
+	int getFileTableSize() { return mapStockFile.size();}
 	stockFile &getFile(string strSymbol) const {
 		return files[mapStockFile.find(strSymbol)->second];
 	}
@@ -77,6 +90,13 @@ public:
 
 	int closeAllFiles();
 
+	void RecordHighWaterMark(string strSymbol, const Data_Store &DataStore) const {
+		dataStores[mapStockFile.find(strSymbol)->second] = DataStore;
+	}
+	Data_Store& GetHighWaterMark(string strSymbol) const {
+		return dataStores[mapStockFile.find(strSymbol)->second];
+	}
+
 protected:
 	
 private:
@@ -85,6 +105,7 @@ private:
 	int NofOpened;
 	stockFile *files;
 	stockFile AttentionFile;
+	Data_Store *dataStores;
 
 	void initial();
 	void clean();

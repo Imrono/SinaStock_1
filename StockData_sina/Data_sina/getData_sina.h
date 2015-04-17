@@ -18,7 +18,7 @@ enum ReceiveDataType
 };
 
 void urlopen_sina(const char* url, char* fileName, char* fileType);
-void urlopen_sina_TB(const char* url, const stock2fpTable &tb);
+void urlopen_sina_TB(const char* url, const stockTable &tb);
 void ReadDataFromInternet(HINTERNET hHttp, string &data_recv);
 
 
@@ -29,15 +29,17 @@ int data_DeepAnalyseOne(const Data_sina &In_data, Data_Monitor &Out_dataMonitor)
 
 void data_WriteAll(const char* fileName, char* fileType, const Data_sina *const In_data, int write_times);
 bool data_WriteOne(const char* fileName, char* fileType, const DataUpdate_sina & In_dataUpdate);
-void data_WriteTable(const stock2fpTable &tb, const Data_sina* const In_data, int write_times);
-int data_WriteTableOne(const stock2fpTable &tb, const Data_sina &In_data);
+void data_WriteTable(const stockTable &tb, const Data_sina* const In_data, int write_times);
+int data_WriteTableOne(const stockTable &tb, const Data_sina &In_data);
 
 ReceiveDataType GetDataType(char* data);
 string GetStrSymbol(const char* const In_data);
-int openURL_write(HINTERNET hSession, const char* url, const stock2fpTable &tb);
+int openURL_write(HINTERNET hSession, const char* url, const stockTable &tb);
 
-int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb);
-void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb);
-int openURL_write_ex(const char* url, const stock2fpTable &tb);
+int data_analyse2FileAll(const char* const In_data, const stockTable &tb);
+void urlopen_sina_TB_ex(const char* url, const stockTable &tb);
+int openURL_write_ex(const char* url, const stockTable &tb);
 char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len);
+int DataStore2Table(const Data_Monitor& In_dataMonitor, const Data_sina& In_data, const stockTable &In_tb);
+
 #endif

@@ -33,31 +33,36 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 }
 
 /////////////////////////////////////////////////////////////
-stock2fpTable::stock2fpTable()
+stockTable::stockTable()
 {
 	initial();
 }
 
-stock2fpTable::~stock2fpTable()
+stockTable::~stockTable()
 {
 	clean();
 }
 
-void stock2fpTable::initial()
+void stockTable::initial()
 {
 	NofFiles = DEFAULT_TABLE_SIZE;
 	files = new stockFile[DEFAULT_TABLE_SIZE];
+	dataStores = new Data_Store[DEFAULT_TABLE_SIZE];
+	for (int i = 0; i < DEFAULT_TABLE_SIZE; i++) {
+		memset(dataStores, 0, sizeof(Data_Store));
+	}
 	AttentionFile.open("stockAttention", "a+", ".att");
 }
 
-void stock2fpTable::clean()
+void stockTable::clean()
 {
 	delete []files;
+	delete []dataStores;
 	NofFiles = 0;
 	AttentionFile.close();
 }
 
-bool stock2fpTable::addStock2File(string strSymbol)
+bool stockTable::addStock2File(string strSymbol)
 {
 	int idx = 0;
 	if (findFreeFile(idx)) {
@@ -68,7 +73,7 @@ bool stock2fpTable::addStock2File(string strSymbol)
 	}
 	else return false;
 }
-int stock2fpTable::removeStock2File(string strSymbol)
+int stockTable::removeStock2File(string strSymbol)
 {
 	int idx = mapStockFile[strSymbol];
 	if (true == files[idx].IsFileOpened()) { files[idx].close();}
@@ -79,7 +84,7 @@ int stock2fpTable::removeStock2File(string strSymbol)
 	return NofErase;
 }
 
-bool stock2fpTable::findFreeFile(int &idx)
+bool stockTable::findFreeFile(int &idx)
 {
 	for (idx = 0; idx < NofFiles; idx++)
 	{
@@ -96,9 +101,9 @@ bool stock2fpTable::findFreeFile(int &idx)
 	return false;
 }
 
-int stock2fpTable::closeAllFiles()
+int stockTable::closeAllFiles()
 {
-	int size = getTableSize();
+	int size = getFileTableSize();
 	int i = 0;
 	for (; i < size; i++)
 		files[i].close();

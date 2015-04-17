@@ -73,12 +73,12 @@ bool data_WriteOne(const char* fileName, char* fileType, const DataUpdate_sina &
 	return true;
 }
 
-void data_WriteTable(const stock2fpTable &tb, const Data_sina* const In_data, int write_times)
+void data_WriteTable(const stockTable &tb, const Data_sina* const In_data, int write_times)
 {
 	for (int i = 0; i < write_times; i++)
 		data_WriteTableOne(tb, In_data[i]);
 }
-int data_WriteTableOne(const stock2fpTable &tb, const Data_sina &In_data)
+int data_WriteTableOne(const stockTable &tb, const Data_sina &In_data)
 {
 	const int bufSize = 384;
 	const DataUpdate_sina & In_dataUpdate = In_data.dataUpdate;
@@ -253,7 +253,7 @@ string GetStrSymbol(const char* const In_data)
 	return ret;
 }
 
-void urlopen_sina_TB(const char* url, const stock2fpTable &tb)
+void urlopen_sina_TB(const char* url, const stockTable &tb)
 {
 	INFO("sizeof(DataUpdate_sina):%d, sizeof(Data_sina):%d, sizeof(Data_Monitor):%d\n", sizeof(DataUpdate_sina), sizeof(Data_sina), sizeof(Data_Monitor));
 	HINTERNET hSession = InternetOpen(NULL, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -269,7 +269,7 @@ void urlopen_sina_TB(const char* url, const stock2fpTable &tb)
 	}
 	InternetCloseHandle(hSession);	hSession = NULL;
 }
-int openURL_write(HINTERNET hSession, const char* url, const stock2fpTable &tb)
+int openURL_write(HINTERNET hSession, const char* url, const stockTable &tb)
 {
 	if (NULL == hSession) return -2;
 
@@ -307,22 +307,23 @@ void ReadDataFromInternet(HINTERNET hHttp, string &data_recv)
 		else {break;}
 	}
 }
-int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
+int data_analyse2FileAll(const char* const In_data, const stockTable &tb)
 {
-	Data_sina Out_data;
-	Data_Monitor Out_dataMonitor;
+	Data_sina analyseData;
+	Data_Monitor dataMonitor;
 	int i = 0, j = 0, IsRecord = 0;
 	const char* tmp = In_data;
 	char AttentionStr[MAX_RECV_BUF_SIZE];
 	while (1)
 	{
-		if (NULL != (tmp = data_analyseOne(tmp, Out_data))) {
-			data_WriteTableOne(tb, Out_data);
-			if (0 != (IsRecord = data_DeepAnalyseOne(Out_data, Out_dataMonitor))) {
-				INFO("%s, ATTENTION!!! Data need record:%d!!\n", Out_dataMonitor.strSymbol.c_str(), IsRecord);
-				tb.writeAttentionFile(PrepareAttentionData(Out_dataMonitor, AttentionStr, MAX_RECV_BUF_SIZE));
+		if (NULL != (tmp = data_analyseOne(tmp, analyseData))) {
+			data_WriteTableOne(tb, analyseData);
+			if (0 != (IsRecord = data_DeepAnalyseOne(analyseData, dataMonitor))) {
+				INFO("%s, ATTENTION!!! Data need record:%d!!\n", dataMonitor.strSymbol.c_str(), IsRecord);
+				tb.writeAttentionFile(PrepareAttentionData(dataMonitor, AttentionStr, MAX_RECV_BUF_SIZE));
 				j++;
 			}
+			DataStore2Table(dataMonitor, analyseData, tb);
 			i++;
 		}
 		else {
@@ -334,7 +335,7 @@ int data_analyse2FileAll(const char* const In_data, const stock2fpTable &tb)
 	return i;
 }
 
-void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb)
+void urlopen_sina_TB_ex(const char* url, const stockTable &tb)
 {
 	int i = 0;
 	while (1) {
@@ -345,7 +346,7 @@ void urlopen_sina_TB_ex(const char* url, const stock2fpTable &tb)
 		else					DYNAMIC_TRACE(PROGRESS_TRACE, "times_get=%d\n", i);
 	}
 }
-int openURL_write_ex(const char* url, const stock2fpTable &tb)
+int openURL_write_ex(const char* url, const stockTable &tb)
 {
 	HttpUrlGetSyn urlGet;
 	if (NULL != urlGet.OpenUrl(url)) {
@@ -395,4 +396,12 @@ char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len)
 		}
 		return Out_str;
 	}
+}
+
+int DataStore2Table(const Data_Monitor& In_dataMonitor, const Data_sina& In_data, const stockTable &In_tb)
+{
+	Data_Store tmp;
+// 	In_dataMonitor.
+
+	return 0;
 }

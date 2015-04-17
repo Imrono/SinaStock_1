@@ -20,6 +20,7 @@ enum RecordType {
 };
 
 struct Data_Monitor;
+struct Data_Store;
 
 struct DataStockNavi_sina
 {
@@ -58,6 +59,7 @@ struct Data_sina
 	DataUpdate_sina dataUpdate;
 
 	stockDate date;
+
 };
 
 struct Data_Monitor

@@ -26,7 +26,7 @@ int main()
 	string histor1 = "http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/600820.phtml?year=2015&judu=1";
 // 	AsyncWinINet asyn_test("http://hq.sinajs.cn/list=sh600036,sz000333", "test.stk");
 	AsyncWinINet asyn_test(histor1.c_str(), "asyn.stk");
-	stock2fpTable tb1;
+	stockTable tb1;
 
 // 	urlopen_sina_TB_ex(history.c_str(), tb1);
 
@@ -42,7 +42,7 @@ int main()
 
 
 	clock_t start=clock();
-	stock2fpTable tb;
+	stockTable tb;
 
 	char fileName[100] = "test.txt";
 	char url_tmp[150] = "http://hq.sinajs.cn/list=sh600036";
@@ -55,7 +55,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getFileTableSize(), symbol.c_str());
 
 	// -- 2 ----------------------------
 	symbol = "sz000333";
@@ -63,7 +63,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getFileTableSize(), symbol.c_str());
 
 	// -- 3 ----------------------------
 	symbol = "sh600820";
@@ -71,7 +71,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getFileTableSize(), symbol.c_str());
 
 	// -- 4 ----------------------------
 	symbol = "sz000623";
@@ -79,7 +79,7 @@ int main()
 	url_req += symbol;
 	tb.addStock2File(symbol);
 	tb.getFile(symbol).open(symbol);
-	INFO("stock2fpTable Size: %d << %s add\n", tb.getTableSize(), symbol.c_str());
+	INFO("stock2fpTable Size: %d << %s add\n", tb.getFileTableSize(), symbol.c_str());
 
 	//urlopen_sina_TB(url_req.c_str(), tb);
 	urlopen_sina_TB_ex(url_req.c_str(), tb);
