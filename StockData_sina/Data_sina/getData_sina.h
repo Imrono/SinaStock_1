@@ -9,6 +9,9 @@ using namespace std;
 #include "..//Common//HttpUrl.h"
 #include "..//Common//GlobalParam.h"
 
+#define RETURN_BUY	1
+#define RETURN_SEL	2
+
 enum ReceiveDataType
 {
 	NORMAL_SINA,
@@ -40,6 +43,6 @@ int data_analyse2FileAll(const char* const In_data, const stockTable &tb);
 void urlopen_sina_TB_ex(const char* url, const stockTable &tb);
 int openURL_write_ex(const char* url, const stockTable &tb);
 char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len);
-int DataStore2Table(const Data_Monitor& In_dataMonitor, const Data_sina& In_data, const stockTable &In_tb);
+int DataStore2Table(const Data_Monitor& In_dataMonitor, const stockTable &In_tb);
 
 #endif

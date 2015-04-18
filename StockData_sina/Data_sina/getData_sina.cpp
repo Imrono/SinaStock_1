@@ -192,10 +192,12 @@ int data_DeepAnalyseOne(const Data_sina &In_data, Data_Monitor &Out_dataMonitor)
 		if (Out_dataMonitor.bMoney[MONEY_IDX][i] > Out_dataMonitor.bLargeMoneyIn5[MONEY_IDX]) {
 			Out_dataMonitor.bLargeMoneyIn5[MONEY_IDX] = Out_dataMonitor.bMoney[MONEY_IDX][i];
 			Out_dataMonitor.bLargeMoneyIn5[PRICE_IDX] = In_data.dataUpdate.upOrder_price[i];
+			Out_dataMonitor.bLargeMoneyIn5[HANDS_IDX] = (float)In_data.dataUpdate.upOrder_stock[i]/100;
 		}
 		if (Out_dataMonitor.sMoney[MONEY_IDX][i] > Out_dataMonitor.sLargeMoneyIn5[MONEY_IDX]) {
 			Out_dataMonitor.sLargeMoneyIn5[MONEY_IDX] = Out_dataMonitor.sMoney[MONEY_IDX][i];
 			Out_dataMonitor.sLargeMoneyIn5[PRICE_IDX] = In_data.dataUpdate.downOrder_price[i];
+			Out_dataMonitor.sLargeMoneyIn5[HANDS_IDX] = (float)In_data.dataUpdate.downOrder_stock[i]/100;
 		}
 	}
 	Out_dataMonitor.diffMoneyIn5[MONEY_IDX] = Out_dataMonitor.bTotalMoneyIn5[MONEY_IDX] - Out_dataMonitor.sTotalMoneyIn5[MONEY_IDX];
@@ -323,7 +325,7 @@ int data_analyse2FileAll(const char* const In_data, const stockTable &tb)
 				tb.writeAttentionFile(PrepareAttentionData(dataMonitor, AttentionStr, MAX_RECV_BUF_SIZE));
 				j++;
 			}
-			DataStore2Table(dataMonitor, analyseData, tb);
+			DataStore2Table(dataMonitor, tb);
 			i++;
 		}
 		else {
@@ -398,10 +400,37 @@ char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len)
 	}
 }
 
-int DataStore2Table(const Data_Monitor& In_dataMonitor, const Data_sina& In_data, const stockTable &In_tb)
+int DataStore2Table(const Data_Monitor& In_dataMonitor, const stockTable &In_tb)
 {
-	Data_Store tmp;
-// 	In_dataMonitor.
+	Data_Store tmp = In_tb.GetHighWaterMark(In_dataMonitor.strSymbol);
+	if (In_dataMonitor.bLargeMoneyIn5[MONEY_IDX] > tmp.bHighWaterMark[L_MONEY_IDX]) {
+		DYNAMIC_TRACE(ANALYZE_TRACE, "%s buy order max update. FROM(%d:%d:%d): MONEY:%f, HANDS:%.0f -> ", In_dataMonitor.strSymbol.c_str(),
+			tmp.bTime.hour, tmp.bTime.minute, tmp.bTime.second,
+			tmp.bHighWaterMark[L_MONEY_IDX], tmp.bHighWaterMark[L_HANDS_IDX]);
+
+		tmp.bHighWaterMark[L_MONEY_IDX] = In_dataMonitor.bLargeMoneyIn5[MONEY_IDX];
+		tmp.bHighWaterMark[L_HANDS_IDX] = In_dataMonitor.bLargeMoneyIn5[HANDS_IDX];
+		tmp.bTime = In_dataMonitor.time;
+
+		DYNAMIC_TRACE(ANALYZE_TRACE, "TO(%d:%d:%d): MONEY:%f, HANDS:%.0f\n", 
+			tmp.bTime.hour, tmp.bTime.minute, tmp.bTime.second,
+			tmp.bHighWaterMark[L_MONEY_IDX], tmp.bHighWaterMark[L_HANDS_IDX]);
+		return RETURN_BUY;
+	}
+	if (In_dataMonitor.sLargeMoneyIn5[MONEY_IDX] > tmp.sHighWaterMark[L_MONEY_IDX]) {
+		DYNAMIC_TRACE(ANALYZE_TRACE, "%s sell order max update. FROM(%d:%d:%d): MONEY:%f, HANDS:%.0f -> ", In_dataMonitor.strSymbol.c_str(),
+			tmp.sTime.hour, tmp.sTime.minute, tmp.sTime.second,
+			tmp.sHighWaterMark[L_MONEY_IDX], tmp.sHighWaterMark[L_HANDS_IDX]);
+
+		tmp.sHighWaterMark[L_MONEY_IDX] = In_dataMonitor.sLargeMoneyIn5[MONEY_IDX];
+		tmp.sHighWaterMark[L_HANDS_IDX] = In_dataMonitor.sLargeMoneyIn5[HANDS_IDX];
+		tmp.sTime = In_dataMonitor.time;
+
+		DYNAMIC_TRACE(ANALYZE_TRACE, "TO(%d:%d:%d): MONEY:%f, HANDS:%.0f\n", 
+			tmp.sTime.hour, tmp.sTime.minute, tmp.sTime.second,
+			tmp.sHighWaterMark[L_MONEY_IDX], tmp.sHighWaterMark[L_HANDS_IDX]);
+		return RETURN_SEL;
+	}
 
 	return 0;
 }

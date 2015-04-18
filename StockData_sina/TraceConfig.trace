@@ -5,7 +5,7 @@
 #define FILE_TRACE		  3
 #define ANALYZE_TRACE	  4
 #define PROGRESS_TRACE	5
-#define DATA_TRACW			8
+#define DATA_TRACE			8
 NUM: 0,1,2,3,4,5,6,7,8;
 VAL: 1,1,1,1,1,1,0,0,0;
 [DYNAMIC_TRACE]

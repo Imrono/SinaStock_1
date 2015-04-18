@@ -10,6 +10,7 @@ using namespace std;
 
 #define PRICE_IDX	0
 #define MONEY_IDX	1
+#define HANDS_IDX	2
 
 enum RecordType {
 	NOT_NEED_RECORD = 0,
@@ -68,8 +69,8 @@ struct Data_Monitor
 	float bMoney[2][NUM_ORDERS];
 	float sTotalMoneyIn5[2];
 	float bTotalMoneyIn5[2];
-	float sLargeMoneyIn5[2];
-	float bLargeMoneyIn5[2];
+	float sLargeMoneyIn5[3];
+	float bLargeMoneyIn5[3];
 	float diffMoneyIn5[2];
 	string strSymbol;
 	stockTime time;

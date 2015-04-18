@@ -35,7 +35,12 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 /////////////////////////////////////////////////////////////
 stockTable::stockTable()
 {
-	initial();
+	files = NULL;
+	dataStores = NULL;
+	NofFiles = 0;
+
+	initial(DEFAULT_TABLE_SIZE);
+	AttentionFile.open("stockAttention", "a+", ".att");
 }
 
 stockTable::~stockTable()
@@ -43,15 +48,16 @@ stockTable::~stockTable()
 	clean();
 }
 
-void stockTable::initial()
+void stockTable::initial(int TableSize)
 {
-	NofFiles = DEFAULT_TABLE_SIZE;
-	files = new stockFile[DEFAULT_TABLE_SIZE];
-	dataStores = new Data_Store[DEFAULT_TABLE_SIZE];
-	for (int i = 0; i < DEFAULT_TABLE_SIZE; i++) {
-		memset(dataStores, 0, sizeof(Data_Store));
+	if (0 == NofFiles) {
+		files = new stockFile[TableSize];
+		dataStores = new Data_Store[TableSize];
+		for (int i = 0; i < TableSize; i++) {
+			memset(dataStores, 0, sizeof(Data_Store));
+		}
 	}
-	AttentionFile.open("stockAttention", "a+", ".att");
+	NofFiles += TableSize;
 }
 
 void stockTable::clean()

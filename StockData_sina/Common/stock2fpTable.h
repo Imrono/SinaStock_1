@@ -8,13 +8,14 @@ using namespace std;
 
 #include "..//Common//GlobalParam.h"
 #include "..//Common//TraceMicro.h"
+#include "stockData.h"
 #include "..//Data_sina//DataStruct_sina.h"
 
 #define DEFAULT_TABLE_SIZE	10
 #define TABLE_SIZE_STEP		10
 #define TABLE_MAX_SIZE		100
 
-#define L_HAND_IDX	0
+#define L_HANDS_IDX	0
 #define L_MONEY_IDX	1
 #define L_MAI3		0
 #define L_MAI4		1
@@ -25,8 +26,14 @@ typedef map<string, int>::value_type StockType;
 class stockTable;
 struct Data_Store
 {
-	float Price[2][2];
-	float HighWaterMark[2][2];
+	float bPrice;
+	float sPrice;
+
+	float bHighWaterMark[2];
+	float sHighWaterMark[2];
+
+	stockTime bTime;
+	stockTime sTime;
 };
 
 class stockFile
@@ -107,7 +114,7 @@ private:
 	stockFile AttentionFile;
 	Data_Store *dataStores;
 
-	void initial();
+	void initial(int TableSize);
 	void clean();
 	bool findFreeFile(int &idx);
 
