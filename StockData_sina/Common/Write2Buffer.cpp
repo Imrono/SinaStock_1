@@ -1,8 +1,9 @@
-#include <string.h>
 #include "Write2Buffer.h"
 
-Write2Buffer::Write2Buffer() :_buffer(nullptr), _bufferSize(0), _round(false), _writeCount(0), _1stLength(0), _2ndLength(0) {}
-Write2Buffer::Write2Buffer(bool round, int n):_writeCount(0), _1stLength(0), _2ndLength(0) {
+Write2Buffer::Write2Buffer() :_buffer(nullptr), _bufferSize(0), _round(false), _writeCount(0), _1stLength(0), _2ndLength(0), 
+	_maxSearchLength(0), currentSearchNum(0) {}
+Write2Buffer::Write2Buffer(bool round, int n):_writeCount(0), _1stLength(0), _2ndLength(0), 
+	_maxSearchLength(0), currentSearchNum(0) {
 	_round = round;
 	if (_round)
 		_bufferSize = 2*n;
@@ -28,9 +29,9 @@ int Write2Buffer::GetBufferSize() {
 	return _bufferSize;
 }
 
-int Write2Buffer::Write(char *InData, int InSize) {
+int Write2Buffer::Write(char *InData, unsigned int InSize) {
 	if (_round) {
-		for (int len = 0; len < _2ndLength; len += _1stLength) {
+		for (unsigned int len = 0; len < _2ndLength; len += _1stLength) {
 			int tmpLength = 0;
 			if (len+_1stLength > _2ndLength)
 				tmpLength = _2ndLength - len;
@@ -59,7 +60,7 @@ int Write2Buffer::Write(char *InData, int InSize) {
 	memset(_buffer+_1stLength+_2ndLength, 0, _bufferSize-_1stLength-_2ndLength);
 	return _2ndLength;
 }
-bool Write2Buffer::Read(char *OutData, int InSize) {
+bool Write2Buffer::Read(char *OutData, unsigned int InSize) {
 	if (InSize > _bufferSize)
 		return false;
 	else {
@@ -67,7 +68,7 @@ bool Write2Buffer::Read(char *OutData, int InSize) {
 		return true;
 	}
 }
-bool Write2Buffer::ReadEx(char *OutData, int InLoc, int InSize) {
+bool Write2Buffer::ReadEx(char *OutData, int InLoc, unsigned int InSize) {
 	if (InSize > _bufferSize-InLoc)
 		return false;
 	else {
@@ -84,3 +85,81 @@ bool Write2Buffer::Find(char *InData, int& OutLoc) {
 	else
 		return false;
 }
+
+
+int Write2Buffer::AddSearchString(const string &InStartStr, const string &InEndStr) {
+	bufferStatus tmp;
+	tmp.IsStarted = false;
+	tmp.ResultStr = "";
+	tmp.SearchStr = InStartStr;
+	tmp.StartStr = InStartStr;
+	tmp.EndStr = InEndStr;
+	tmp.Num = currentSearchNum;
+
+	searchStatus.push_back(tmp);
+
+	currentSearchNum ++;
+	_maxSearchLength = _maxSearchLength > tmp.SearchStr.size() ? _maxSearchLength : tmp.SearchStr.size();
+
+	return tmp.Num;
+}
+void Write2Buffer::RemoveSearchString(int num) {
+	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
+		if (it->Num == num) {
+
+			searchStatus.erase(it);
+
+			_maxSearchLength = _maxSearchLength > it->SearchStr.size() ? _maxSearchLength : it->SearchStr.size();
+		}
+	}
+}
+
+void Write2Buffer::getBuffer4Write(char* OutBuffer, int& len) {
+	if (_1stLength+_2ndLength <= _maxSearchLength) {
+		_1stLength += _2ndLength;
+	}
+	else {
+		char* tmp = new char[_maxSearchLength];
+		memmove(_buffer, _buffer+ (_1stLength+_2ndLength-_maxSearchLength), _maxSearchLength);
+		delete []tmp;
+		memset(_buffer+_maxSearchLength, 0, _1stLength+_2ndLength-_maxSearchLength);
+		_1stLength = _maxSearchLength;
+	}
+	_2ndLength = 0;
+
+	OutBuffer = _buffer + _1stLength;
+	len = _bufferSize - _1stLength;
+}
+
+void Write2Buffer::updateAfterWrite(int len, bool* ans) {
+	_2ndLength = len;
+
+	//Analyse
+	char* tmp;
+	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
+		if (nullptr != (tmp = strstr(_buffer, it->SearchStr.c_str()))) {
+			if (false == it->IsStarted) {
+				it->IsStarted = true;
+				it->SearchStr = it->EndStr;
+				it->ResultStr += tmp;
+				ans[it->Num] = false;
+			}
+			else {
+				it->IsStarted = false;
+				it->SearchStr = it->StartStr;
+				it->ResultStr += tmp;
+				ans[it->Num] = true;
+			}
+		}
+		ans[it->Num] = false;
+	}
+}
+
+const char* Write2Buffer::getData(int num) {
+	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
+		if (it->Num == num)
+			return it->SearchStr.c_str();
+	}
+	return nullptr;
+}
+
