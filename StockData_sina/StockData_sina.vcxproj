@@ -68,6 +68,7 @@
     <ClCompile Include="Common\stock2fpTable.cpp" />
     <ClCompile Include="Common\stockData.cpp" />
     <ClCompile Include="Common\TraceMicro.cpp" />
+    <ClCompile Include="Common\Write2Buffer.cpp" />
     <ClCompile Include="Data_sina\DataStruct_sina.cpp" />
     <ClCompile Include="Data_sina\getData_sina.cpp" />
     <ClCompile Include="main.cpp" />
@@ -79,6 +80,7 @@
     <ClInclude Include="Common\stock2fpTable.h" />
     <ClInclude Include="Common\stockData.h" />
     <ClInclude Include="Common\TraceMicro.h" />
+    <ClInclude Include="Common\Write2Buffer.h" />
     <ClInclude Include="Data_sina\DataStruct_sina.h" />
     <ClInclude Include="Data_sina\getData_sina.h" />
   </ItemGroup>
