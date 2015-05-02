@@ -87,31 +87,41 @@ bool Write2Buffer::Find(char *InData, int& OutLoc) {
 }
 
 
-int Write2Buffer::AddSearchString(const string &InStartStr, const string &InEndStr) {
+bool Write2Buffer::AddSearchString(const string &InStartStr, const string &InEndStr, int num) {
+	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
+		if (it->NaviNum == num) return false;
+	}
+
 	bufferStatus tmp;
 	tmp.IsStarted = false;
+	tmp.IsFinished = false;
+
 	tmp.ResultStr = "";
 	tmp.SearchStr = InStartStr;
 	tmp.StartStr = InStartStr;
 	tmp.EndStr = InEndStr;
-	tmp.Num = currentSearchNum;
+
+	tmp.Count = 0;
+	tmp.NaviNum = num;
 
 	searchStatus.push_back(tmp);
 
 	currentSearchNum ++;
 	_maxSearchLength = _maxSearchLength > tmp.SearchStr.size() ? _maxSearchLength : tmp.SearchStr.size();
 
-	return tmp.Num;
+	return true;
 }
-void Write2Buffer::RemoveSearchString(int num) {
+bool Write2Buffer::RemoveSearchString(int num) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
-		if (it->Num == num) {
-
+		if (it->NaviNum == num) {
 			searchStatus.erase(it);
 
+			currentSearchNum--;
 			_maxSearchLength = _maxSearchLength > it->SearchStr.size() ? _maxSearchLength : it->SearchStr.size();
+			return true;
 		}
 	}
+	return false;
 }
 
 void Write2Buffer::getBuffer4Write(char* OutBuffer, int& len) {
@@ -140,25 +150,24 @@ void Write2Buffer::updateAfterWrite(int len, bool* ans) {
 		if (nullptr != (tmp = strstr(_buffer, it->SearchStr.c_str()))) {
 			if (false == it->IsStarted) {
 				it->IsStarted = true;
+				it->IsFinished = false;
 				it->SearchStr = it->EndStr;
 				it->ResultStr += tmp;
-				ans[it->Num] = false;
 			}
 			else {
 				it->IsStarted = false;
+				it->IsFinished = true;
 				it->SearchStr = it->StartStr;
 				it->ResultStr += tmp;
-				ans[it->Num] = true;
 			}
 		}
-		ans[it->Num] = false;
 	}
 }
 
 const char* Write2Buffer::getData(int num) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
-		if (it->Num == num)
-			return it->SearchStr.c_str();
+		if (it->NaviNum == num)
+			return it->ResultStr.c_str();
 	}
 	return nullptr;
 }

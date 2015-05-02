@@ -7,11 +7,15 @@ using namespace std;
 struct bufferStatus
 {
 	bool IsStarted;
+	bool IsFinished;
+
 	string SearchStr;
 	string StartStr;
 	string EndStr;
 	string ResultStr;
-	int Num;
+
+	int Count;
+	int NaviNum;
 };
 
 class Write2Buffer
@@ -29,8 +33,8 @@ public:
 	bool ReadEx(char *OutData, int InLoc, unsigned int InSize);
 	bool Find(char *InData, int& OutLoc);
 
-	int AddSearchString(const string &InStartStr, const string &InEndStr);
-	void RemoveSearchString(int num);
+	bool AddSearchString(const string &InStartStr, const string &InEndStr, int num);
+	bool RemoveSearchString(int num);
 
 	void getBuffer4Write(char* OutBuffer, int& len);
 	void updateAfterWrite(int len, bool* ans);
