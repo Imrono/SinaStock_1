@@ -22,4 +22,10 @@ struct stockTime
 	int second;
 };
 
+struct stockSeason
+{
+	int year;
+	int season;
+};
+
 #endif

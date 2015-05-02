@@ -57,6 +57,9 @@
     <ClCompile Include="Common\Write2Buffer.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="Data_sina\DataHistory.cpp">
+      <Filter>Source Files\Data_sina</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stockData.h">
@@ -85,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="Common\Write2Buffer.h">
       <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Data_sina\DataHistory.h">
+      <Filter>Header Files\Data_sina</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

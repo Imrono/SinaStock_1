@@ -7,6 +7,7 @@ using namespace std;
 
 #include "Data_sina//DataStruct_sina.h"
 #include "Data_sina//getData_sina.h"
+#include "Data_sina//DataHistory.h"
 #include "Common//stock2fpTable.h"
 #include "Common//HttpUrl.h"
 #include "Common//GlobalParam.h"
@@ -20,6 +21,7 @@ int main()
 
 	Write2Buffer w2b(true, 1024);
 	w2b.AddSearchString("<!--历史交易begin-->", "<!--历史交易end-->", 1);
+	DataInSeason dataSeason;
 
 	int len = 0;
 	const int constLength = 1024;
@@ -40,8 +42,24 @@ int main()
 		}
 	} while (sizeRead);
 	fclose(fp);
+
+	dataSeason.DataAnalyze(w2b.getData(1)->ResultStr.c_str());
+	vector<DataOfDay> *dataDaily = dataSeason.getDateDaily();
+	for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
+		char tmp[256] = {0};
+		sprintf(tmp, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%d,%d\n", it->date.year, it->date.month, it->date.day
+			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney);
+
+		FILE* fp2 = fopen("bbb.stk", "a+");
+		fwrite(tmp, 1, strlen(tmp), fp2);
+		fclose(fp2);
+	}
+
 	printf_s("###### end: test Write2Buffer ######\n");
 	getchar();
+
+
+
 	getTraceConfigFromFile();
 	for (int i = 0; i < NUM_TRACES; i++) {
 		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
