@@ -1,14 +1,14 @@
 #include "Write2Buffer.h"
 
 Write2Buffer::Write2Buffer() :_buffer(nullptr), _bufferSize(0), _round(false), _writeCount(0), _1stLength(0), _2ndLength(0), 
-	_maxSearchLength(0), currentSearchNum(0) {}
-Write2Buffer::Write2Buffer(bool round, int n):_writeCount(0), _1stLength(0), _2ndLength(0), 
-	_maxSearchLength(0), currentSearchNum(0) {
+	_maxSearchLength(0), NofCurrentSearch(0) {}
+Write2Buffer::Write2Buffer(bool round, int BufferSize):_writeCount(0), _1stLength(0), _2ndLength(0), 
+	_maxSearchLength(0), NofCurrentSearch(0) {
 	_round = round;
 	if (_round)
-		_bufferSize = 2*n;
+		_bufferSize = 2*BufferSize;
 	else
-		_bufferSize = n;
+		_bufferSize = BufferSize;
 
 	_buffer = new char[_bufferSize+1];
 	memset(_buffer, 0, _bufferSize+1);
@@ -95,79 +95,117 @@ bool Write2Buffer::AddSearchString(const string &InStartStr, const string &InEnd
 	bufferStatus tmp;
 	tmp.IsStarted = false;
 	tmp.IsFinished = false;
-
-	tmp.ResultStr = "";
+	tmp.NaviNum = num;
 	tmp.SearchStr = InStartStr;
 	tmp.StartStr = InStartStr;
 	tmp.EndStr = InEndStr;
 
-	tmp.Count = 0;
-	tmp.NaviNum = num;
 
 	searchStatus.push_back(tmp);
 
-	currentSearchNum ++;
+	NofCurrentSearch ++;
 	_maxSearchLength = _maxSearchLength > tmp.SearchStr.size() ? _maxSearchLength : tmp.SearchStr.size();
 
+	mapSearchResult[num].Count = 0;
+	mapSearchResult[num].ResultStr = "";
 	return true;
 }
 bool Write2Buffer::RemoveSearchString(int num) {
+	bool vecReady = false;
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
 		if (it->NaviNum == num) {
 			searchStatus.erase(it);
-
-			currentSearchNum--;
 			_maxSearchLength = _maxSearchLength > it->SearchStr.size() ? _maxSearchLength : it->SearchStr.size();
-			return true;
+			NofCurrentSearch--;
+
+			vecReady = true;
 		}
 	}
-	return false;
+	if (mapSearchResult.erase(num)) {
+		if (vecReady)	return true;
+		else			return false;
+	}
+	else return false;
 }
 
-void Write2Buffer::getBuffer4Write(char* OutBuffer, int& len) {
+char* Write2Buffer::getBuffer4Write(int& len) {
 	if (_1stLength+_2ndLength <= _maxSearchLength) {
 		_1stLength += _2ndLength;
 	}
 	else {
-		char* tmp = new char[_maxSearchLength];
 		memmove(_buffer, _buffer+ (_1stLength+_2ndLength-_maxSearchLength), _maxSearchLength);
-		delete []tmp;
 		memset(_buffer+_maxSearchLength, 0, _1stLength+_2ndLength-_maxSearchLength);
 		_1stLength = _maxSearchLength;
 	}
 	_2ndLength = 0;
 
-	OutBuffer = _buffer + _1stLength;
 	len = _bufferSize - _1stLength;
+	return 	_buffer + _1stLength;
 }
 
-void Write2Buffer::updateAfterWrite(int len, bool* ans) {
+void Write2Buffer::updateAfterWrite(int len) {
 	_2ndLength = len;
 
-	//Analyse
-	char* tmp;
+	//ANALYZE
+	char* tmp, *tmpStart, *tmpEnd;
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
-		if (nullptr != (tmp = strstr(_buffer, it->SearchStr.c_str()))) {
-			if (false == it->IsStarted) {
-				it->IsStarted = true;
-				it->IsFinished = false;
-				it->SearchStr = it->EndStr;
-				it->ResultStr += tmp;
+		tmp = nullptr; tmpStart = nullptr; tmpEnd = nullptr;
+		bool loop = false;
+		do {
+			if (nullptr != (tmp = strstr(_buffer, it->SearchStr.c_str()))) {		// find subStr?
+				if (false == it->IsStarted) {	// IsStarted?
+					tmpStart = tmp;
+					it->IsStarted = true;
+					it->IsFinished = false;
+					it->SearchStr = it->EndStr;
+
+					// startStr & endStr in one data stream
+					if (nullptr != (tmp = strstr(_buffer+it->StartStr.size(), it->SearchStr.c_str()))) {
+						tmpEnd = tmp + it->EndStr.size();
+						mapSearchResult[it->NaviNum].Count ++;
+						loop = true;
+					}
+					else {
+						tmpEnd = _buffer + _1stLength+_2ndLength;
+						loop = false;
+					}
+				} // IsStarted? End if
+				else {							// IsStarted?
+					tmpStart = _buffer + _1stLength;
+					tmpEnd = tmp + it->EndStr.size();
+
+					it->IsStarted = false;
+					it->IsFinished = true;
+					mapSearchResult[it->NaviNum].Count ++;
+
+					it->SearchStr = it->StartStr;
+					loop = true;
+				} // IsStarted? End else
+			} // find subStr? End if
+			else {								// find subStr?
+				if (true == it->IsStarted) {
+					tmpStart = _buffer + _1stLength;
+					tmpEnd = _buffer + _1stLength + _2ndLength;
+					loop = false;
+				}
+				else {
+					tmpStart = nullptr;
+					tmpEnd = nullptr;
+					loop = false;
+				}
+			} // find subStr? End else
+			if (nullptr != tmpStart && nullptr != tmpEnd) {
+				mapSearchResult[it->NaviNum].ResultStr.append(tmpStart, tmpEnd);
+// 				it->ResultStr.append(_buffer, tmpStart-_buffer, tmpEnd-tmpStart);
 			}
-			else {
-				it->IsStarted = false;
-				it->IsFinished = true;
-				it->SearchStr = it->StartStr;
-				it->ResultStr += tmp;
-			}
-		}
-	}
+		} while(loop);
+	} //End for <searchStatus>
 }
 
-const char* Write2Buffer::getData(int num) {
+const searchResult* Write2Buffer::getData(int num) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
-		if (it->NaviNum == num)
-			return it->ResultStr.c_str();
+		if (it->NaviNum == num && true == it->IsFinished)
+			return &mapSearchResult[it->NaviNum];
 	}
 	return nullptr;
 }

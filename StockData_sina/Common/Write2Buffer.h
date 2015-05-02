@@ -2,6 +2,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 
 struct bufferStatus
@@ -12,17 +13,20 @@ struct bufferStatus
 	string SearchStr;
 	string StartStr;
 	string EndStr;
-	string ResultStr;
 
-	int Count;
 	int NaviNum;
+};
+struct searchResult
+{
+	int Count;
+	string ResultStr;
 };
 
 class Write2Buffer
 {
 public:
 	Write2Buffer();
-	Write2Buffer(bool round, int n);
+	Write2Buffer(bool round, int BufferSize);
 	~Write2Buffer();
 	
 	inline void SetBufferSize(int n);
@@ -36,9 +40,9 @@ public:
 	bool AddSearchString(const string &InStartStr, const string &InEndStr, int num);
 	bool RemoveSearchString(int num);
 
-	void getBuffer4Write(char* OutBuffer, int& len);
-	void updateAfterWrite(int len, bool* ans);
-	const char* getData(int num);
+	char* getBuffer4Write(int& len);
+	void updateAfterWrite(int len);
+	const searchResult* getData(int num);
 
 private:
 	char *_buffer;
@@ -51,5 +55,7 @@ private:
 
 	unsigned int _maxSearchLength;
 	vector<bufferStatus> searchStatus;
-	int currentSearchNum;
+	int NofCurrentSearch;
+
+	map<int, searchResult> mapSearchResult;
 };

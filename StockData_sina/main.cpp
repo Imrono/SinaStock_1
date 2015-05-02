@@ -11,10 +11,37 @@ using namespace std;
 #include "Common//HttpUrl.h"
 #include "Common//GlobalParam.h"
 #include "Common//TraceMicro.h"
+#include "Common//Write2Buffer.h"
 
 int main()
 {
 	printf_s("######Now @ master branch!!######\n");
+	printf_s("###### start: test Write2Buffer ######\n");
+
+	Write2Buffer w2b(true, 1024);
+	w2b.AddSearchString("<!--历史交易begin-->", "<!--历史交易end-->", 1);
+
+	int len = 0;
+	const int constLength = 1024;
+	char* buf;
+	FILE* fp = fopen("600820_2015-1.stk", "r+");
+	int sizeRead = 0;
+	do {
+		buf = w2b.getBuffer4Write(len);
+		len = constLength > len ? len : constLength;
+		sizeRead = fread(buf, 1, len, fp);
+		w2b.updateAfterWrite(len);
+		if (w2b.getData(1)) {
+			printf_s("%s", w2b.getData(1)->ResultStr.c_str());
+
+			FILE* fp1 = fopen("aaa.stk", "w");
+			fwrite(w2b.getData(1)->ResultStr.c_str(), 1, strlen(w2b.getData(1)->ResultStr.c_str()), fp1);
+			fclose(fp1);
+		}
+	} while (sizeRead);
+	fclose(fp);
+	printf_s("###### end: test Write2Buffer ######\n");
+	getchar();
 	getTraceConfigFromFile();
 	for (int i = 0; i < NUM_TRACES; i++) {
 		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
