@@ -72,14 +72,27 @@ HistoryURL::HistoryURL() : _synHttpUrl("HISTORY") {
 	_strQuarter[2] = "&jidu=2";
 	_strQuarter[3] = "&jidu=3";
 	_strQuarter[4] = "&jidu=4";
+
+	_IsPrepare = false;
 }
 HistoryURL::~HistoryURL() {
+	_IsPrepare = false;
 }
 
 const char* HistoryURL::PrepareURL(int year, int quarter, string stockID, getType priceType) {
 	sprintf_s(_strStockID, 32, "/stockid/%s.phtml", stockID.c_str());
-	sprintf_s(_strYear,    32, "?year=%4d",          year);
+	sprintf_s(_strYear,    32, "?year=%4d",         year);
 	sprintf_s(_URL_StockHistory+_startLength, 256-_startLength, 
 		"%s%s%s%s", _strPriceType[priceType], _strStockID, _strYear, _strQuarter[quarter]);
+	_IsPrepare = true;
 	return _URL_StockHistory;
+}
+void HistoryURL::URL2Data(int year, int quarter, string stockID, getType priceType) {
+	const char* url = PrepareURL(year, quarter, stockID, priceType);
+	_synHttpUrl.OpenUrl(url);
+
+	//loop + read & analyze all data
+	DWORD Number;
+	_synHttpUrl.ReadUrlOne(Number);
+	_HistoryAnalyze.DataAnalyze((char*)_synHttpUrl.GetBuf());
 }

@@ -49,6 +49,27 @@ void HttpUrlGetSyn::ReadUrlAll(string &data_recv) {
 		else {break;}
 	}
 }
+void HttpUrlGetSyn::ReadUrlAll(char* OutBuffer, int &len) {
+	int tmpLength = 0;
+	int ReadTimes = 0;
+	memset(OutBuffer, 0, len);
+	DWORD Number = 0;
+	while (1) {
+		if (!InternetReadFile(_hHttp, _buf, _bufSize - 1, &Number))
+			STATIC_TRACE(URL_TRACE, "Read Internet File failure!!!!!\n");
+		_buf[Number] = '\0';
+		if (tmpLength+(int)Number < len) {
+			memcpy(OutBuffer+tmpLength, _buf, Number);
+			tmpLength += Number;
+		}
+		ReadTimes ++;
+		if (Number) { 
+			// 			printf_s("Temp:\n%s\ndata_recv:\n%s", buf, data_recv.c_str());
+			STATIC_TRACE(URL_TRACE, "ReadTimes:%d, ReadNum:%d\n", ReadTimes, Number);
+		}
+		else {break;}
+	}
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -30,6 +30,7 @@ public:
 
 	int ReadUrlOne(DWORD &Number);
 	void ReadUrlAll(string &data_recv);
+	void ReadUrlAll(char* OutBuffer, int &len);
 
 	BYTE* GetBuf()	{ return _buf; }
 	void PrintBuf()	{ printf_s("buf in HttpUrlGet:\n%s\n", _buf); }

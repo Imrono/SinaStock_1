@@ -49,10 +49,13 @@ public:
 	HistoryURL();
 	~HistoryURL();
 
+	void URL2Data(int year, int quarter, string stockID, getType priceType);
 	const char* PrepareURL(int year, int quarter, string stockID, getType priceType);
 
 private:
 	HttpUrlGetSyn _synHttpUrl;
+	DataInSeason _HistoryAnalyze;
+	bool _IsPrepare;
 
 	char _URL_StockHistory[256];
 	int _startLength;
