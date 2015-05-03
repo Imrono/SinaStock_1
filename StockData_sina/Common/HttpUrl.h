@@ -31,14 +31,14 @@ public:
 	int ReadUrlOne(DWORD &Number);
 	void ReadUrlAll(string &data_recv);
 
-	BYTE* GetBuf()	{ return buf; }
-	void PrintBuf()	{ printf_s("buf in HttpUrlGet:\n%s\n", buf);
-	}
+	BYTE* GetBuf()	{ return _buf; }
+	void PrintBuf()	{ printf_s("buf in HttpUrlGet:\n%s\n", _buf); }
+
 private:
-	HINTERNET hSession;
-	HINTERNET hHttp;
-	BYTE* buf;
-	int bufSize;
+	HINTERNET _hSession;
+	HINTERNET _hHttp;
+	BYTE* _buf;
+	int _bufSize;
 };
 
 class HttpUrlGetAsyn

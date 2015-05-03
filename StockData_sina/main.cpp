@@ -55,6 +55,10 @@ int main()
 		fclose(fp2);
 	}
 
+	HistoryURL hstURL;
+	const char *tmpURL = hstURL.PrepareURL(2015,2,"000333",NO_FUQUAN);
+	printf_s("\n%s\n", tmpURL);
+
 	printf_s("###### end: test Write2Buffer ######\n");
 	getchar();
 
@@ -126,6 +130,7 @@ int main()
 	tb.getFile(symbol).open(symbol);
 	INFO("stock2fpTable Size: %d << %s add\n", tb.getFileTableSize(), symbol.c_str());
 
+	//TB means using stock2fpTable
 	//urlopen_sina_TB(url_req.c_str(), tb);
 	urlopen_sina_TB_ex(url_req.c_str(), tb);
 

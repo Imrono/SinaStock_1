@@ -5,28 +5,30 @@ using namespace std;
 #include "TraceMicro.h"
 
 HttpUrlGetSyn::HttpUrlGetSyn(const char* HttpName, DWORD dwAccessType) {
-	hSession = InternetOpen(HttpName, dwAccessType, NULL, NULL, 0);
-	bufSize = MAX_RECV_BUF_SIZE;
-	buf = new BYTE[bufSize];
-	memset(buf, 0, bufSize*sizeof(BYTE));
+	_hSession = InternetOpen(HttpName, dwAccessType, NULL, NULL, 0);
+	_bufSize = MAX_RECV_BUF_SIZE;
+	_buf = new BYTE[_bufSize];
+	memset(_buf, 0, _bufSize*sizeof(BYTE));
 	STATIC_TRACE(URL_TRACE, "hSession initialed.\n");
 }
 HttpUrlGetSyn::~HttpUrlGetSyn() {
-	InternetCloseHandle(hSession);	hSession = NULL;
-	delete []buf;
+	InternetCloseHandle(_hSession);	_hSession = nullptr;
+	delete []_buf; _buf = nullptr;
+	_hHttp = nullptr;
+	_bufSize = 0;
 }
 HINTERNET HttpUrlGetSyn::OpenUrl(const char* url) {
-	hHttp = InternetOpenUrl(hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
-	if (NULL != hHttp) STATIC_TRACE(URL_TRACE, "successful opened:\n%s\n", url);
-	return hHttp;
+	_hHttp = InternetOpenUrl(_hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
+	if (NULL != _hHttp) STATIC_TRACE(URL_TRACE, "successful opened:\n%s\n", url);
+	return _hHttp;
 }
 void HttpUrlGetSyn::CloseUrl() {
-	InternetCloseHandle(hHttp);	hHttp = NULL;
+	InternetCloseHandle(_hHttp);	_hHttp = NULL;
 }
 
 int HttpUrlGetSyn::ReadUrlOne(DWORD &Number) {
-	int ret = InternetReadFile(hHttp, buf, bufSize-1, &Number);
-	buf[Number] = 0;
+	int ret = InternetReadFile(_hHttp, _buf, _bufSize-1, &Number);
+	_buf[Number] = 0;
 	return ret;
 }
 void HttpUrlGetSyn::ReadUrlAll(string &data_recv) {
@@ -35,10 +37,10 @@ void HttpUrlGetSyn::ReadUrlAll(string &data_recv) {
 	data_recv = "";
 	DWORD Number = 0;
 	while (1) {
-		if (!InternetReadFile(hHttp, buf, bufSize - 1, &Number))
+		if (!InternetReadFile(_hHttp, _buf, _bufSize - 1, &Number))
 			STATIC_TRACE(URL_TRACE, "Read Internet File failure!!!!!\n");
-		buf[Number] = '\0';
-		data_recv += (char*)buf;
+		_buf[Number] = '\0';
+		data_recv += (char*)_buf;
 		ReadTimes ++;
 		if (Number) { 
 // 			printf_s("Temp:\n%s\ndata_recv:\n%s", buf, data_recv.c_str());

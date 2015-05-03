@@ -58,3 +58,28 @@ int DataInSeason::DataAnalyze(const char* rawData) {
 	}
 	else return -1;
 }
+
+HistoryURL::HistoryURL() : _synHttpUrl("HISTORY") {
+
+// 	char *tmp = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/xxxxxx.phtml?year=xxxx&jidu=x";
+	strcpy_s(_URL_StockHistory, 256, "http://money.finance.sina.com.cn/corp/go.php");
+	_startLength = strlen(_URL_StockHistory);
+
+	_strPriceType[FUQUAN] = "/vMS_FuQuanMarketHistory";
+	_strPriceType[NO_FUQUAN] = "/vMS_MarketHistory";
+
+	_strQuarter[1] = "&jidu=1";
+	_strQuarter[2] = "&jidu=2";
+	_strQuarter[3] = "&jidu=3";
+	_strQuarter[4] = "&jidu=4";
+}
+HistoryURL::~HistoryURL() {
+}
+
+const char* HistoryURL::PrepareURL(int year, int quarter, string stockID, getType priceType) {
+	sprintf_s(_strStockID, 32, "/stockid/%s.phtml", stockID.c_str());
+	sprintf_s(_strYear,    32, "?year=%4d",          year);
+	sprintf_s(_URL_StockHistory+_startLength, 256-_startLength, 
+		"%s%s%s%s", _strPriceType[priceType], _strStockID, _strYear, _strQuarter[quarter]);
+	return _URL_StockHistory;
+}
