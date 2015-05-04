@@ -21,8 +21,8 @@ struct DataOfDay
 	float top;
 	float close;
 	float buttom;
-	int exchangeStock;
-	int exchangeMoney;
+	float exchangeStock;
+	float exchangeMoney;
 
 	float factor;
 };
@@ -49,7 +49,7 @@ public:
 	HistoryURL();
 	~HistoryURL();
 
-	void URL2Data(int year, int quarter, string stockID, getType priceType);
+	vector<DataOfDay> * URL2Data(int year, int quarter, string stockID, getType priceType);
 	const char* PrepareURL(int year, int quarter, string stockID, getType priceType);
 
 private:

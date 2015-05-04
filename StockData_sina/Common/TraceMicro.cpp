@@ -35,7 +35,7 @@ void getTraceConfigFromFile()
 			for (int i = 0; i < numSize; i++) {
 				if (0u == val[i] || 1u == val[i])
 					*tmpParam |= (val[i] << num[i]);
-				else EROR("TRACE DATA UNEXPECTED!!\n");
+				else ERRR("TRACE DATA UNEXPECTED!!\n");
 			}
 		}
 		else if ('#' == tmp[0]) {}

@@ -1,4 +1,6 @@
 #include "DataHistory.h"
+#include "..//Common//Write2Buffer.h"
+#include "..//Common//TraceMicro.h"
 
 DataInSeason::DataInSeason() {}
 DataInSeason::~DataInSeason() {
@@ -10,7 +12,13 @@ vector<DataOfDay>* DataInSeason::getDateDaily() {
 }
 int DataInSeason::DataAnalyze(const char* rawData) {
 	const char* tmp = nullptr;
+	bool HasFactor = false;
+	const char* endCheck = nullptr;
 	int count = 0;
+	// check begin
+	if (nullptr == (tmp = strstr(rawData, "<!--历史交易begin-->")))
+		return -1;
+	endCheck = tmp;
 	// get year
 	if (nullptr != (tmp = strstr(rawData, "year")))
 		if (nullptr != (tmp = strstr(tmp, "selected")))
@@ -25,10 +33,14 @@ int DataInSeason::DataAnalyze(const char* rawData) {
 		else return -1;
 	else return -1;
 
+	if (nullptr != strstr(tmp, "复权因子"))
+		HasFactor = true;
+
 	// get daily date
 	if (nullptr != (tmp = strstr(tmp, "<table id=\"FundHoldSharesTable\">"))) {
 		const char* tmpTable = strstr(tmp, "</table>");
 		while (nullptr != (tmp = strstr(tmp, "<a target='_blank' href=")) && tmp < tmpTable) {
+			endCheck = tmp;
 			DataOfDay tmpData;
 			if (nullptr != (tmp = strstr(tmp, "'http://"))) {
 				const char* startURL = strstr(tmp, "'");
@@ -42,15 +54,30 @@ int DataInSeason::DataAnalyze(const char* rawData) {
 			else return -1;
 
 			tmp = strstr(tmp, "<td><div align=\"center\">");
-			sscanf_s(tmp, 
-				"<td><div align=\"center\">%f</div></td>\t"\
-				"<td><div align=\"center\">%f</div></td>\t"\
-				"<td><div align=\"center\">%f</div></td>\t"\
-				"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"\
-				"<td class=\"tdr\"><div align=\"center\">%d</div></td>\t"\
-				"<td class=\"tdr\"><div align=\"center\">%d</div></td>\t"
-				, &tmpData.open, &tmpData.top, &tmpData.close, &tmpData.buttom
-				, &tmpData.exchangeStock, &tmpData.exchangeMoney);
+			if (!HasFactor) {
+				sscanf_s(tmp, 
+					"<td><div align=\"center\">%f</div></td>\t"\
+					"<td><div align=\"center\">%f</div></td>\t"\
+					"<td><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"
+					, &tmpData.open, &tmpData.top, &tmpData.close, &tmpData.buttom
+					, &tmpData.exchangeStock, &tmpData.exchangeMoney);
+				tmpData.factor = 1.0;
+			}
+			else {
+				sscanf_s(tmp, 
+					"<td><div align=\"center\">%f</div></td>\t"\
+					"<td><div align=\"center\">%f</div></td>\t"\
+					"<td><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"\
+					"<td class=\"tdr\"><div align=\"center\">%f</div></td>\t"
+					, &tmpData.open, &tmpData.top, &tmpData.close, &tmpData.buttom
+					, &tmpData.exchangeStock, &tmpData.exchangeMoney, &tmpData.factor);
+			}
 			_dataDaily.push_back(tmpData);
 			count++;
 		}
@@ -87,12 +114,36 @@ const char* HistoryURL::PrepareURL(int year, int quarter, string stockID, getTyp
 	_IsPrepare = true;
 	return _URL_StockHistory;
 }
-void HistoryURL::URL2Data(int year, int quarter, string stockID, getType priceType) {
+vector<DataOfDay> * HistoryURL::URL2Data(int year, int quarter, string stockID, getType priceType) {
 	const char* url = PrepareURL(year, quarter, stockID, priceType);
 	_synHttpUrl.OpenUrl(url);
 
 	//loop + read & analyze all data
-	DWORD Number;
-	_synHttpUrl.ReadUrlOne(Number);
-	_HistoryAnalyze.DataAnalyze((char*)_synHttpUrl.GetBuf());
+	Write2Buffer w2b(true, MAX_RECV_BUF_SIZE);
+	w2b.AddSearchString("<!--历史交易begin-->", "<!--历史交易end-->", HISTORY_EXCHANGE);
+	int len = 0;
+	char* buf;
+	int ReadTimes = 0;
+	do {
+		buf = w2b.getBuffer4Write(len);
+		len = MAX_RECV_BUF_SIZE > len ? len : MAX_RECV_BUF_SIZE;
+		_synHttpUrl.ReadUrlOne(buf, len);
+		if (len) {
+			w2b.updateAfterWrite(len);
+			ReadTimes++;
+		}
+		else {
+			if (w2b.getData(1)) {
+				DYNAMIC_TRACE(PROGRESS_TRACE, "analyze daily history OK\n");
+				break;
+			}
+			else ERRR("Unexpected end when analyze daily history data\n");
+		}
+	} while (1);
+
+	_HistoryAnalyze.DataAnalyze(w2b.getData(1)->ResultStr.c_str());
+	vector<DataOfDay> *dataDaily = _HistoryAnalyze.getDateDaily();
+
+	_synHttpUrl.CloseUrl();
+	return dataDaily;
 }

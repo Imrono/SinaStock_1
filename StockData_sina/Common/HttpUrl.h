@@ -29,8 +29,9 @@ public:
 	void CloseUrl();
 
 	int ReadUrlOne(DWORD &Number);
+	int ReadUrlOne(char* OutBuffer, int &Length);
 	void ReadUrlAll(string &data_recv);
-	void ReadUrlAll(char* OutBuffer, int &len);
+	void ReadUrlAll(char* OutBuffer, int &Length);
 
 	BYTE* GetBuf()	{ return _buf; }
 	void PrintBuf()	{ printf_s("buf in HttpUrlGet:\n%s\n", _buf); }

@@ -19,6 +19,22 @@ int main()
 	printf_s("######Now @ master branch!!######\n");
 	printf_s("###### start: test Write2Buffer ######\n");
 
+	HistoryURL historyData;
+	vector<DataOfDay> *dataDaily1 = historyData.URL2Data(2015,2,"000333",NO_FUQUAN);
+
+	for (vector<DataOfDay>::iterator it = (*dataDaily1).begin(); it != (*dataDaily1).end(); ++it) {
+		char tmp[256] = {0};
+		sprintf(tmp, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%f,%f,%f\n", it->date.year, it->date.month, it->date.day
+			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
+
+		FILE* fp2 = fopen("ccc.stk", "a+");
+		fwrite(tmp, 1, strlen(tmp), fp2);
+		fclose(fp2);
+	}
+
+	getchar();
+
+
 	Write2Buffer w2b(true, 1024);
 	w2b.AddSearchString("<!--历史交易begin-->", "<!--历史交易end-->", 1);
 	DataInSeason dataSeason;
@@ -47,8 +63,8 @@ int main()
 	vector<DataOfDay> *dataDaily = dataSeason.getDateDaily();
 	for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 		char tmp[256] = {0};
-		sprintf(tmp, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%d,%d\n", it->date.year, it->date.month, it->date.day
-			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney);
+		sprintf(tmp, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%f,%f,%f\n", it->date.year, it->date.month, it->date.day
+			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
 
 		FILE* fp2 = fopen("bbb.stk", "a+");
 		fwrite(tmp, 1, strlen(tmp), fp2);

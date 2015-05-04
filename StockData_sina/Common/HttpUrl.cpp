@@ -31,6 +31,14 @@ int HttpUrlGetSyn::ReadUrlOne(DWORD &Number) {
 	_buf[Number] = 0;
 	return ret;
 }
+int HttpUrlGetSyn::ReadUrlOne(char* OutBuffer, int &Length) {
+	DWORD tmp = 0;
+	int ret = InternetReadFile(_hHttp, OutBuffer, Length-1, &tmp);
+	Length = (int)tmp;
+	OutBuffer[Length] = 0;
+	return ret;
+}
+
 void HttpUrlGetSyn::ReadUrlAll(string &data_recv) {
 
 	int ReadTimes = 0;
@@ -49,16 +57,16 @@ void HttpUrlGetSyn::ReadUrlAll(string &data_recv) {
 		else {break;}
 	}
 }
-void HttpUrlGetSyn::ReadUrlAll(char* OutBuffer, int &len) {
+void HttpUrlGetSyn::ReadUrlAll(char* OutBuffer, int &Length) {
 	int tmpLength = 0;
 	int ReadTimes = 0;
-	memset(OutBuffer, 0, len);
+	memset(OutBuffer, 0, Length);
 	DWORD Number = 0;
 	while (1) {
 		if (!InternetReadFile(_hHttp, _buf, _bufSize - 1, &Number))
 			STATIC_TRACE(URL_TRACE, "Read Internet File failure!!!!!\n");
 		_buf[Number] = '\0';
-		if (tmpLength+(int)Number < len) {
+		if (tmpLength+(int)Number < Length) {
 			memcpy(OutBuffer+tmpLength, _buf, Number);
 			tmpLength += Number;
 		}

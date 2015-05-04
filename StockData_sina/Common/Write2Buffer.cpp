@@ -128,6 +128,11 @@ bool Write2Buffer::RemoveSearchString(int num) {
 	else return false;
 }
 
+/****************************************************************/
+/* return buffer address
+/* param(s)
+/* int &len : out max available buffer size
+/****************************************************************/
 char* Write2Buffer::getBuffer4Write(int& len) {
 	if (_1stLength+_2ndLength <= _maxSearchLength) {
 		_1stLength += _2ndLength;
@@ -202,11 +207,18 @@ void Write2Buffer::updateAfterWrite(int len) {
 	} //End for <searchStatus>
 }
 
-const searchResult* Write2Buffer::getData(int num) {
+/****************************************************************/
+/* return string between start sub str and end sub str
+/* param(s)
+/* int idx : start & end sub str idx
+/****************************************************************/
+const searchResult* Write2Buffer::getData(int idx) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
-		if (it->NaviNum == num && true == it->IsFinished)
+		if (it->NaviNum == idx && true == it->IsFinished)
 			return &mapSearchResult[it->NaviNum];
 	}
 	return nullptr;
 }
-
+unsigned int Write2Buffer::getBufferSize() {
+	return _bufferSize;
+}

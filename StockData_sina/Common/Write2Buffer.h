@@ -22,6 +22,10 @@ struct searchResult
 	string ResultStr;
 };
 
+enum StrInStockHistory {
+	HISTORY_EXCHANGE = 1
+};
+
 class Write2Buffer
 {
 public:
@@ -42,7 +46,8 @@ public:
 
 	char* getBuffer4Write(int& len);
 	void updateAfterWrite(int len);
-	const searchResult* getData(int num);
+	const searchResult* getData(int idx);
+	unsigned int getBufferSize();
 
 private:
 	char *_buffer;

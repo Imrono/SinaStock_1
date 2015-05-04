@@ -131,7 +131,7 @@ const char* data_analyseOne(const char* const In_data, Data_sina &Out_data)
 		if		(strcmp(pIn_data+idx, "sh")) { Out_data.stockNavi.market = SH;	idx += 2;}
 		else if	(strcmp(pIn_data+idx, "sz")) { Out_data.stockNavi.market = SZ;	idx += 2;}
 		else if	(strcmp(pIn_data+idx, "hk")) { Out_data.stockNavi.market = HK;	idx += 2;}
-		else {	EROR("Undefined Market!!");}
+		else {	ERRR("Undefined Market!!");}
 		
 		sscanf_s(pIn_data+idx, "%d=\"%[^,],%f,%f,%f,%f,%f,%f,%f,%d,%lf,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d-%d-%d,%d:%d:%d,00\";",
 			&Out_data.stockNavi.symbol, Out_data.stockNavi.name, sizeof(Out_data.stockNavi.name), &Out_data.td_open, &Out_data.ysd_close,
