@@ -14,4 +14,6 @@ extern float downOrderThreshold;
 extern unsigned int StaticTraceParam;
 extern unsigned int DynamicTraceParam;
 
+extern char* DataDir;
+extern char* DailyDataDir;
 #endif

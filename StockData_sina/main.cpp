@@ -4,6 +4,8 @@
 #include <utility>
 #include <ctime>
 using namespace std;
+#include <direct.h>
+#include  <io.h>
 
 #include "Data_sina//DataStruct_sina.h"
 #include "Data_sina//getData_sina.h"
@@ -13,23 +15,36 @@ using namespace std;
 #include "Common//GlobalParam.h"
 #include "Common//TraceMicro.h"
 #include "Common//Write2Buffer.h"
+#include "Common//stockTime.h"
 
 int main()
 {
+// 	system("md d:\\mydir");
+	int a = stockTimeHandler::getLocalWeekDay();
+	_mkdir("d:\\mydir1\\aaa");
 	printf_s("######Now @ master branch!!######\n");
 	printf_s("###### start: test Write2Buffer ######\n");
+	stockHistoryStatus status1;
+	HistoryData historyData;
+	stockFile stkFile;
+	if (-1 != _access("d:\\mydir",0)) printf_s("afsdfwer\n");
+	if (stkFile.CheckFolderExist("d:\\mydir")) printf_s("aaaaaaa\n");
+	else printf_s("BBBBBBB\n");
 
-	HistoryURL historyData;
-	vector<DataOfDay> *dataDaily1 = historyData.URL2Data(2015,2,"000333",NO_FUQUAN);
+
+	vector<DataOfDay> *dataDaily1 = historyData.URL2Data(2015,2,"000333",NO_FUQUAN, status1);
+
+	historyData.DailyData2File(dataDaily1);
+	getchar();
 
 	for (vector<DataOfDay>::iterator it = (*dataDaily1).begin(); it != (*dataDaily1).end(); ++it) {
 		char tmp[256] = {0};
-		sprintf(tmp, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%f,%f,%f\n", it->date.year, it->date.month, it->date.day
+		sprintf(tmp, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
-
-		FILE* fp2 = fopen("ccc.stk", "a+");
-		fwrite(tmp, 1, strlen(tmp), fp2);
-		fclose(fp2);
+		printf_s("%s", tmp);
+		stkFile.open("ddd");
+		stkFile.write(tmp, strlen(tmp));
+		stkFile.close();
 	}
 
 	getchar();
@@ -59,7 +74,8 @@ int main()
 	} while (sizeRead);
 	fclose(fp);
 
-	dataSeason.DataAnalyze(w2b.getData(1)->ResultStr.c_str());
+	stockHistoryStatus status;
+	dataSeason.DataAnalyze(w2b.getData(1)->ResultStr.c_str(), status);
 	vector<DataOfDay> *dataDaily = dataSeason.getDateDaily();
 	for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 		char tmp[256] = {0};
@@ -71,7 +87,7 @@ int main()
 		fclose(fp2);
 	}
 
-	HistoryURL hstURL;
+	HistoryData hstURL;
 	const char *tmpURL = hstURL.PrepareURL(2015,2,"000333",NO_FUQUAN);
 	printf_s("\n%s\n", tmpURL);
 

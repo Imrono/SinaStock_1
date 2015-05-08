@@ -8,3 +8,6 @@ unsigned int DynamicTraceParam = 0;
 
 extern float upOrderThreshold = THRESHOLD;
 extern float downOrderThreshold = THRESHOLD;
+
+extern char* DataDir = "d:\\StockData";
+extern char* DailyDataDir = "\\DailyData";

@@ -67,6 +67,7 @@
     <ClCompile Include="Common\HttpUrl.cpp" />
     <ClCompile Include="Common\stock2fpTable.cpp" />
     <ClCompile Include="Common\stockData.cpp" />
+    <ClCompile Include="Common\stockTime.cpp" />
     <ClCompile Include="Common\TraceMicro.cpp" />
     <ClCompile Include="Common\Write2Buffer.cpp" />
     <ClCompile Include="Data_sina\DataHistory.cpp" />
@@ -80,6 +81,7 @@
     <ClInclude Include="Common\HttpUrl.h" />
     <ClInclude Include="Common\stock2fpTable.h" />
     <ClInclude Include="Common\stockData.h" />
+    <ClInclude Include="Common\stockTime.h" />
     <ClInclude Include="Common\TraceMicro.h" />
     <ClInclude Include="Common\Write2Buffer.h" />
     <ClInclude Include="Data_sina\DataHistory.h" />

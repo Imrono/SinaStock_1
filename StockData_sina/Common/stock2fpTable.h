@@ -4,7 +4,10 @@
 #include <map>
 #include <cstring>
 #include <string>
+#include <vector>
 using namespace std;
+#include <windows.h>
+#include  <io.h>
 
 #include "..//Common//GlobalParam.h"
 #include "..//Common//TraceMicro.h"
@@ -47,13 +50,18 @@ public:
 
 	bool open(string fileName, char* fileType = "a+", char* tp = ".stk");
 	void close();
-	int write();
 	int write(const char* str, int len) const {
 		return fwrite(str, len, 1, file);
 	}
 	int read();
 	bool IsFileOpened()	{ return IsOpened; }
 	static int getNofOpenedFiles() { return openedFiles; }
+
+	static bool CheckFolderExist(const string &strPath);
+	static bool IsAccessable(const char *path) {
+		return -1 != _access(path, 0);	//#define F_OK 0 /* Test for existence. */
+	}
+	static void getFiles(string path, vector<string>& files);
 
 private:
 	FILE* file;

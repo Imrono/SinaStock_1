@@ -1,6 +1,24 @@
 #include "stock2fpTable.h"
 
 int stockFile::openedFiles = 0;
+void stockFile::getFiles(string path, vector<string>& files)
+{  
+	long hFile = 0;
+	struct _finddata_t fileinfo;
+	string p;
+	if((hFile = _findfirst(p.assign(path).append("\\*").c_str(),&fileinfo)) !=  -1)
+	{  
+		do {
+			if((fileinfo.attrib &  _A_SUBDIR)) {		//if directory, iterate
+				if(strcmp(fileinfo.name,".") != 0  &&  strcmp(fileinfo.name,"..") != 0)
+					getFiles(p.assign(path).append("\\").append(fileinfo.name), files);
+			} else {			//if not directory, add it
+				files.push_back(p.assign(path).append("\\").append(fileinfo.name));
+			}
+		}while(_findnext(hFile, &fileinfo)  == 0);
+		_findclose(hFile);
+	}
+}
 stockFile::stockFile()
 {
 	counter = 0;
@@ -31,6 +49,20 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 	}
 	else return false;
 }
+
+bool stockFile::CheckFolderExist(const string &strPath) {
+	WIN32_FIND_DATA  wfd;
+	bool rValue = false;
+	HANDLE hFind = FindFirstFile(strPath.c_str(), &wfd);
+	if ((hFind != INVALID_HANDLE_VALUE) && (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		rValue = true;   
+	FindClose(hFind);
+	return rValue;
+}
+
+
+
+
 
 /////////////////////////////////////////////////////////////
 stockTable::stockTable()

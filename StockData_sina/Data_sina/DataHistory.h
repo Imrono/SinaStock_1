@@ -7,10 +7,15 @@
 using namespace std;
 #include "..//Common//stockData.h"
 #include "..//Common//HttpUrl.h"
+#include "..//Common//stock2fpTable.h"
 
 enum getType {
 	FUQUAN = 0,
 	NO_FUQUAN = 1
+};
+enum historyType {
+	DAILY_DATA = 0,
+	ONTIME_DATA = 1
 };
 
 struct DataOfDay
@@ -27,14 +32,27 @@ struct DataOfDay
 	float factor;
 };
 
+class stockHistoryStatus
+{
+public:
+	stockHistoryStatus();
+	int HistoryType;
+	string symbol;
+	bool HasDailyDataInit;
+	bool NeedDailyDataUpdate;
+	bool HasOnTimeDataInit;
+	vector<stockStatus> status;
+};
+
 class DataInSeason
 {
 public:
 	DataInSeason();
 	~DataInSeason();
 
-	int DataAnalyze(const char* rawData);
+	int DataAnalyze(const char* rawData, stockHistoryStatus &status);
 	vector<DataOfDay>* getDateDaily();
+	stockSeason &getDataSeason() {return _dataSeason;}
 
 private:
 	stockSeason _dataSeason;
@@ -43,16 +61,20 @@ private:
 
 
 
-class HistoryURL
+class HistoryData
 {
 public:
-	HistoryURL();
-	~HistoryURL();
+	HistoryData();
+	~HistoryData();
 
-	vector<DataOfDay> * URL2Data(int year, int quarter, string stockID, getType priceType);
+	vector<DataOfDay> * URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status);
 	const char* PrepareURL(int year, int quarter, string stockID, getType priceType);
 
+	void CheckAndSetFolder(stockHistoryStatus &status);
+	void DailyData2File(vector<DataOfDay> *DailyData);
+
 private:
+	stockFile stkFile;
 	HttpUrlGetSyn _synHttpUrl;
 	DataInSeason _HistoryAnalyze;
 	bool _IsPrepare;

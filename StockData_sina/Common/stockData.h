@@ -28,4 +28,14 @@ struct stockSeason
 	int season;
 };
 
+class stockStatus
+{
+public:
+	stockStatus();
+
+	int year;
+	bool seasons[4];
+	bool prepare[4];
+};
+
 #endif
