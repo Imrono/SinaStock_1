@@ -65,6 +65,7 @@ class HistoryData
 {
 public:
 	HistoryData();
+	HistoryData(string stockID);
 	~HistoryData();
 
 	vector<DataOfDay> * URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status);
@@ -85,6 +86,9 @@ private:
 	char _URL_StockHistory[256];
 	int _startLength;
 	
+	string _stockID;
+	getType IsFQ;
+
 	map <getType, char*> _strPriceType;
 	map <int, char*> _strQuarter;
 	char _strStockID[32];

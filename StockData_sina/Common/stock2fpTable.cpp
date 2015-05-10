@@ -62,6 +62,13 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 	}
 	else return false;
 }
+int stockFile::readline(char *OutBuffer, int size) {
+	if (!IsOpened) return -1;
+	else {
+		return fscanf_s(file, "[^\n]", OutBuffer, size);
+	}
+}
+
 void stockFile::SetFileNameFormate(const string &id, int year, int season, char *tp, string &str) {
 	char tmp[128] = {0};
 	str.clear();

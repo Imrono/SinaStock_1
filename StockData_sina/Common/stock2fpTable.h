@@ -53,7 +53,7 @@ public:
 	int write(const char* str, int len) const {
 		return fwrite(str, len, 1, file);
 	}
-	int read();
+	int readline(char *OutBuffer, int size);
 	bool IsFileOpened()	{ return IsOpened; }
 	static int getNofOpenedFiles() { return openedFiles; }
 

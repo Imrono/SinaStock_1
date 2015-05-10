@@ -153,6 +153,24 @@ HistoryData::HistoryData() : _synHttpUrl("HISTORY") {
 
 	_IsPrepare = false;
 }
+HistoryData::HistoryData(string stockID) : _stockID(stockID), _synHttpUrl("HISTORY") {
+	if (!stockFile::IsAccessable(DataDir))
+		_mkdir(DataDir);
+
+	// 	char *tmp = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/xxxxxx.phtml?year=xxxx&jidu=x";
+	strcpy_s(_URL_StockHistory, 256, "http://money.finance.sina.com.cn/corp/go.php");
+	_startLength = strlen(_URL_StockHistory);
+
+	_strPriceType[FUQUAN] = "/vMS_FuQuanMarketHistory";
+	_strPriceType[NO_FUQUAN] = "/vMS_MarketHistory";
+
+	_strQuarter[1] = "&jidu=1";
+	_strQuarter[2] = "&jidu=2";
+	_strQuarter[3] = "&jidu=3";
+	_strQuarter[4] = "&jidu=4";
+
+	_IsPrepare = false;
+}
 HistoryData::~HistoryData() {
 	_IsPrepare = false;
 }
@@ -212,6 +230,8 @@ vector<DataOfDay> * HistoryData::URL2Data(int year, int quarter, string stockID,
 	return dataDaily;
 }
 void HistoryData::StockDailyData(string stockID, getType priceType) {
+	_stockID = stockID;
+	IsFQ = priceType;
 	stockHistoryStatus status;
 	status.symbol = stockID;
 	char pt[32] = {0};
