@@ -1,6 +1,8 @@
 #ifndef TRACE_MICRO_H
 #define TRACE_MICRO_H
 #include "GlobalParam.h"
+#include <cstdio>
+using namespace std;
 
 #define URL_TRACE		0
 #define CALLBACE_TRACE	1
@@ -50,5 +52,8 @@
 	do { printf_s("ERROR: "); printf_s(__VA_ARGS__); } while (0)
 
 void getTraceConfigFromFile();
+
+#define TO_DISPLAY(x) (x+1)
+#define TO_DATA(x) (x-1)
 
 #endif // TRACE_MICRO_H

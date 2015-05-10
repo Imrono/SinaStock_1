@@ -58,10 +58,18 @@ public:
 	static int getNofOpenedFiles() { return openedFiles; }
 
 	static bool CheckFolderExist(const string &strPath);
+	static bool CheckDSTKFileExist(const string &strPath, bool IsFolder, char *pt);
+	static void FindLatestDTSK(const string &strPath, string &OutStr, char *pt);
+
 	static bool IsAccessable(const char *path) {
 		return -1 != _access(path, 0);	//#define F_OK 0 /* Test for existence. */
 	}
 	static void getFiles(string path, vector<string>& files);
+	static bool createFile(string path);
+	static bool FileWriteTime(string path, SYSTEMTIME &s_t);
+
+	static void SetFileNameFormate(const string &id, int year, int season, char *tp, string &str);
+	static void GetFileNameFormate(const string &str, char *tp, int &year, int &season, string &id);
 
 private:
 	FILE* file;

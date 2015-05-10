@@ -5,7 +5,7 @@
 #include <ctime>
 using namespace std;
 #include <direct.h>
-#include  <io.h>
+#include <io.h>
 
 #include "Data_sina//DataStruct_sina.h"
 #include "Data_sina//getData_sina.h"
@@ -16,30 +16,60 @@ using namespace std;
 #include "Common//TraceMicro.h"
 #include "Common//Write2Buffer.h"
 #include "Common//stockTime.h"
+#include "stockHandler.h"
 
 int main()
 {
 // 	system("md d:\\mydir");
+	char aaaa[128] = "d:\\StockData\\000333\\DailyData\\[000333]2013-3.dstk";
+	char tmpID[128] = {0};
+	char tmp1[128] = {0};
+	char *p = aaaa;
+	int tmpSeason;
+	int year;
+	do 
+	{
+		char *tp;
+		tp = strstr(p+1, "\\");
+		if (tp) p = tp;
+		else { p++; break;}
+	} while (1);
+	strcpy_s(tmp1, 128, p);
+	sscanf_s(tmp1, "%[^.]", tmpID, 128);
+
 	int a = stockTimeHandler::getLocalWeekDay();
 	_mkdir("d:\\mydir1\\aaa");
+	SYSTEMTIME lcTime;
+	GetLocalTime(&lcTime);
+
 	printf_s("######Now @ master branch!!######\n");
 	printf_s("###### start: test Write2Buffer ######\n");
 	stockHistoryStatus status1;
 	HistoryData historyData;
+	historyData.StockDailyData("000333", NO_FUQUAN);
+
+
+	getchar();
+
+	SYSTEMTIME lt;
+	stockFile::FileWriteTime("eee.stk", lt);
+	string ttt = "tmp.stk";
+	historyData.CheckUpdate(lt, ttt);
 	stockFile stkFile;
 	if (-1 != _access("d:\\mydir",0)) printf_s("afsdfwer\n");
 	if (stkFile.CheckFolderExist("d:\\mydir")) printf_s("aaaaaaa\n");
 	else printf_s("BBBBBBB\n");
-
+	SYSTEMTIME t;
+	stockFile::FileWriteTime("eee.stk", t);
 
 	vector<DataOfDay> *dataDaily1 = historyData.URL2Data(2015,2,"000333",NO_FUQUAN, status1);
 
-	historyData.DailyData2File(dataDaily1);
+	historyData.DailyData2File(dataDaily1, "rrr");
 	getchar();
 
 	for (vector<DataOfDay>::iterator it = (*dataDaily1).begin(); it != (*dataDaily1).end(); ++it) {
 		char tmp[256] = {0};
-		sprintf(tmp, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
+		sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
 		printf_s("%s", tmp);
 		stkFile.open("ddd");
@@ -79,7 +109,7 @@ int main()
 	vector<DataOfDay> *dataDaily = dataSeason.getDateDaily();
 	for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 		char tmp[256] = {0};
-		sprintf(tmp, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%f,%f,%f\n", it->date.year, it->date.month, it->date.day
+		sprintf_s(tmp, 256, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%f,%f,%f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
 
 		FILE* fp2 = fopen("bbb.stk", "a+");

@@ -9,7 +9,7 @@ void stockFile::getFiles(string path, vector<string>& files)
 	if((hFile = _findfirst(p.assign(path).append("\\*").c_str(),&fileinfo)) !=  -1)
 	{  
 		do {
-			if((fileinfo.attrib &  _A_SUBDIR)) {		//if directory, iterate
+			if((fileinfo.attrib &  _A_SUBDIR)) {	//if directory, iterate
 				if(strcmp(fileinfo.name,".") != 0  &&  strcmp(fileinfo.name,"..") != 0)
 					getFiles(p.assign(path).append("\\").append(fileinfo.name), files);
 			} else {			//if not directory, add it
@@ -19,6 +19,19 @@ void stockFile::getFiles(string path, vector<string>& files)
 		_findclose(hFile);
 	}
 }
+bool stockFile::createFile(string path) {
+	// if exist return false
+	if (stockFile::IsAccessable(path.c_str()))
+		return false;
+	// if not exist, create and return true
+	else {
+		FILE *fp;
+		fopen_s(&fp, path.c_str(), "w");
+		fclose(fp);
+		return true;
+	}
+}
+
 stockFile::stockFile()
 {
 	counter = 0;
@@ -49,18 +62,105 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 	}
 	else return false;
 }
+void stockFile::SetFileNameFormate(const string &id, int year, int season, char *tp, string &str) {
+	char tmp[128] = {0};
+	str.clear();
+	sprintf_s(tmp, 128, "[%s]%d-%d%s", id.c_str(), year, TO_DISPLAY(season), tp);
+	str = tmp;
+	return;
+
+}
+void stockFile::GetFileNameFormate(const string &str, char *tp, int &year, int &season, string &id) {
+	char tmpID[128] = {0};
+	int tmpSeason;
+	const char *p = str.c_str();
+	do {
+		const char *tp;
+		tp = strstr(p+1, "\\");
+		if (tp) p = tp;
+		else { p = strstr(p, "["); break;}
+	} while (1);
+
+	if (!strcmp(tp, ".dstk")) {
+		sscanf_s(p, "[%[^]]]%d-%d.dstk", tmpID, 128, &year, &tmpSeason);
+		season = TO_DATA(tmpSeason);
+		id = tmpID;
+	} else 	if (!strcmp(tp, ".FQdstk")) {
+		sscanf_s(p, "[%[^]]]%d-%d.FQdstk", tmpID, 128, &year, &tmpSeason);
+		season = TO_DATA(tmpSeason);
+		id = tmpID;
+	} else 	if (!strcmp(tp, ".NFQstk")) {
+		sscanf_s(p, "[%[^]]]%d-%d.NFQdstk", tmpID, 128, &year, &tmpSeason);
+		season = TO_DATA(tmpSeason);
+		id = tmpID;
+	}
+
+
+}
 
 bool stockFile::CheckFolderExist(const string &strPath) {
 	WIN32_FIND_DATA  wfd;
 	bool rValue = false;
 	HANDLE hFind = FindFirstFile(strPath.c_str(), &wfd);
 	if ((hFind != INVALID_HANDLE_VALUE) && (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-		rValue = true;   
+		rValue = true;
 	FindClose(hFind);
 	return rValue;
 }
+bool stockFile::CheckDSTKFileExist(const string &strPath, bool IsFolder, char *pt) {
+	string p;
+	if (IsFolder) {
+		char tmp[32] = {0};
+		sprintf_s(tmp, 32, "\\*.%s", pt);
+		p.assign(strPath).append(tmp);
+	}
+	else
+		p.assign(strPath);
+	WIN32_FIND_DATA  wfd;
+	HANDLE hFind = FindFirstFile(p.c_str(), &wfd);
+	if (INVALID_HANDLE_VALUE == hFind) {
+		FindClose(hFind);
+		return false;
+	} else {
+		FindClose(hFind);
+		return true;
+	}
+}
+void stockFile::FindLatestDTSK(const string &strPath, string &OutStr, char *pt) {
+	vector<string> files;
+	getFiles(strPath, files);
+	int year = 0, season = 0;
+	int maxYear = 0, maxSeason = 0;
+	string id;
+	for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
+		GetFileNameFormate(it->c_str(), pt, year, season, id);
+		if (year > maxYear) {
+			maxYear = year;
+			maxSeason = season;
+		}
+		else if (year == maxYear) {
+			maxSeason = maxSeason >= season ? maxSeason : season;
+		}
+		else {}
+	}
+	SetFileNameFormate(id, maxYear, maxSeason, pt, OutStr);
+}
 
 
+bool stockFile::FileWriteTime(string path, SYSTEMTIME &s_t) {
+	WIN32_FIND_DATA p;
+	HANDLE hFind = FindFirstFile(path.c_str(), &p);
+	if (INVALID_HANDLE_VALUE != hFind) {
+		FILETIME f_tm;
+		if (!FileTimeToLocalFileTime(&p.ftLastWriteTime, &f_tm)) goto FileWriteTimeError;
+		if (!FileTimeToSystemTime(&f_tm, &s_t)) goto FileWriteTimeError;
+		FindClose(hFind);
+		return true;
+	} else goto FileWriteTimeError;
+FileWriteTimeError:
+	FindClose(hFind);
+	return false;
+}
 
 
 
@@ -139,8 +239,7 @@ bool stockTable::findFreeFile(int &idx)
 	return false;
 }
 
-int stockTable::closeAllFiles()
-{
+int stockTable::closeAllFiles() {
 	int size = getFileTableSize();
 	int i = 0;
 	for (; i < size; i++)

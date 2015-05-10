@@ -7,6 +7,8 @@ enum stockMarkets
 	SZ,
 	HK
 };
+#define NEED_UPDATE false
+#define HAVE_UPDATED true
 
 struct stockDate
 {
@@ -34,7 +36,8 @@ public:
 	stockStatus();
 
 	int year;
-	bool seasons[4];
+
+	bool seasons[4];	// (true)have updated, (false)need updated
 	bool prepare[4];
 };
 

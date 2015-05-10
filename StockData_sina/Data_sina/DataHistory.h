@@ -69,11 +69,14 @@ public:
 
 	vector<DataOfDay> * URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status);
 	const char* PrepareURL(int year, int quarter, string stockID, getType priceType);
+	void StockDailyData(string stockID, getType priceType);
 
-	void CheckAndSetFolder(stockHistoryStatus &status);
-	void DailyData2File(vector<DataOfDay> *DailyData);
-
+	void CheckAndSetFolder(stockHistoryStatus &status, getType priceType);
+	void DailyData2File(vector<DataOfDay> *DailyData, const string &filename);
+	bool CheckUpdate(SYSTEMTIME lcTime, const string &file);
 private:
+
+	vector<stockHistoryStatus> statusOfStocks;
 	stockFile stkFile;
 	HttpUrlGetSyn _synHttpUrl;
 	DataInSeason _HistoryAnalyze;

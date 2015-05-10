@@ -74,6 +74,7 @@
     <ClCompile Include="Data_sina\DataStruct_sina.cpp" />
     <ClCompile Include="Data_sina\getData_sina.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="stockHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ErrorCode2String.h" />
@@ -87,6 +88,7 @@
     <ClInclude Include="Data_sina\DataHistory.h" />
     <ClInclude Include="Data_sina\DataStruct_sina.h" />
     <ClInclude Include="Data_sina\getData_sina.h" />
+    <ClInclude Include="stockHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
