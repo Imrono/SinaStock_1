@@ -53,7 +53,12 @@ public:
 	int write(const char* str, int len) const {
 		return fwrite(str, len, 1, file);
 	}
-	int readline(char *OutBuffer, int size);
+	int writeHead(const char* str, int len) const {
+		fseek(file,0,SEEK_SET);
+		return fwrite(str, len, 1, file);
+	}
+
+	char* readline(char *OutBuffer, int size);
 	bool IsFileOpened()	{ return IsOpened; }
 	static int getNofOpenedFiles() { return openedFiles; }
 

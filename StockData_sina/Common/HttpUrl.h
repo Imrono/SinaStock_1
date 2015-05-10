@@ -23,6 +23,7 @@ class HttpUrlGetSyn
 {
 public:
 	HttpUrlGetSyn(const char* HttpName = NULL, DWORD dwAccessType = INTERNET_OPEN_TYPE_PRECONFIG);
+	HttpUrlGetSyn(const HttpUrlGetSyn &copy);
 	~HttpUrlGetSyn();
 
 	HINTERNET OpenUrl(const char* url);
@@ -41,6 +42,8 @@ private:
 	HINTERNET _hHttp;
 	BYTE* _buf;
 	int _bufSize;
+	char _HttpName[128];
+	DWORD _dwAccessType;
 };
 
 class HttpUrlGetAsyn

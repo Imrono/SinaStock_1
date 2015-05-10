@@ -20,30 +20,16 @@ using namespace std;
 
 int main()
 {
-// 	system("md d:\\mydir");
-	char aaaa[128] = "d:\\StockData\\000333\\DailyData\\[000333]2013-3.dstk";
-	char tmpID[128] = {0};
-	char tmp1[128] = {0};
-	char *p = aaaa;
-	int tmpSeason;
-	int year;
-	do 
-	{
-		char *tp;
-		tp = strstr(p+1, "\\");
-		if (tp) p = tp;
-		else { p++; break;}
-	} while (1);
-	strcpy_s(tmp1, 128, p);
-	sscanf_s(tmp1, "%[^.]", tmpID, 128);
-
-	int a = stockTimeHandler::getLocalWeekDay();
-	_mkdir("d:\\mydir1\\aaa");
-	SYSTEMTIME lcTime;
-	GetLocalTime(&lcTime);
-
 	printf_s("######Now @ master branch!!######\n");
 	printf_s("###### start: test Write2Buffer ######\n");
+
+	StockHandler sh;
+// 	sh.AddMyStock("000333", true);
+// 	sh.AddMyStock("600820", true);
+	sh.AddMyStockFromFile();
+	sh.UpdateAllStock();
+	getchar();
+
 	stockHistoryStatus status1;
 	HistoryData historyData;
 	historyData.StockDailyData("000333", NO_FUQUAN);

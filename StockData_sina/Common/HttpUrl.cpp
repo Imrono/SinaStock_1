@@ -5,12 +5,24 @@ using namespace std;
 #include "TraceMicro.h"
 
 HttpUrlGetSyn::HttpUrlGetSyn(const char* HttpName, DWORD dwAccessType) {
+	strcpy_s(_HttpName, 128, HttpName);
+	_dwAccessType = dwAccessType;
 	_hSession = InternetOpen(HttpName, dwAccessType, NULL, NULL, 0);
 	_bufSize = MAX_RECV_BUF_SIZE;
 	_buf = new BYTE[_bufSize];
 	memset(_buf, 0, _bufSize*sizeof(BYTE));
-	STATIC_TRACE(URL_TRACE, "hSession initialed.\n");
+	STATIC_TRACE(URL_TRACE, "hSession (%s) initialed.\n", _HttpName);
 }
+HttpUrlGetSyn::HttpUrlGetSyn(const HttpUrlGetSyn &copy) {
+	strcpy_s(_HttpName, 128, copy._HttpName);
+	_dwAccessType = copy._dwAccessType;
+	_hSession = InternetOpen(_HttpName, _dwAccessType, NULL, NULL, 0);
+	_bufSize = MAX_RECV_BUF_SIZE;
+	_buf = new BYTE[_bufSize];
+	memset(_buf, 0, _bufSize*sizeof(BYTE));
+	STATIC_TRACE(URL_TRACE, "hSession (%s) initialed using copy.\n", _HttpName);
+}
+
 HttpUrlGetSyn::~HttpUrlGetSyn() {
 	InternetCloseHandle(_hSession);	_hSession = nullptr;
 	delete []_buf; _buf = nullptr;
@@ -20,6 +32,7 @@ HttpUrlGetSyn::~HttpUrlGetSyn() {
 HINTERNET HttpUrlGetSyn::OpenUrl(const char* url) {
 	_hHttp = InternetOpenUrl(_hSession, url, NULL, 0, INTERNET_FLAG_DONT_CACHE, 0);
 	if (NULL != _hHttp) STATIC_TRACE(URL_TRACE, "successful opened:\n%s\n", url);
+	else ERRR("OpenURL failed: ErrorCode:%d\n", GetLastError());
 	return _hHttp;
 }
 void HttpUrlGetSyn::CloseUrl() {

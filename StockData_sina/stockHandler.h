@@ -9,10 +9,16 @@ using namespace std;
 class StockHandler
 {
 public:
+	StockHandler();
+	~StockHandler();
 	void AddMyStock(string id, bool add2file = false);
 	void AddMyStockFromFile();
+	int UpdateAllStock();
 
 private:
 	stockFile _MyStockFile;
-	map<string, HistoryData> mapHistoryData;
+	map<string, HistoryData*> _mapHistoryData;
+	map<string, string> _test;
+
+	string _filepath;
 };

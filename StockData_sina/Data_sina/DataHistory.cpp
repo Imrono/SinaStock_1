@@ -153,7 +153,7 @@ HistoryData::HistoryData() : _synHttpUrl("HISTORY") {
 
 	_IsPrepare = false;
 }
-HistoryData::HistoryData(string stockID) : _stockID(stockID), _synHttpUrl("HISTORY") {
+HistoryData::HistoryData(string stockID) : _stockID(stockID), _synHttpUrl((string("History Daily Data : ") + stockID).c_str()) {
 	if (!stockFile::IsAccessable(DataDir))
 		_mkdir(DataDir);
 
@@ -315,6 +315,7 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 	// check stock directory
 	int len = sprintf_s(tmp, 128, "%s\\%s", DataDir, status.symbol.c_str());
 	if (!stkFile.CheckFolderExist(tmp)) {	//create direct stock @
+		INFO("%s not exist! create it.\n", tmp);
 		if (-1 == _mkdir(tmp)) ERRR("Make Directory \"%s\"Error!", tmp);
 		status.HasDailyDataInit = false;
 		status.HasOnTimeDataInit = false;
@@ -334,6 +335,7 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 	if (DAILY_DATA == status.HistoryType) {
 		len += sprintf_s(tmp+len, 128-len, "%s", DailyDataDir);
 		if (!stkFile.CheckFolderExist(tmp)) {
+			INFO("%s not exist! create it.\n", tmp);
 			if (-1 == _mkdir(tmp)) ERRR("Make Directory \"%s\"Error!", tmp);
 			status.HasDailyDataInit = false;
 		} else {

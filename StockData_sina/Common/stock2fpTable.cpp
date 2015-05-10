@@ -62,17 +62,17 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 	}
 	else return false;
 }
-int stockFile::readline(char *OutBuffer, int size) {
-	if (!IsOpened) return -1;
+char* stockFile::readline(char *OutBuffer, int size) {
+	if (!IsOpened) return nullptr;
 	else {
-		return fscanf_s(file, "[^\n]", OutBuffer, size);
+		return fgets(OutBuffer, size, file);
 	}
 }
 
 void stockFile::SetFileNameFormate(const string &id, int year, int season, char *tp, string &str) {
 	char tmp[128] = {0};
 	str.clear();
-	sprintf_s(tmp, 128, "[%s]%d-%d%s", id.c_str(), year, TO_DISPLAY(season), tp);
+	sprintf_s(tmp, 128, "[$%s$]%d-%d%s", id.c_str(), year, TO_DISPLAY(season), tp);
 	str = tmp;
 	return;
 
@@ -89,7 +89,7 @@ void stockFile::GetFileNameFormate(const string &str, char *tp, int &year, int &
 	} while (1);
 
 	if (!strcmp(tp, ".dstk")) {
-		sscanf_s(p, "[%[^]]]%d-%d.dstk", tmpID, 128, &year, &tmpSeason);
+		sscanf_s(p, "[$%[^$]]]%d-%d.dstk", tmpID, 128, &year, &tmpSeason);
 		season = TO_DATA(tmpSeason);
 		id = tmpID;
 	} else 	if (!strcmp(tp, ".FQdstk")) {
