@@ -18,7 +18,7 @@ enum historyType {
 	ONTIME_DATA = 1
 };
 
-struct DataOfDay
+struct sinaDailyData
 {
 	string DetailWeb;
 	stockDate date;
@@ -51,12 +51,12 @@ public:
 	~DataInSeason();
 
 	int DataAnalyze(const char* rawData, stockHistoryStatus &status);
-	vector<DataOfDay>* getDateDaily();
+	vector<sinaDailyData>* getDateDaily();
 	stockSeason &getDataSeason() {return _dataSeason;}
 
 private:
 	stockSeason _dataSeason;
-	vector<DataOfDay> _dataDaily;
+	vector<sinaDailyData> _dataDaily;
 };
 
 
@@ -68,12 +68,12 @@ public:
 	HistoryData(string stockID);
 	~HistoryData();
 
-	vector<DataOfDay> * URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status);
+	vector<sinaDailyData> * URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status);
 	const char* PrepareURL(int year, int quarter, string stockID, getType priceType);
 	void StockDailyData(string stockID, getType priceType);
 
 	void CheckAndSetFolder(stockHistoryStatus &status, getType priceType);
-	void DailyData2File(vector<DataOfDay> *DailyData, const string &filename);
+	void DailyData2File(vector<sinaDailyData> *DailyData, const string &filename);
 	bool CheckUpdate(SYSTEMTIME lcTime, const string &file);
 private:
 

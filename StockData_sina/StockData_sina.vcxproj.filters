@@ -25,6 +25,12 @@
     <Filter Include="Source Files\Data_sina">
       <UniqueIdentifier>{0b88fc11-2c52-4d0b-91ab-c5014453fa96}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\AnalyzeData">
+      <UniqueIdentifier>{325d5288-f8d9-4a28-a16d-8f1d30895ef6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AnalyzeData">
+      <UniqueIdentifier>{74f7c2ec-8b8a-4ffc-b306-f89e1e12ffe4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,6 +72,9 @@
     <ClCompile Include="stockHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AnalyzeData\analyzeDailyData.cpp">
+      <Filter>Source Files\AnalyzeData</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stockData.h">
@@ -103,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="stockHandler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnalyzeData\analyzeDailyData.h">
+      <Filter>Header Files\AnalyzeData</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -48,12 +48,12 @@ int main()
 	SYSTEMTIME t;
 	stockFile::FileWriteTime("eee.stk", t);
 
-	vector<DataOfDay> *dataDaily1 = historyData.URL2Data(2015,2,"000333",NO_FUQUAN, status1);
+	vector<sinaDailyData> *dataDaily1 = historyData.URL2Data(2015,2,"000333",NO_FUQUAN, status1);
 
 	historyData.DailyData2File(dataDaily1, "rrr");
 	getchar();
 
-	for (vector<DataOfDay>::iterator it = (*dataDaily1).begin(); it != (*dataDaily1).end(); ++it) {
+	for (vector<sinaDailyData>::iterator it = (*dataDaily1).begin(); it != (*dataDaily1).end(); ++it) {
 		char tmp[256] = {0};
 		sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
@@ -92,8 +92,8 @@ int main()
 
 	stockHistoryStatus status;
 	dataSeason.DataAnalyze(w2b.getData(1)->ResultStr.c_str(), status);
-	vector<DataOfDay> *dataDaily = dataSeason.getDateDaily();
-	for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
+	vector<sinaDailyData> *dataDaily = dataSeason.getDateDaily();
+	for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 		char tmp[256] = {0};
 		sprintf_s(tmp, 256, "%d-%d-%d : %.3f,%.3f,%.3f,%.3f,%f,%f,%f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);

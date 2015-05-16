@@ -17,7 +17,7 @@ DataInSeason::~DataInSeason() {
 	_dataDaily.clear();
 }
 
-vector<DataOfDay>* DataInSeason::getDateDaily() {
+vector<sinaDailyData>* DataInSeason::getDateDaily() {
 	return &_dataDaily;
 }
 int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
@@ -90,7 +90,7 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 		const char* tmpTable = strstr(tmp, "</table>");
 		while (nullptr != (tmp = strstr(tmp, "<a target='_blank' href=")) && tmp < tmpTable) {
 			endCheck = tmp;
-			DataOfDay tmpData;
+			sinaDailyData tmpData;
 			if (nullptr != (tmp = strstr(tmp, "'http://"))) {
 				const char* startURL = strstr(tmp, "'");
 				const char* endURL = strstr(startURL+1, "'");
@@ -183,7 +183,7 @@ const char* HistoryData::PrepareURL(int year, int quarter, string stockID, getTy
 	_IsPrepare = true;
 	return _URL_StockHistory;
 }
-vector<DataOfDay> * HistoryData::URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status) {
+vector<sinaDailyData> * HistoryData::URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status) {
 	const char* url = PrepareURL(year, quarter, stockID, priceType);
 	_synHttpUrl.OpenUrl(url);
 
@@ -215,7 +215,7 @@ vector<DataOfDay> * HistoryData::URL2Data(int year, int quarter, string stockID,
 	} while (1);
 
 	_HistoryAnalyze.DataAnalyze(w2b.getData(1)->ResultStr.c_str(), status);
-	vector<DataOfDay> *dataDaily = _HistoryAnalyze.getDateDaily();
+	vector<sinaDailyData> *dataDaily = _HistoryAnalyze.getDateDaily();
 	for (vector<stockStatus>::iterator it = status.status.begin(); it != status.status.end(); ++it) {
 		if (it->year == year) {
 			if (NEED_UPDATE == it->seasons[TO_DATA(quarter)] && true == it->prepare[TO_DATA(quarter)])
@@ -253,12 +253,12 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 		stockSeason lcStockData;
 		stockTimeHandler::getLocalJiDu(lcStockData.year, lcStockData.season);
 
-		vector<DataOfDay> *dataDaily = URL2Data(lcStockData.year, TO_DISPLAY(lcStockData.season), stockID, priceType, status);
+		vector<sinaDailyData> *dataDaily = URL2Data(lcStockData.year, TO_DISPLAY(lcStockData.season), stockID, priceType, status);
 		if (0 != dataDaily->size()) {
 			stockFile::SetFileNameFormate(stockID, lcStockData.year, lcStockData.season, pt, FileName);
 			FileName = FilePath + FileName;
 			stkFile.open(FileName.c_str(), "a+", "");
-			for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
+			for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 				char tmp[256] = {0};
 				sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 					, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
@@ -287,12 +287,12 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 		for (int i = 0; i < 4; i++) {
 			if (NEED_UPDATE == it->seasons[i]) {
 				season = i;
-				vector<DataOfDay> *dataDaily = URL2Data(it->year, TO_DISPLAY(season), stockID, priceType, status);
+				vector<sinaDailyData> *dataDaily = URL2Data(it->year, TO_DISPLAY(season), stockID, priceType, status);
 				if (0 != dataDaily->size()) {
 					stockFile::SetFileNameFormate(stockID, it->year, season, pt, FileName);
 					FileName = FilePath + FileName;
 					stkFile.open(FileName.c_str(), "a+", "");
-					for (vector<DataOfDay>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
+					for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 						char tmp[256] = {0};
 						sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 							, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
@@ -401,9 +401,9 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 	}
 }
 
-void HistoryData::DailyData2File(vector<DataOfDay> *DailyData, const string &filename) {
+void HistoryData::DailyData2File(vector<sinaDailyData> *DailyData, const string &filename) {
 
-	for (vector<DataOfDay>::iterator it = (*DailyData).begin(); it != (*DailyData).end(); ++it) {
+	for (vector<sinaDailyData>::iterator it = (*DailyData).begin(); it != (*DailyData).end(); ++it) {
 		char tmp[256] = {0};
 		sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.0f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
