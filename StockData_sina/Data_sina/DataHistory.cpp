@@ -1,4 +1,5 @@
 #include "DataHistory.h"
+#include "..//Common//GlobalParam.h"
 #include "..//Common//Write2Buffer.h"
 #include "..//Common//TraceMicro.h"
 #include "..//Common//stockTime.h"
@@ -176,10 +177,10 @@ HistoryData::~HistoryData() {
 }
 
 const char* HistoryData::PrepareURL(int year, int quarter, string stockID, getType priceType) {
-	sprintf_s(_strStockID, 32, "/stockid/%s.phtml", stockID.c_str());
-	sprintf_s(_strYear,    32, "?year=%4d",         year);
+	sprintf_s(_urlStockID, 32, "/stockid/%s.phtml", stockID.c_str());
+	sprintf_s(_urlYear,    32, "?year=%4d",         year);
 	sprintf_s(_URL_StockHistory+_startLength, 256-_startLength, 
-		"%s%s%s%s", _strPriceType[priceType], _strStockID, _strYear, _strQuarter[quarter]);
+		"%s%s%s%s", _strPriceType[priceType], _urlStockID, _urlYear, _strQuarter[quarter]);
 	_IsPrepare = true;
 	return _URL_StockHistory;
 }
@@ -234,14 +235,11 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 	IsFQ = priceType;
 	stockHistoryStatus status;
 	status.symbol = stockID;
-	char pt[32] = {0};
-	if (FUQUAN == priceType) sprintf_s(pt, ".%sdstk", "FQ");
-	else if (NO_FUQUAN == priceType) sprintf_s(pt, ".%sdstk", "NFQ");
-	else sprintf_s(pt, ".%sdstk", "");
+	const char *pt = ::getPriceType(priceType);
 
 	CheckAndSetFolder(status, priceType);
-	char tmp[128] = {0};
-	int len = sprintf_s(tmp, 128, "%s\\%s", DataDir, status.symbol.c_str());
+	char tmp[g_szPath] = {0};
+	int len = sprintf_s(tmp, g_szPath, "%s\\%s", DataDir, status.symbol.c_str());
 	string FilePath = tmp;
 	FilePath += DailyDataDir; FilePath += "\\";
 	string FileName;
@@ -257,15 +255,15 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 		if (0 != dataDaily->size()) {
 			stockFile::SetFileNameFormate(stockID, lcStockData.year, lcStockData.season, pt, FileName);
 			FileName = FilePath + FileName;
-			stkFile.open(FileName.c_str(), "a+", "");
+			_stkFile.open(FileName, "a+", "");
 			for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 				char tmp[256] = {0};
 				sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 					, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
 				DYNAMIC_TRACE(DATA_TRACE, "%s", tmp);
-				stkFile.write(tmp, strlen(tmp));
+				_stkFile.write(tmp, strlen(tmp));
 			}
-			stkFile.close();
+			_stkFile.close();
 		}
 		dataDaily->clear();
 
@@ -291,15 +289,15 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 				if (0 != dataDaily->size()) {
 					stockFile::SetFileNameFormate(stockID, it->year, season, pt, FileName);
 					FileName = FilePath + FileName;
-					stkFile.open(FileName.c_str(), "a+", "");
+					_stkFile.open(FileName, "a+", "");
 					for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 						char tmp[256] = {0};
 						sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 							, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
 						DYNAMIC_TRACE(DATA_TRACE, "%s", tmp);
-						stkFile.write(tmp, strlen(tmp));
+						_stkFile.write(tmp, strlen(tmp));
 					}
-					stkFile.close();
+					_stkFile.close();
 				}
 				dataDaily->clear();
 			}
@@ -314,7 +312,7 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 
 	// check stock directory
 	int len = sprintf_s(tmp, 128, "%s\\%s", DataDir, status.symbol.c_str());
-	if (!stkFile.CheckFolderExist(tmp)) {	//create direct stock @
+	if (!_stkFile.CheckFolderExist(tmp)) {	//create direct stock @
 		INFO("%s not exist! create it.\n", tmp);
 		if (-1 == _mkdir(tmp)) ERRR("Make Directory \"%s\"Error!", tmp);
 		status.HasDailyDataInit = false;
@@ -323,10 +321,8 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 		if (-1 == _mkdir(tmp)) ERRR("Make Directory \"%s\"Error!", tmp);
 		return;
 	}
-	char pt[32] = {0};
-	if (FUQUAN == priceType) sprintf_s(pt, ".%sdstk", "FQ");
-	else if (NO_FUQUAN == priceType) sprintf_s(pt, ".%sdstk", "NFQ");
-	else sprintf_s(pt, ".%sdstk", "");
+	const char *pt = ::getPriceType(priceType);
+
 	// local time 4 check data
 	stockSeason lcStockData;
 	stockTimeHandler::getLocalJiDu(lcStockData.year, lcStockData.season);
@@ -334,7 +330,7 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 	// check Daily Data directory
 	if (DAILY_DATA == status.HistoryType) {
 		len += sprintf_s(tmp+len, 128-len, "%s", DailyDataDir);
-		if (!stkFile.CheckFolderExist(tmp)) {
+		if (!_stkFile.CheckFolderExist(tmp)) {
 			INFO("%s not exist! create it.\n", tmp);
 			if (-1 == _mkdir(tmp)) ERRR("Make Directory \"%s\"Error!", tmp);
 			status.HasDailyDataInit = false;
@@ -402,17 +398,16 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 }
 
 void HistoryData::DailyData2File(vector<sinaDailyData> *DailyData, const string &filename) {
-
 	for (vector<sinaDailyData>::iterator it = (*DailyData).begin(); it != (*DailyData).end(); ++it) {
 		char tmp[256] = {0};
 		sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.0f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
 			, it->open, it->top, it->close, it->buttom, it->exchangeStock, it->exchangeMoney, it->factor);
 		DYNAMIC_TRACE(DATA_TRACE, "%s", tmp);
-		stkFile.open(filename);
-		if (stkFile.IsFileOpened()) {
-			stkFile.write(tmp, strlen(tmp));
+		_stkFile.open(filename);
+		if (_stkFile.IsFileOpened()) {
+			_stkFile.write(tmp, strlen(tmp));
 		}
-		stkFile.close();
+		_stkFile.close();
 	}
 }
 

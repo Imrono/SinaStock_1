@@ -9,10 +9,6 @@ using namespace std;
 #include "..//Common//HttpUrl.h"
 #include "..//Common//stock2fpTable.h"
 
-enum getType {
-	FUQUAN = 0,
-	NO_FUQUAN = 1
-};
 enum historyType {
 	DAILY_DATA = 0,
 	ONTIME_DATA = 1
@@ -78,7 +74,7 @@ public:
 private:
 
 	vector<stockHistoryStatus> statusOfStocks;
-	stockFile stkFile;
+	stockFile _stkFile;
 	HttpUrlGetSyn _synHttpUrl;
 	DataInSeason _HistoryAnalyze;
 	bool _IsPrepare;
@@ -91,6 +87,6 @@ private:
 
 	map <getType, char*> _strPriceType;
 	map <int, char*> _strQuarter;
-	char _strStockID[32];
-	char _strYear[32];
+	char _urlStockID[32];
+	char _urlYear[32];
 };

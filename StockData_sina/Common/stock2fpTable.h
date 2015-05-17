@@ -48,7 +48,7 @@ public:
 public:
 	bool used;
 
-	bool open(string fileName, char* fileType = "a+", char* tp = ".stk");
+	bool open(string fileName, const char *fileType = "a+", const char *tp = ".stk");
 	void close();
 	int write(const char* str, int len) const {
 		return fwrite(str, len, 1, file);
@@ -57,14 +57,17 @@ public:
 		fseek(file,0,SEEK_SET);
 		return fwrite(str, len, 1, file);
 	}
+	char* readline(char *OutBuffer, int size) {
+		if (!IsOpened)	return nullptr;
+		else			return fgets(OutBuffer, size, file);
+	}
 
-	char* readline(char *OutBuffer, int size);
 	bool IsFileOpened()	{ return IsOpened; }
 	static int getNofOpenedFiles() { return openedFiles; }
 
 	static bool CheckFolderExist(const string &strPath);
-	static bool CheckDSTKFileExist(const string &strPath, bool IsFolder, char *pt);
-	static void FindLatestDTSK(const string &strPath, string &OutStr, char *pt);
+	static bool CheckDSTKFileExist(const string &strPath, bool IsFolder, const char *pt);
+	static void FindLatestDTSK(const string &strPath, string &OutStr, const char *pt);
 
 	static bool IsAccessable(const char *path) {
 		return -1 != _access(path, 0);	//#define F_OK 0 /* Test for existence. */
@@ -73,8 +76,8 @@ public:
 	static bool createFile(string path);
 	static bool FileWriteTime(string path, SYSTEMTIME &s_t);
 
-	static void SetFileNameFormate(const string &id, int year, int season, char *tp, string &str);
-	static void GetFileNameFormate(const string &str, char *tp, int &year, int &season, string &id);
+	static void SetFileNameFormate(const string &id, int year, int data_Season, const char *tp, string &str);
+	static void GetFileNameFormate(const string &str, const char *tp, int &year, int &data_Season, string &id);
 
 private:
 	FILE* file;

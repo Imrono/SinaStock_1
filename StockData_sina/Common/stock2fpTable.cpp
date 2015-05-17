@@ -32,27 +32,25 @@ bool stockFile::createFile(string path) {
 	}
 }
 
-stockFile::stockFile()
-{
+stockFile::stockFile() {
 	counter = 0;
 	file = NULL;
 	used = false;
 	IsOpened = false;
 }
-stockFile::~stockFile()
-{
+stockFile::~stockFile() {
 	if (NULL != file)	close();
 	used = false;
 	IsOpened = false;
 	counter = 0;
 }
-void stockFile::close()
-{
-	fclose(file);
-	IsOpened = false;
+void stockFile::close() {
+	if (IsOpened) {
+		fclose(file);
+		IsOpened = false;
+	}
 }
-bool stockFile::open(string fileName, char* fileType, char* tp)
-{
+bool stockFile::open(string fileName, const char *fileType, const char *tp) {
 	fileName += tp;
 	if (0 == fopen_s(&file, fileName.c_str(), fileType)) {
 		IsOpened = true;
@@ -62,24 +60,18 @@ bool stockFile::open(string fileName, char* fileType, char* tp)
 	}
 	else return false;
 }
-char* stockFile::readline(char *OutBuffer, int size) {
-	if (!IsOpened) return nullptr;
-	else {
-		return fgets(OutBuffer, size, file);
-	}
-}
 
-void stockFile::SetFileNameFormate(const string &id, int year, int season, char *tp, string &str) {
+void stockFile::SetFileNameFormate(const string &id, int year, int data_Season, const char *tp, string &str) {
 	char tmp[128] = {0};
 	str.clear();
-	sprintf_s(tmp, 128, "[$%s$]%d-%d%s", id.c_str(), year, TO_DISPLAY(season), tp);
+	sprintf_s(tmp, 128, "[$%s$]%d-%d%s", id.c_str(), year, TO_DISPLAY(data_Season), tp);
 	str = tmp;
 	return;
 
 }
-void stockFile::GetFileNameFormate(const string &str, char *tp, int &year, int &season, string &id) {
+void stockFile::GetFileNameFormate(const string &str, const char *tp, int &year, int &data_Season, string &id) {
 	char tmpID[128] = {0};
-	int tmpSeason;
+	int dspl_tmpSeason;
 	const char *p = str.c_str();
 	do {
 		const char *tp;
@@ -89,20 +81,14 @@ void stockFile::GetFileNameFormate(const string &str, char *tp, int &year, int &
 	} while (1);
 
 	if (!strcmp(tp, ".dstk")) {
-		sscanf_s(p, "[$%[^$]]]%d-%d.dstk", tmpID, 128, &year, &tmpSeason);
-		season = TO_DATA(tmpSeason);
-		id = tmpID;
+		sscanf_s(p, "[$%[^$]]]%d-%d.dstk", tmpID, 128, &year, &dspl_tmpSeason);
 	} else 	if (!strcmp(tp, ".FQdstk")) {
-		sscanf_s(p, "[%[^]]]%d-%d.FQdstk", tmpID, 128, &year, &tmpSeason);
-		season = TO_DATA(tmpSeason);
-		id = tmpID;
+		sscanf_s(p, "[$%[^$]]]%d-%d.FQdstk", tmpID, 128, &year, &dspl_tmpSeason);
 	} else 	if (!strcmp(tp, ".NFQstk")) {
-		sscanf_s(p, "[%[^]]]%d-%d.NFQdstk", tmpID, 128, &year, &tmpSeason);
-		season = TO_DATA(tmpSeason);
-		id = tmpID;
+		sscanf_s(p, "[$%[^$]]]%d-%d.NFQdstk", tmpID, 128, &year, &dspl_tmpSeason);
 	}
-
-
+	data_Season = TO_DATA(dspl_tmpSeason);
+	id = tmpID;
 }
 
 bool stockFile::CheckFolderExist(const string &strPath) {
@@ -114,7 +100,7 @@ bool stockFile::CheckFolderExist(const string &strPath) {
 	FindClose(hFind);
 	return rValue;
 }
-bool stockFile::CheckDSTKFileExist(const string &strPath, bool IsFolder, char *pt) {
+bool stockFile::CheckDSTKFileExist(const string &strPath, bool IsFolder, const char *pt) {
 	string p;
 	if (IsFolder) {
 		char tmp[32] = {0};
@@ -133,7 +119,7 @@ bool stockFile::CheckDSTKFileExist(const string &strPath, bool IsFolder, char *p
 		return true;
 	}
 }
-void stockFile::FindLatestDTSK(const string &strPath, string &OutStr, char *pt) {
+void stockFile::FindLatestDTSK(const string &strPath, string &OutStr, const char *pt) {
 	vector<string> files;
 	getFiles(strPath, files);
 	int year = 0, season = 0;
