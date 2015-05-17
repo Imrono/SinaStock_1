@@ -14,7 +14,23 @@ struct averageData {
 	float exchangeMoney;
 
 	float factor;
-};
+
+	averageData operator+ (const averageData &aR) {
+		averageData ans;
+		ans.date = date;
+		ans.close = aR.close + close;
+		ans.exchangeMoney = aR.exchangeMoney + exchangeMoney;
+		ans.exchangeStock = aR.exchangeStock + exchangeStock;
+		return ans;
+	}
+	averageData operator* (int scalar) {
+		averageData ans;
+		ans.date = date;
+		ans.close = scalar * close;
+		ans.exchangeMoney = scalar * exchangeMoney;
+		ans.exchangeStock = scalar * exchangeStock;
+		return ans;
+	}};
 
 class analyzeDailyData
 {

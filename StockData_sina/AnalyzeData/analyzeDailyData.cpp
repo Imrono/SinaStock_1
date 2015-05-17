@@ -41,14 +41,21 @@ int analyzeDailyData::GetnDayAverage(int **avgDay, vector<averageData> *avgData,
 	averageData **tmpData = new averageData*[avgNum];
 	for (int i = 0; i < avgNum; i++) {
 		tmpData[i] = new averageData[avgDay[i][0]];
+		for (int j = 0; j < avgDay[i][0]; j++) {
+			memset(tmpData[i], 0, sizeof(averageData)*avgDay[i][0]);
+		}
 		tmpCount[i] = avgDay[i][0];
 	}
 
 	// main analyze procedure
+	int ix = 0, tmpDays = 0;
 	for (vector<averageData>::iterator it = _vecTmpDailyData.begin(); it != _vecTmpDailyData.end(); ++it) {
 		for (int i = 0; i < avgNum; i++) {
+			tmpDays = avgDay[i][0];
+			ix = i%tmpDays;
 			if (count < avgDay[i][0]) {
-
+				// average data = weight1*data1 + weight2*data2 + ...
+// 				tmpData[i][ix] += avgDay[i][ix+1] * ;
 				// factor ix%3+y
 				// write when = days-1 then clean
 			} else {
