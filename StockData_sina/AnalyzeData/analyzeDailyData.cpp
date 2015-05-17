@@ -31,17 +31,38 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 // latest weight is at head 
 int analyzeDailyData::GetnDayAverage(int **avgDay, vector<averageData> *avgData, int avgNum) {
 	int count = 0;
+
+	// initial tmp structure
 	if (avgNum > 32) {
 		ERRR("avgNum is %d, larger than 32, modify it or change the program!\n", avgNum);
 		return 0;
 	}
 	int tmpCount[32] = {0};
+	averageData **tmpData = new averageData*[avgNum];
+	for (int i = 0; i < avgNum; i++) {
+		tmpData[i] = new averageData[avgDay[i][0]];
+		tmpCount[i] = avgDay[i][0];
+	}
 
+	// main analyze procedure
 	for (vector<averageData>::iterator it = _vecTmpDailyData.begin(); it != _vecTmpDailyData.end(); ++it) {
 		for (int i = 0; i < avgNum; i++) {
+			if (count < avgDay[i][0]) {
 
+				// factor ix%3+y
+				// write when = days-1 then clean
+			} else {
+
+			}
 		}
 		count ++;
 	}
+
+	// clean temp data
+	for (int i = 0; i < avgNum; i++) {
+		delete []tmpData[i];
+	}
+	delete []tmpData;
+
 	return count;
 }
