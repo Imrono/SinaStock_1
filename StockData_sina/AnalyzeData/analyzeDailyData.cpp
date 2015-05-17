@@ -29,7 +29,7 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 }
 // [IN] avgDay: the first col is average days, the following cols are weights
 // latest weight is at head 
-int analyzeDailyData::GetnDayAverage(int **avgDay, vector<averageData> *avgData, int avgNum) {
+int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum) {
 	int count = 0;
 
 	// initial tmp structure
@@ -40,26 +40,31 @@ int analyzeDailyData::GetnDayAverage(int **avgDay, vector<averageData> *avgData,
 	int tmpCount[32] = {0};
 	averageData **tmpData = new averageData*[avgNum];
 	for (int i = 0; i < avgNum; i++) {
-		tmpData[i] = new averageData[avgDay[i][0]];
-		for (int j = 0; j < avgDay[i][0]; j++) {
-			memset(tmpData[i], 0, sizeof(averageData)*avgDay[i][0]);
+		tmpData[i] = new averageData[avgDay[i]];
+		for (int j = 0; j < avgDay[i]; j++) {
+			memset(tmpData[i], 0, sizeof(averageData)*avgDay[i]);
 		}
-		tmpCount[i] = avgDay[i][0];
+		tmpCount[i] = avgDay[i];
 	}
 
 	// main analyze procedure
-	int ix = 0, tmpDays = 0;
+	int ix = 0;
+	// for raw data
 	for (vector<averageData>::iterator it = _vecTmpDailyData.begin(); it != _vecTmpDailyData.end(); ++it) {
+		// for average type
 		for (int i = 0; i < avgNum; i++) {
-			tmpDays = avgDay[i][0];
-			ix = i%tmpDays;
-			if (count < avgDay[i][0]) {
-				// average data = weight1*data1 + weight2*data2 + ...
-// 				tmpData[i][ix] += avgDay[i][ix+1] * ;
-				// factor ix%3+y
-				// write when = days-1 then clean
-			} else {
+			ix = i%avgDay[i];
+			// for days in one average type
+			for (int j = 0; j < avgDay[i]; j++) {
+				if (count < avgDay[i]) {
+					// average data = weight1*data1 + weight2*data2 + ...
+					// weight location is ix;
+					tmpData[i][ix] = tmpData[i][ix] + ((*it)*avgWeight[i][ix]);
 
+					// write when = days-1 then clean
+				} else {
+
+				}
 			}
 		}
 		count ++;

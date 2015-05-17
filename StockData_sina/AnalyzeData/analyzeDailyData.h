@@ -23,14 +23,22 @@ struct averageData {
 		ans.exchangeStock = aR.exchangeStock + exchangeStock;
 		return ans;
 	}
-	averageData operator* (int scalar) {
+	averageData operator* (float scalar) {
 		averageData ans;
 		ans.date = date;
 		ans.close = scalar * close;
 		ans.exchangeMoney = scalar * exchangeMoney;
 		ans.exchangeStock = scalar * exchangeStock;
 		return ans;
-	}};
+	}
+	void clear() {
+		memset(&date, 0, sizeof(stockDate));
+		close = 0.0;
+		exchangeStock = 0.0;
+		exchangeMoney = 0.0;
+		factor = 0.0;
+	}
+};
 
 class analyzeDailyData
 {
@@ -45,7 +53,7 @@ public:
 	void ResetStatus();
 
 	vector<averageData> *GetDailyDataFromFile(int year, int data_Jidu, getType priceType);
-	int GetnDayAverage(int **avgDay, vector<averageData> *avgData, int avgNum);
+	int GetnDayAverage(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
 
 
 
