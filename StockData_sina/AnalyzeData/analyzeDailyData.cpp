@@ -28,7 +28,7 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 	return &_vecTmpDailyData;
 }
 // [IN] avgDay: the first col is average days, the following cols are weights
-// latest weight is at head 
+// [*]weight is from previous to recent
 int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum) {
 	int count = 0;
 
@@ -48,22 +48,23 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 	}
 
 	// main analyze procedure
-	int ix = 0;
-	// for raw data
+	int idx_tmp = 0, idx_wt = 0;
+	// for raw data, [*]from previous to recent such as 1998 -> 2015
 	for (vector<averageData>::iterator it = _vecTmpDailyData.begin(); it != _vecTmpDailyData.end(); ++it) {
-		// for average type
+		// for average type, such as 5, 10, 15 days
 		for (int i = 0; i < avgNum; i++) {
-			ix = i%avgDay[i];
+			idx_tmp = i%avgDay[i];
 			// for days in one average type
 			for (int j = 0; j < avgDay[i]; j++) {
-				if (count < avgDay[i]) {
-					// average data = weight1*data1 + weight2*data2 + ...
-					// weight location is ix;
-					tmpData[i][ix] = tmpData[i][ix] + ((*it)*avgWeight[i][ix]);
-
-					// write when = days-1 then clean
-				} else {
-
+				idx_wt = (idx_tmp + j)%avgDay[i];
+				// average data = weight1*data1 + weight2*data2 + ...
+				tmpData[i][idx_tmp] = tmpData[i][idx_tmp] + ((*it)*avgWeight[i][idx_wt]);
+				if (0 == idx_wt) {
+					// if count less than needed average days, ignore it because it's incomplete
+					if (count >= avgDay[i])
+						// record average data
+						avgData[i].push_back(tmpData[i][idx_tmp]);
+					tmpData[i][idx_tmp].clear();
 				}
 			}
 		}

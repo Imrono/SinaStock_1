@@ -58,6 +58,7 @@ public:
 
 
 private:
+	void RecordAverage();
 	stockFile _file;
 
 	// class status
