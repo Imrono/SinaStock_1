@@ -9,6 +9,7 @@ void analyzeDailyData::ResetStatus() {
 	_file.close();
 }
 
+// For signal record file, this function should looped
 vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_Jidu, getType priceType) {
 	const char *tp = ::getPriceType(priceType);
 	string fileName;
@@ -31,22 +32,18 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 // [*]weight is from previous to recent
 int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum) {
 	int count = 0;
-
 	// initial tmp structure
 	if (avgNum > 32) {
 		ERRR("avgNum is %d, larger than 32, modify it or change the program!\n", avgNum);
 		return 0;
 	}
-	int tmpCount[32] = {0};
 	averageData **tmpData = new averageData*[avgNum];
 	for (int i = 0; i < avgNum; i++) {
 		tmpData[i] = new averageData[avgDay[i]];
 		for (int j = 0; j < avgDay[i]; j++) {
 			memset(tmpData[i], 0, sizeof(averageData)*avgDay[i]);
 		}
-		tmpCount[i] = avgDay[i];
 	}
-
 	// main analyze procedure
 	int idx_tmp = 0, idx_wt = 0;
 	// for raw data, [*]from previous to recent such as 1998 -> 2015
@@ -70,7 +67,6 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 		}
 		count ++;
 	}
-
 	// clean temp data
 	for (int i = 0; i < avgNum; i++) {
 		delete []tmpData[i];
