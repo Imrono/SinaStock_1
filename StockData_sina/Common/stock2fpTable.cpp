@@ -106,9 +106,9 @@ bool stockFile::CheckDSTKFileExist(const string &strPath, bool IsFolder, const c
 		char tmp[32] = {0};
 		sprintf_s(tmp, 32, "\\*.%s", pt);
 		p.assign(strPath).append(tmp);
-	}
-	else
+	} else {
 		p.assign(strPath);
+	}
 	WIN32_FIND_DATA  wfd;
 	HANDLE hFind = FindFirstFile(p.c_str(), &wfd);
 	if (INVALID_HANDLE_VALUE == hFind) {

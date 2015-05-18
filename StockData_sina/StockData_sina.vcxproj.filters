@@ -31,6 +31,12 @@
     <Filter Include="Source Files\AnalyzeData">
       <UniqueIdentifier>{74f7c2ec-8b8a-4ffc-b306-f89e1e12ffe4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\test">
+      <UniqueIdentifier>{9f93eea1-c6bd-42ee-9137-243829592b1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\test">
+      <UniqueIdentifier>{bf423b76-a951-4826-a62f-2ebca866ca6a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

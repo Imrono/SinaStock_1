@@ -52,6 +52,7 @@ public:
 	void ClearDailyData() { _vecTmpDailyData.clear();}
 	void ResetStatus();
 
+	void ExtractionData(getType priceType);
 	vector<averageData> *GetDailyDataFromFile(int year, int data_Jidu, getType priceType);
 	int GetnDayAverage(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
 
@@ -59,7 +60,7 @@ public:
 
 private:
 	void RecordAverage();
-	stockFile _file;
+	stockFile _stkFile;
 
 	// class status
 	// now class is used for this stock

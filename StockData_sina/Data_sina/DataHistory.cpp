@@ -82,10 +82,8 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 			}
 		}
 	}
-
 	if (nullptr != strstr(tmp, "¸´È¨Òò×Ó"))
 		HasFactor = true;
-
 	// get daily date
 	if (nullptr != (tmp = strstr(tmp, "<table id=\"FundHoldSharesTable\">"))) {
 		const char* tmpTable = strstr(tmp, "</table>");
@@ -348,6 +346,7 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 				string id;
 				stockFile::GetFileNameFormate(latestUpdate, pt, ftStockData.year, ftStockData.season, id);
 				latestUpdate = path + "\\" + latestUpdate;
+				// compare the file write time with the local clock
 				int later = stockTimeHandler::GetLaterSeason(lcStockData, ftStockData);
 				SYSTEMTIME lcTime;
 				GetLocalTime(&lcTime);
