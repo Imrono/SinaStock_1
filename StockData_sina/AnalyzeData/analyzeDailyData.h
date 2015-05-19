@@ -1,3 +1,6 @@
+#ifndef ANALYZE_DAILY_DATA_H
+#define ANALYZE_DAILY_DATA_H
+
 #include <cstring>
 #include <string.h>
 #include <vector>
@@ -6,6 +9,7 @@ using namespace std;
 #include "..//Common//GlobalParam.h"
 #include "..//Common//stock2fpTable.h"
 #include "..//Data_sina//DataHistory.h"
+
 
 struct averageData {
 	stockDate date;
@@ -17,10 +21,11 @@ struct averageData {
 
 	averageData operator+ (const averageData &aR) {
 		averageData ans;
-		ans.date = date;
+		ans.date = aR.date;
 		ans.close = aR.close + close;
 		ans.exchangeMoney = aR.exchangeMoney + exchangeMoney;
 		ans.exchangeStock = aR.exchangeStock + exchangeStock;
+		ans.factor = aR.factor;
 		return ans;
 	}
 	averageData operator* (float scalar) {
@@ -29,6 +34,7 @@ struct averageData {
 		ans.close = scalar * close;
 		ans.exchangeMoney = scalar * exchangeMoney;
 		ans.exchangeStock = scalar * exchangeStock;
+		ans.factor = factor;
 		return ans;
 	}
 	void clear() {
@@ -43,11 +49,15 @@ struct averageData {
 class analyzeDailyData
 {
 public:
-	analyzeDailyData();
+	analyzeDailyData(){}
 	~analyzeDailyData();
 
+	vector<averageData> *getAvgData() {return &_vecTmpDailyData;}
 	string getStockID()			{ return _stockID;}
-	void setStockID(string id)	{ _stockID = id;}
+	void setStockID(string id)	{
+		ResetStatus();
+		_stockID = id;
+	}
 
 	void ClearDailyData() { _vecTmpDailyData.clear();}
 	void ResetStatus();
@@ -68,3 +78,5 @@ private:
 	// _vecTmpDailyData 28(size)*260(work days/year) < 7.3 kB/year
 	vector<averageData> _vecTmpDailyData;
 };
+
+#endif

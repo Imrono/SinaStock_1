@@ -81,6 +81,9 @@
     <ClCompile Include="AnalyzeData\analyzeDailyData.cpp">
       <Filter>Source Files\AnalyzeData</Filter>
     </ClCompile>
+    <ClCompile Include="test\testAnalyze.cpp">
+      <Filter>Source Files\test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stockData.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="AnalyzeData\analyzeDailyData.h">
       <Filter>Header Files\AnalyzeData</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testAnalyze.h">
+      <Filter>Header Files\test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

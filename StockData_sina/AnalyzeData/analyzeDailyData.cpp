@@ -15,19 +15,26 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 	const char *tp = ::getPriceType(priceType);
 	string fileName;
 	stockFile::SetFileNameFormate(_stockID, year, data_Jidu, tp, fileName);
+	string pathName = DataDir + string("\\") + _stockID + DailyDataDir + string("\\") + fileName;
 
-	if (_stkFile.open(fileName, "r", "")) {
+	int lines = 0;
+	if (_stkFile.open(pathName, "r", "")) {
 		const int sizeBuffer = 256;
 		char tmpBuffer[sizeBuffer] = {0};
 		averageData it;
+		memset(&it, 0, sizeof(averageData));
 		while (NULL != _stkFile.readline(tmpBuffer, sizeBuffer)) {
-			sscanf_s(tmpBuffer, "%d-%2d-%2d : %*f,%*f,%.3f,%*f,%.0f,%.3f,%.3f\n", it.date.year, it.date.month, it.date.day
-				, it.close, it.exchangeStock, it.exchangeMoney, it.factor);
+			sscanf_s(tmpBuffer, "%d-%d-%d : %*f,%*f,%f,%*f,%f,%f,%f\n", &it.date.year, &it.date.month, &it.date.day
+				, &it.close, &it.exchangeStock, &it.exchangeMoney, &it.factor);
 			_vecTmpDailyData.push_back(it);
+			memset(&it, 0, sizeof(averageData));
+			lines ++;
 		}
 		_stkFile.close();
+	} else {
+		ERRR("open \"%s\" failed!\n", fileName.c_str());
 	}
-	DYNAMIC_TRACE(PROGRESS_TRACE, "$%s$%d年%d季度，数据抽取完成\n", _stockID.c_str(), year, TO_DISPLAY(data_Jidu));
+	DYNAMIC_TRACE(PROGRESS_TRACE, "$%s$%d年%d季度，数据抽取完成 lines:%d\n", _stockID.c_str(), year, TO_DISPLAY(data_Jidu), lines);
 	return &_vecTmpDailyData;
 }
 // [IN] avgDay: the first col is average days, the following cols are weights
@@ -49,26 +56,26 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 	/********************************************************************************/
 	/* average algorithm description
 	/* data: 5,4,3,2,1,... weight:0.5,0.3,0.2 avgDay[i]:3 (the ith calculation)
-	  --------------------------------------------------------------------
-	   count   idx_tmp       tmpData[i][0]      tmpData[i][1]      tmpData[i][2]
+     --------------------------------------------------------------------------------
+       count   idx_tmp       tmpData[i][0]      tmpData[i][1]      tmpData[i][2]
                                 clear()
-	     0        0             5*0.5(0)           5*0.2(2)           5*0.3(1)
-	 --------------------------------------------------------------------------------
+         0        0             5*0.5(0)           5*0.2(2)           5*0.3(1)
+     --------------------------------------------------------------------------------
                                                    clear()
-		 1        1          5*0.5+4*0.3(1)        4*0.5(0)        5*0.3+4*0.2(2)
-	 --------------------------------------------------------------------------------
+         1        1          5*0.5+4*0.3(1)        4*0.5(0)        5*0.3+4*0.2(2)
+     --------------------------------------------------------------------------------
                                                                       clear()
-		 2        2       5*0.5+4*0.3+3*0.2(2)   4*0.5+3*0.3(1)       3*0.5(0)
-		                      push_back(0)
-	 --------------------------------------------------------------------------------
+         2        2       5*0.5+4*0.3+3*0.2(2)   4*0.5+3*0.3(1)       3*0.5(0)
+                              push_back(0)
+     --------------------------------------------------------------------------------
                                 clear()
-		 3        0             2*0.5(0)      4*0.5+3*0.3+2*0.2(2)  3*0.5+2*0.3(1)
-		                                          push_back(1)
-	 --------------------------------------------------------------------------------
+         3        0             2*0.5(0)      4*0.5+3*0.3+2*0.2(2)  3*0.5+2*0.3(1)
+                                                  push_back(1)
+     --------------------------------------------------------------------------------
                                                     clear()
-		 4        1          2*0.5+1*0.3(1)         1*0.5(0)      3*0.5+2*0.3+1*0.2(2)
+         4        1          2*0.5+1*0.3(1)         1*0.5(0)      3*0.5+2*0.3+1*0.2(2)
                                                                       push_back(2)
-	 --------------------------------------------------------------------------------
+     --------------------------------------------------------------------------------
        count count%avgDay[i]    tmpData[i][j] += avgData[i][count]*((idx_tmp-j)%avgDay[i])
     idx_tmp.clear()
     if (idx_tmp >= avgDay[i]-1) push_back((idx_tmp+1)%avgDay[i])
@@ -84,7 +91,7 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 			tmpData[i][idx_tmp].clear(); // ready for record
 			// for days in one average type
 			for (int j = 0; j < avgDay[i]; j++) {
-				idx_wt = (idx_tmp - j)%avgDay[i];
+				idx_wt = (idx_tmp - j + avgDay[i])%avgDay[i];
 				// average data = weight1*data1 + weight2*data2 + ...
 				tmpData[i][j] = tmpData[i][j] + ((*it)*avgWeight[i][idx_wt]);
 				if (avgDay[i]-1 == idx_wt) {
@@ -96,6 +103,7 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 			}
 		}
 		count ++;
+		printf_s("%5d,%5d\n", avgData[0].size(), avgData[1].size());
 	}
 	// clean temp data
 	for (int i = 0; i < avgNum; i++) {
@@ -129,25 +137,30 @@ void analyzeDailyData::ExtractionData(getType priceType) {
 	stockHistoryStatus status;
 	vector<string> files;
 	stockFile::getFiles(tmp, files);
-	int year = 0, data_Season = 0;
-	int maxYear = 0, maxSeason = 0;
 	string id;
 	// For all files of one stock
 	// [*]recent -> previous
-	for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
-		// get latest file
-		stockFile::GetFileNameFormate(it->c_str(), pt, year, data_Season, id);
-		if (year > maxYear) {
-			maxYear = year;
-			maxSeason = data_Season;
-		} else if (year == maxYear) {
-			maxSeason = maxSeason >= data_Season ? maxSeason : data_Season;
-		} else {}
+	while (files.size()) {
+		int year = 0, data_Season = 0;
+		int maxYear = 0, maxSeason = 0;
+		vector<string>::iterator it_latest;
+		for (vector<string>::iterator it = files.begin(); it != files.end(); ++it) {
+			// get latest file
+			stockFile::GetFileNameFormate(it->c_str(), pt, year, data_Season, id);
+			if (year > maxYear) {
+				maxYear = year;
+				maxSeason = data_Season;
+				it_latest = it;
+			} else if (year == maxYear) {
+				if (maxSeason < data_Season) {
+					maxSeason = data_Season;
+					it_latest = it;
+				}
+			} else {}
+		}
 		// list data from file to vector
 		GetDailyDataFromFile(year, data_Season, priceType);
-		DYNAMIC_TRACE(PROGRESS_TRACE, "get \"%s\" data to vector\n", it->c_str());
-
-		files.erase(it);
+		DYNAMIC_TRACE(PROGRESS_TRACE, "\"%s\" data get finish!\n", it_latest->c_str());
+		files.erase(it_latest);
 	}
-
 }

@@ -74,19 +74,23 @@ void stockFile::GetFileNameFormate(const string &str, const char *tp, int &year,
 	int dspl_tmpSeason;
 	const char *p = str.c_str();
 	do {
-		const char *tp;
-		tp = strstr(p+1, "\\");
-		if (tp) p = tp;
+		const char *p_tmp;
+		p_tmp = strstr(p+1, "\\");
+		if (p_tmp) p = p_tmp;
 		else { p = strstr(p, "["); break;}
 	} while (1);
 
 	if (!strcmp(tp, ".dstk")) {
-		sscanf_s(p, "[$%[^$]]]%d-%d.dstk", tmpID, 128, &year, &dspl_tmpSeason);
+		sscanf_s(p, "[$%[^$]$]%d-%d.dstk", tmpID, 128, &year, &dspl_tmpSeason);
 	} else 	if (!strcmp(tp, ".FQdstk")) {
-		sscanf_s(p, "[$%[^$]]]%d-%d.FQdstk", tmpID, 128, &year, &dspl_tmpSeason);
-	} else 	if (!strcmp(tp, ".NFQstk")) {
-		sscanf_s(p, "[$%[^$]]]%d-%d.NFQdstk", tmpID, 128, &year, &dspl_tmpSeason);
+		sscanf_s(p, "[$%[^$]$]%d-%d.FQdstk", tmpID, 128, &year, &dspl_tmpSeason);
+	} else 	if (!strcmp(tp, ".NFQdstk")) {
+		sscanf_s(p, "[$%[^$]$]%d-%d.NFQdstk", tmpID, 128, &year, &dspl_tmpSeason);
+	} else {
+		ERRR("Unknown file type!\n");
 	}
+	if (dspl_tmpSeason > 4 || dspl_tmpSeason < 1)
+		ERRR("Get season(%d) from file failed\n", dspl_tmpSeason);
 	data_Season = TO_DATA(dspl_tmpSeason);
 	id = tmpID;
 }
@@ -104,7 +108,7 @@ bool stockFile::CheckDSTKFileExist(const string &strPath, bool IsFolder, const c
 	string p;
 	if (IsFolder) {
 		char tmp[32] = {0};
-		sprintf_s(tmp, 32, "\\*.%s", pt);
+		sprintf_s(tmp, 32, "\\*%s", pt);
 		p.assign(strPath).append(tmp);
 	} else {
 		p.assign(strPath);

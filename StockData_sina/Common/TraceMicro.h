@@ -49,7 +49,11 @@ using namespace std;
 #define INFO(...) \
 	do { printf_s("INFO: "); printf_s(__VA_ARGS__); } while (0)
 #define ERRR(...) \
-	do { printf_s("ERROR: "); printf_s(__VA_ARGS__); } while (0)
+	do { \
+		printf_s("%s(%d)", __FILE__, __LINE__); \
+		printf_s("ERROR: "); \
+		printf_s(__VA_ARGS__); \
+	} while (0)
 
 void getTraceConfigFromFile();
 

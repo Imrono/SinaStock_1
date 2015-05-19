@@ -18,10 +18,20 @@ using namespace std;
 #include "Common//stockTime.h"
 #include "stockHandler.h"
 
+#include "test//testAnalyze.h"
+
 int main()
 {
 	printf_s("######Now @ master branch!!######\n");
 	printf_s("###### start: test Write2Buffer ######\n");
+
+	getTraceConfigFromFile();
+	for (int i = 0; i < NUM_TRACES; i++) {
+		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
+		DYNAMIC_TRACE(i, "dynamic trace(%d) %s ok!!\n", i, "test");
+	}
+
+	testAnalyzeAverage();
 
 	StockHandler sh;
 // 	sh.AddMyStock("000333", true);
@@ -109,14 +119,6 @@ int main()
 
 	printf_s("###### end: test Write2Buffer ######\n");
 	getchar();
-
-
-
-	getTraceConfigFromFile();
-	for (int i = 0; i < NUM_TRACES; i++) {
-		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
-		DYNAMIC_TRACE(i, "dynamic trace(%d) %s ok!!\n", i, "test");
-	}
 
 //////////////////////////////////////////////////////////////////////
 	string history = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/000333.phtml";
