@@ -103,7 +103,7 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 			}
 		}
 		count ++;
-		printf_s("%5d,%5d\n", avgData[0].size(), avgData[1].size());
+		printf_s("%5d,%5d\r", avgData[0].size(), avgData[1].size());
 	}
 	// clean temp data
 	for (int i = 0; i < avgNum; i++) {

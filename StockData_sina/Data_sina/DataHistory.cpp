@@ -276,8 +276,7 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 		}
 		status.HasDailyDataInit = true;
 	}
-
-	// get stock all data
+	// get stock all data and write 2 file
 	for (vector<stockStatus>::iterator it = status.status.begin(); it != status.status.end(); ++it) {
 		int season;
 		for (int i = 0; i < 4; i++) {
@@ -287,7 +286,7 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 				if (0 != dataDaily->size()) {
 					stockFile::SetFileNameFormate(stockID, it->year, season, pt, FileName);
 					FileName = FilePath + FileName;
-					_stkFile.open(FileName, "a+", "");
+					_stkFile.open(FileName, "w", "");
 					for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 						char tmp[256] = {0};
 						sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
@@ -321,10 +320,6 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 	}
 	const char *pt = ::getPriceType(priceType);
 
-	// local time 4 check data
-	stockSeason lcStockData;
-	stockTimeHandler::getLocalJiDu(lcStockData.year, lcStockData.season);
-
 	// check Daily Data directory
 	if (DAILY_DATA == status.HistoryType) {
 		len += sprintf_s(tmp+len, 128-len, "%s", DailyDataDir);
@@ -336,7 +331,18 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 			// if .dstk exist, only update needed
 			if (!stockFile::CheckDSTKFileExist(tmp, true, pt)) 
 				status.HasDailyDataInit = false;
-			else {
+			else { // only update needed
+	/********************************************************************************/
+	/* update data algorithm description
+	"lcStockData" : local time's season
+	"ftStockData" : latest season read from file name
+	"lcTime"      : local time
+	lcStockData > ftStockData : check new file + check update
+	lcStockData < ftStockData : unexpected
+	lcStockData = ftStockData : check update
+	/********************************************************************************/
+				stockSeason lcStockData;
+				stockTimeHandler::getLocalJiDu(lcStockData.year, lcStockData.season);
 				status.HasDailyDataInit = true;
 				string path = tmp;
 				string latestUpdate;
@@ -347,43 +353,43 @@ void HistoryData::CheckAndSetFolder(stockHistoryStatus &status, getType priceTyp
 				stockFile::GetFileNameFormate(latestUpdate, pt, ftStockData.year, ftStockData.season, id);
 				latestUpdate = path + "\\" + latestUpdate;
 				// compare the file write time with the local clock
-				int later = stockTimeHandler::GetLaterSeason(lcStockData, ftStockData);
+				int delt_season = lcStockData - ftStockData;
+				INFO("TEST: later %d\n", delt_season);
 				SYSTEMTIME lcTime;
-				GetLocalTime(&lcTime);
-				int year = ftStockData.year;
-				int season = ftStockData.season;
-				if (later > 0) {
+				::GetLocalTime(&lcTime);
+				if (delt_season > 0) { // lcStockData > ftStockData
 					// new file & add to status
-					for (int i = 0; i < later; i++) {
-						season++;
-						if (season >= 4) {
+					int year = ftStockData.year;
+					int data_season = ftStockData.season;
+					for (int i = 0; i < delt_season; i++) {
+						data_season++;
+						if (data_season >= 4) {
 							year ++;
-							season -= 4;
+							data_season -= 4;
 						}
 						stockStatus stk_st;
 						stk_st.year = year;
-						stk_st.seasons[season] = false;
+						stk_st.seasons[data_season] = false;
 						status.status.push_back(stk_st);
 						string NewFileName;
 						id = status.symbol;
-						stockFile::SetFileNameFormate(id, year, season, pt, NewFileName);
+						stockFile::SetFileNameFormate(id, year, data_season, pt, NewFileName);
 						char nFile[128] = {0};
 						sprintf_s(nFile, 128, "%s//%s", tmp, NewFileName.c_str());
 						if (!stockFile::createFile(nFile)) {
 							ERRR("create file failed!\n");
 						}
 					}
-					// check update
+					// check latest data file update
 					if (CheckUpdate(lcTime, latestUpdate)) {
 						stockStatus stk_st;
 						stk_st.year = ftStockData.year;
 						stk_st.seasons[ftStockData.season] = false;
 						status.status.push_back(stk_st);
 					}
-				} else if (later < 0) {
+				} else if (delt_season < 0) { // lcStockData < ftStockData -> impossible
 					INFO("unexpected NEW data!\n");
-				} else {
-					// check update
+				} else { // lcStockData = ftStockData -> check update
 					if (CheckUpdate(lcTime, latestUpdate)) {
 						stockStatus stk_st;
 						stk_st.year = ftStockData.year;
@@ -411,23 +417,44 @@ void HistoryData::DailyData2File(vector<sinaDailyData> *DailyData, const string 
 }
 
 bool HistoryData::CheckUpdate(SYSTEMTIME lcTime, const string &file) {
+	/********************************************************************************/
+	/*lcTime : local time
+	  stData : latest data time
+	  ~ Don't update
+	  1. stData is the last day in the season
+	  2. stData later than lcTime
+	  ~ Do update
+	  1. lcTime later than stData, but stData is not the last day in season
+	  2. lcTime - stData > threshold
+	/********************************************************************************/
+	// latest data time in file
 	SYSTEMTIME stData;
 
 	// month end
 	FILE *fp;
 	fopen_s(&fp, file.c_str(), "r");
-	char tmp[128] = {0};
-	fscanf_s(fp, "%[^\n]", tmp, 128);
-	if (!strlen(tmp)) return true;
-	sscanf_s(tmp, "%d-%d-%d", &stData.wYear, &stData.wMonth, &stData.wDay);
-	stockTimeHandler::GetWeekDay(stData);
-	fclose(fp);
-	if (stockTimeHandler::IsLastWorkDayInMonth(stData)) return false;
+	if (nullptr == fp) {
+		ERRR ("File %s can't open!", file.c_str());
+	} else {
+		char tmp[128] = {0};
+		fscanf_s(fp, "%[^\n]", tmp, 128);
+		if (!strlen(tmp)) return true;
+		sscanf_s(tmp, "%d-%d-%d", &stData.wYear, &stData.wMonth, &stData.wDay);
+		stockTimeHandler::GetWeekDay(stData);
+		fclose(fp);
+	}
+	// if file contains the data of the last day in the season, don't update it
+	if (0 == stData.wMonth%3) {
+		if (stockTimeHandler::IsLastWorkDayInMonth(stData))
+			return false;
+	}
 
-	// normal time, ftTime ~ stData
-	if (lcTime.wYear > stData.wYear || lcTime.wMonth > stData.wMonth) return false;
-	else if (lcTime.wYear < stData.wYear || lcTime.wMonth < stData.wMonth) {
-		INFO("unexpected: Local Time < File Time!\n");
+	if (lcTime.wYear > stData.wYear || 
+	  (lcTime.wYear == stData.wYear && lcTime.wMonth > stData.wMonth)) {
+		  return true;
+	} else if (lcTime.wYear < stData.wYear || 
+		     (lcTime.wYear == stData.wYear && lcTime.wMonth < stData.wMonth)) {
+		INFO("unexpected: Local Time < Data Time!\n");
 		return false;
 	} else {
 		WORD addtionDay = 0;

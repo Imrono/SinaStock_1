@@ -1,5 +1,5 @@
 #include "testAnalyze.h"
-
+#include <time.h>
 #include <vector>
 using namespace std;
 
@@ -7,6 +7,7 @@ void testAnalyzeAverage() {
 	printf_s("\n######################################\n");
 	printf_s("# Now begin to test Analyze Average! #\n");
 	printf_s("######################################\n\n");
+	clock_t clock_start = clock();
 
 	averageData it;
 	memset(&it, 0, sizeof(averageData));
@@ -17,7 +18,7 @@ void testAnalyzeAverage() {
 
 	printf_s("# begin get history data of 000333\n");
 	HistoryData historyData;
-// 	historyData.StockDailyData("000333", NO_FUQUAN);
+	historyData.StockDailyData("000333", NO_FUQUAN);
 
 	printf_s("# begin to extraction data\n");
 	analyzeDailyData alzDailyData;
@@ -34,6 +35,8 @@ void testAnalyzeAverage() {
 	pwt[1] = wt[1];
 	alzDailyData.GetnDayAverage(Days, pwt, ans, 2);
 
+	clock_t clock_end = clock();
+	INFO("Test Analyze Average using time: %d s\n", (int)((clock_end-clock_start)/CLOCKS_PER_SEC));
 	printf_s("######################################\n");
 	printf_s("# Now test Analyze Average finished! #\n");
 	printf_s("######################################\n\n");

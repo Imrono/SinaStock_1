@@ -28,6 +28,10 @@ struct stockSeason
 {
 	int year;
 	int season;
+
+	int operator- (const stockSeason &aR) {
+		return (year-aR.year)*4+(season-aR.season);
+	}
 };
 
 class stockStatus
