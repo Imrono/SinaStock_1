@@ -39,12 +39,21 @@ using namespace std;
 #define DYNAMIC_TRACE(n, ...) \
 	do { \
 		if (0 != ((1u << n) & DynamicTraceParam)) { \
-			printf_s("TRACE %d:", n); printf_s(__VA_ARGS__); \
+			printf_s(TRACE_NAME_TABLE(n)); printf_s(__VA_ARGS__); \
 		} \
 	} while (0)
 #else
 #define DYNAMIC_TRACE(n, ...)
 #endif // DYNAMIC_TRACE_OPEN
+
+#ifdef TEST_TRACE_OPEN
+#define TEST_TRACE(...) \
+	do { \
+	printf_s("TEST: "); printf_s(__VA_ARGS__); \
+	} while (0)
+#else
+#define DYNAMIC_TRACE(n, ...)
+#endif // TEST_TRACE_OPEN
 
 #define INFO(...) \
 	do { printf_s("INFO: "); printf_s(__VA_ARGS__); } while (0)

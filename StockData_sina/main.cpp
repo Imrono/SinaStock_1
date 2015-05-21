@@ -32,6 +32,7 @@ int main()
 	}
 
 	testAnalyzeAverage();
+	getchar();
 
 	StockHandler sh;
 // 	sh.AddMyStock("000333", true);

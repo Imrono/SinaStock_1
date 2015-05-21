@@ -202,18 +202,15 @@ vector<sinaDailyData> * HistoryData::URL2Data(int year, int quarter, string stoc
 			ReadTimes++;
 		}
 		else {
-			if (w2b.getData(1)) {
+			if (w2b.getData(1))
 				DYNAMIC_TRACE(PROGRESS_TRACE, "analyze daily history OK\n");
-				break;
-			}
-			else {
-				ERRR("Unexpected end when analyze daily history data, maybe no data exist!\n");
-				break;
-			}
+			break;
 		}
 	} while (1);
 
-	_HistoryAnalyze.DataAnalyze(w2b.getData(1)->ResultStr.c_str(), status);
+	if (0 > _HistoryAnalyze.DataAnalyze(w2b.getData(1)->ResultStr.c_str(), status)) {
+		ERRR("_HistoryAnalyze.DataAnalyze failed!\n");
+	}
 	vector<sinaDailyData> *dataDaily = _HistoryAnalyze.getDateDaily();
 	for (vector<stockStatus>::iterator it = status.status.begin(); it != status.status.end(); ++it) {
 		if (it->year == year) {
@@ -460,8 +457,11 @@ bool HistoryData::CheckUpdate(SYSTEMTIME lcTime, const string &file) {
 		WORD addtionDay = 0;
 		if (5 == stData.wDayOfWeek) addtionDay = 2;
 		else addtionDay = 0;
-		if (lcTime.wDay < stData.wDay + addtionDay + 1 && lcTime.wHour < 15)
+		if (lcTime.wDay < stData.wDay + addtionDay + 1 ||
+		  (lcTime.wDay == stData.wDay + addtionDay && lcTime.wHour < 15)) {
 			return false;
-		else return true;
+		} else {
+			return true;
+		}
 	}
 }

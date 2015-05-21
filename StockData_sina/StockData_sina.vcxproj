@@ -41,7 +41,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>STATIC_TRACE_OPEN;DYNAMIC_TRACE_OPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>STATIC_TRACE_OPEN;DYNAMIC_TRACE_OPEN;TEST_TRACE_OPEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -77,6 +77,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stockHandler.cpp" />
     <ClCompile Include="test\testAnalyze.cpp" />
+    <ClCompile Include="test\testMonitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnalyzeData\analyzeDailyData.h" />
@@ -93,6 +94,7 @@
     <ClInclude Include="Data_sina\getData_sina.h" />
     <ClInclude Include="stockHandler.h" />
     <ClInclude Include="test\testAnalyze.h" />
+    <ClInclude Include="test\testMonitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

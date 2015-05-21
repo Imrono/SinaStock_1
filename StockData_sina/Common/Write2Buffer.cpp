@@ -1,4 +1,5 @@
 #include "Write2Buffer.h"
+#include "TraceMicro.h"
 
 Write2Buffer::Write2Buffer() :_buffer(nullptr), _bufferSize(0), _round(false), _writeCount(0), _1stLength(0), _2ndLength(0), 
 	_maxSearchLength(0), NofCurrentSearch(0) {}
@@ -156,8 +157,8 @@ void Write2Buffer::updateAfterWrite(int len) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
 		tmp = nullptr; tmpStart = nullptr; tmpEnd = nullptr;
 		bool loop = false;
-		do {
-			if (nullptr != (tmp = strstr(_buffer, it->SearchStr.c_str()))) {		// find subStr?
+		do { // there may many in one url read
+			if (nullptr != (tmp = strstr(_buffer, it->SearchStr.c_str()))) {		// find subStr
 				if (false == it->IsStarted) {	// IsStarted?
 					tmpStart = tmp;
 					it->IsStarted = true;
@@ -187,7 +188,7 @@ void Write2Buffer::updateAfterWrite(int len) {
 					loop = true;
 				} // IsStarted? End else
 			} // find subStr? End if
-			else {								// find subStr?
+			else {								// not find subStr
 				if (true == it->IsStarted) {
 					tmpStart = _buffer + _1stLength;
 					tmpEnd = _buffer + _1stLength + _2ndLength;
@@ -201,7 +202,6 @@ void Write2Buffer::updateAfterWrite(int len) {
 			} // find subStr? End else
 			if (nullptr != tmpStart && nullptr != tmpEnd) {
 				mapSearchResult[it->NaviNum].ResultStr.append(tmpStart, tmpEnd);
-// 				it->ResultStr.append(_buffer, tmpStart-_buffer, tmpEnd-tmpStart);
 			}
 		} while(loop);
 	} //End for <searchStatus>
@@ -214,9 +214,15 @@ void Write2Buffer::updateAfterWrite(int len) {
 /****************************************************************/
 const searchResult* Write2Buffer::getData(int idx) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
-		if (it->NaviNum == idx && true == it->IsFinished)
-			return &mapSearchResult[it->NaviNum];
+		if (it->NaviNum == idx) {
+			if (true != it->IsFinished) {
+				INFO("Unexpected end when analyze daily history data, mostly on impact!\n");
+			} else {
+				return &mapSearchResult[it->NaviNum];
+			}
+		}
 	}
+	ERRR("Can not find index %d in searchResult\n", idx);
 	return nullptr;
 }
 unsigned int Write2Buffer::getBufferSize() {
