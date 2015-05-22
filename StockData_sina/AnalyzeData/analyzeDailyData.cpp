@@ -4,14 +4,14 @@ analyzeDailyData::~analyzeDailyData() {
 	ClearDailyData();
 }
 void analyzeDailyData::ResetStatus() {
-	_vecTmpDailyData.clear();
+	_vecTmpDailyDataAvg.clear();
 	_stockID.clear();
 	_stkFile.close();
 }
 
 // For signal record file, this function should looped
 // [*]recent -> previous
-vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_Jidu, getType priceType) {
+vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_Jidu, getType priceType, int ExtractionType) {
 	const char *tp = ::getPriceType(priceType);
 	string fileName;
 	stockFile::SetFileNameFormate(_stockID, year, data_Jidu, tp, fileName);
@@ -26,7 +26,7 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 		while (NULL != _stkFile.readline(tmpBuffer, sizeBuffer)) {
 			sscanf_s(tmpBuffer, "%d-%d-%d : %*f,%*f,%f,%*f,%f,%f,%f\n", &it.date.year, &it.date.month, &it.date.day
 				, &it.close, &it.exchangeStock, &it.exchangeMoney, &it.factor);
-			_vecTmpDailyData.push_back(it);
+			_vecTmpDailyDataAvg.push_back(it);
 			memset(&it, 0, sizeof(averageData));
 			lines ++;
 		}
@@ -35,7 +35,7 @@ vector<averageData> *analyzeDailyData::GetDailyDataFromFile(int year, int data_J
 		ERRR("open \"%s\" failed!\n", fileName.c_str());
 	}
 	DYNAMIC_TRACE(PROGRESS_TRACE, "$%s$%d年%d季度，数据抽取完成 lines:%d\n", _stockID.c_str(), year, TO_DISPLAY(data_Jidu), lines);
-	return &_vecTmpDailyData;
+	return &_vecTmpDailyDataAvg;
 }
 // [IN] avgDay: the first col is average days, the following cols are weights
 // [*]weight is from recent to previous
@@ -84,7 +84,7 @@ int analyzeDailyData::GetnDayAverage(int *avgDay, float **avgWeight, vector<aver
 	int idx_tmp = 0, idx_wt = 0;
 	// loop each raw data
 	// [*]from recent to previous such as 2015 -> 1998
-	for (vector<averageData>::iterator it = _vecTmpDailyData.begin(); it != _vecTmpDailyData.end(); ++it) {
+	for (vector<averageData>::iterator it = _vecTmpDailyDataAvg.begin(); it != _vecTmpDailyDataAvg.end(); ++it) {
 		// for average type, such as 5, 10, 15 days
 		for (int i = 0; i < avgNum; i++) {
 			idx_tmp = count%avgDay[i];
@@ -163,4 +163,17 @@ void analyzeDailyData::ExtractionData(getType priceType) {
 		DYNAMIC_TRACE(PROGRESS_TRACE, "\"%s\" data get finish!\n", it_latest->c_str());
 		files.erase(it_latest);
 	}
+}
+
+/********************************************************************************/
+/* TR (True Range) = max(H-L,H-PDC,PDC-L)
+   PDC is yesterday's close
+   N is TR's 20 days average
+   ATR : average TR
+   N = (19×PDN+TR)/20  PDN : yesterday's N
+/********************************************************************************/
+double analyzeDailyData::turtleAnalyze(stockDate start, stockDate end, int ATRdays, double unit) {
+	struct AvgTureRange { float ATR; stockDate date;};
+
+	return 0.0;
 }
