@@ -13,12 +13,6 @@ void testAnalyzeAverage() {
 
 	testTime tst_Tm("testAnalyzeAverage");
 
-	averageData it;
-	memset(&it, 0, sizeof(averageData));
-	char *tmpBuffer = "2015- 5-19 : 33.330,35.000,34.830,33.300,35521084.000,1217427328.000,1.000";
-	sscanf_s(tmpBuffer, "%d- %d-%d : %*f,%*f,%f,%*f,%f,%f,%f\n", &it.date.year, &it.date.month, &it.date.day
-			, &it.close, &it.exchangeStock, &it.exchangeMoney, &it.factor);
-
 	string testStockID = "000651";
 	printf_s("# begin get history data of %s\n", testStockID.c_str());
 	HistoryData historyData;
@@ -28,7 +22,7 @@ void testAnalyzeAverage() {
 	analyzeDailyData alzDailyData;
 	alzDailyData.setStockID(testStockID);
 	alzDailyData.ExtractionData(NO_FUQUAN);
-	vector<averageData> *pData = alzDailyData.getAvgData();
+	vector<sinaDailyData> *pData = alzDailyData.getExtractData();
 	vector<averageData> ans[2];
 
 	printf_s("# begin to get average data\n");
