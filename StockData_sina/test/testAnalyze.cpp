@@ -2,7 +2,7 @@
 #include <time.h>
 #include <vector>
 using namespace std;
-// #include "testMonitor.h"
+#include "testMonitor.h"
 
 void testAnalyzeAverage() {
 	printf_s("\n######################################\n");
@@ -11,7 +11,7 @@ void testAnalyzeAverage() {
 	printf_s("enter return to start!\n");
 	getchar();
 
-// 	testTime tst_Tm("testAnalyzeAverage");
+	testTime tst_Tm("testAnalyzeAverage");
 
 	averageData it;
 	memset(&it, 0, sizeof(averageData));
