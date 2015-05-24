@@ -5,6 +5,11 @@ using namespace std;
 #include "..//Common//stockData.h"
 #include "..//Data_sina//DataHistory.h"
 
+struct turtleTopButtom {
+	float Top;
+	float Buttom;
+};
+
 struct turtleRawData {
 	float lastClose;
 	float thisTop;
@@ -18,6 +23,7 @@ public:
 	}
 	stockDate date;
 	float price;
+	turtleTopButtom lastTopButtom;
 
 	inline turtleATRData operator+ (const turtleRawData &rawData) {
 		turtleATRData ans;
@@ -57,7 +63,13 @@ private:
 class WayOfTurtle {
 public:
 	int GetATR(vector<sinaDailyData> &rawData, int *avgDay, vector<turtleATRData> *N, int atrNum);
-
+private:
+	float getMin(float a, float b) {
+		return a < b ? a : b;
+	}
+	float getMax(float a, float b) {
+		return a > b ? a : b;
+	}
 
 };
 

@@ -74,9 +74,10 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 	}
 	for (vector<stockStatus>::iterator it = status.status.begin(); it != status.status.end(); ++it) {
 		if (it->year == _dataSeason.year) {
-			if (false == it->prepare[TO_DATA(_dataSeason.season)])
+			if (false == it->prepare[TO_DATA(_dataSeason.season)]) {
 				it->prepare[TO_DATA(_dataSeason.season)] = true;
-			else {
+				break;
+			} else {
 				ERRR("Stock history season prepare status mismatched!\n");
 				return -1;
 			}
@@ -86,21 +87,38 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 		HasFactor = true;
 	// get daily date
 	if (nullptr != (tmp = strstr(tmp, "<table id=\"FundHoldSharesTable\">"))) {
+		bool OnTimeURL = true;
 		const char* tmpTable = strstr(tmp, "</table>");
-		while (nullptr != (tmp = strstr(tmp, "<a target='_blank' href=")) && tmp < tmpTable) {
+		int len_1 = strlen("<td><div align=\"center\">");
+		while (tmp < tmpTable) {
 			endCheck = tmp;
 			sinaDailyData tmpData;
-			if (nullptr != (tmp = strstr(tmp, "'http://"))) {
-				const char* startURL = strstr(tmp, "'");
-				const char* endURL = strstr(startURL+1, "'");
-				tmpData.DetailWeb.append(startURL+1, endURL);
-				if (nullptr != (tmp = strstr(endURL, "'>"))) {
-					sscanf_s(tmp, "'>%d-%d-%d</a>", &tmpData.date.year, &tmpData.date.month, &tmpData.date.day);
-				}
-				else return -1;
-			}
-			else return -1;
 
+			// 得到时间，要是有分时数据网址则保存
+			OnTimeURL = false;
+			if (nullptr == (tmp = strstr(tmp, "<td><div align=\"center\">"))) {
+				return -1;
+			} else {
+				// 有分时数据URL的情况
+				if (true == OnTimeURL && nullptr != (tmp = strstr(tmp, "<a target='_blank' href="))) {
+					OnTimeURL = true;
+					if (nullptr == (tmp = strstr(tmp, "'http://"))) {
+						return -1;
+					} else {
+						const char* startURL = strstr(tmp, "'");
+						const char* endURL = strstr(startURL+1, "'");
+						tmpData.DetailWeb.append(startURL+1, endURL);
+						if (nullptr != (tmp = strstr(endURL, "'>"))) {
+							sscanf_s(tmp, "'>%d-%d-%d</a>", &tmpData.date.year, &tmpData.date.month, &tmpData.date.day);
+						}
+						else return -1;
+					}
+				} else { // 没有分时数据URL的情况
+					OnTimeURL = false;
+					sscanf_s(tmp+len_1, "%d-%d-%d</a>", &tmpData.date.year, &tmpData.date.month, &tmpData.date.day);
+				}
+			}
+			// 保存DailyData
 			tmp = strstr(tmp, "<td><div align=\"center\">");
 			if (!HasFactor) {
 				sscanf_s(tmp, 
@@ -128,6 +146,10 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 			}
 			_dataDaily.push_back(tmpData);
 			count++;
+			tmp = strstr(tmp+len_1, "<td><div align=\"center\">");
+			tmp = strstr(tmp+len_1, "<td><div align=\"center\">");
+			tmp = strstr(tmp+len_1, "<td><div align=\"center\">");
+			if (nullptr == tmp) break;
 		}
 		return count;
 	}
@@ -230,8 +252,10 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 	IsFQ = priceType;
 	stockHistoryStatus status;
 	status.symbol = stockID;
+	// priceType 复权/不复权
 	const char *pt = ::getPriceType(priceType);
 
+	// 查看目录及文件存在情况，得到status状态
 	CheckAndSetFolder(status, priceType);
 	char tmp[g_szPath] = {0};
 	int len = sprintf_s(tmp, g_szPath, "%s\\%s", DataDir, status.symbol.c_str());
@@ -239,18 +263,20 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 	FilePath += DailyDataDir; FilePath += "\\";
 	string FileName;
 
-	// init
+	// 如果已经初始化过了
 	if (!status.HasDailyDataInit) {
 		SYSTEMTIME lcTime;
 		GetLocalTime(&lcTime);
 		stockSeason lcStockData;
 		stockTimeHandler::getLocalJiDu(lcStockData.year, lcStockData.season);
 
+		// 把读到的sinaDailyData数据存到对应的文件中
 		vector<sinaDailyData> *dataDaily = URL2Data(lcStockData.year, TO_DISPLAY(lcStockData.season), stockID, priceType, status);
 		if (0 != dataDaily->size()) {
 			stockFile::SetFileNameFormate(stockID, lcStockData.year, lcStockData.season, pt, FileName);
 			FileName = FilePath + FileName;
 			_stkFile.open(FileName, "a+", "");
+			// 写入sinaDailyData的每项
 			for (vector<sinaDailyData>::iterator it = (*dataDaily).begin(); it != (*dataDaily).end(); ++it) {
 				char tmp[256] = {0};
 				sprintf_s(tmp, 256, "%d-%2d-%2d : %.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", it->date.year, it->date.month, it->date.day
@@ -262,7 +288,7 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 		}
 		dataDaily->clear();
 
-		// the feature seasons set to HAVE_UPDATED
+		// 更新status中对应的season状态为HAVE_UPDATED
 		for (vector<stockStatus>::iterator it = status.status.begin(); it != status.status.end(); ++it) {
 			if (it->year == lcStockData.year) {
 				for (int i = lcStockData.season; i < 4; i++) {
@@ -292,6 +318,8 @@ void HistoryData::StockDailyData(string stockID, getType priceType) {
 						_stkFile.write(tmp, strlen(tmp));
 					}
 					_stkFile.close();
+				} else {
+					INFO ("Analyze sinaDailyData result: size = %d\n", dataDaily->size());
 				}
 				dataDaily->clear();
 			}

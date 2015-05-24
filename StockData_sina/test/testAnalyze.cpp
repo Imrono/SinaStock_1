@@ -13,8 +13,9 @@ void testAnalyzeAverage() {
 
 	testTime tst_Tm("testAnalyzeAverage");
 
-	string testStockID = "000651";
+	string testStockID = "000001";
 	printf_s("# begin get history data of %s\n", testStockID.c_str());
+	// 得到历史数据并存至文件
 	HistoryData historyData;
 	historyData.StockDailyData(testStockID, NO_FUQUAN);
 
