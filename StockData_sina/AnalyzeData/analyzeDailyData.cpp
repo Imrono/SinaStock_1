@@ -1,4 +1,4 @@
-#include "analyzeDailyData.h"
+ï»¿#include "analyzeDailyData.h"
 
 analyzeDailyData::~analyzeDailyData() {
 	ClearDailyData();
@@ -34,7 +34,7 @@ vector<sinaDailyData> *analyzeDailyData::_GetDailyDataFromFile(int year, int dat
 	} else {
 		ERRR("open \"%s\" failed!\n", fileName.c_str());
 	}
-	DYNAMIC_TRACE(PROGRESS_TRACE, "$%s$%dÄê%d¼¾¶È£¬Êı¾İ³éÈ¡Íê³É lines:%d\n", _stockID.c_str(), year, TO_DISPLAY(data_Jidu), lines);
+	DYNAMIC_TRACE(PROGRESS_TRACE, "$%s$%då¹´%då­£åº¦ï¼Œæ•°æ®æŠ½å–å®Œæˆ lines:%d\n", _stockID.c_str(), year, TO_DISPLAY(data_Jidu), lines);
 	return &_vecExtractData;
 }
 
@@ -177,7 +177,7 @@ void analyzeDailyData::ExtractionData(getType priceType) {
    PDC is yesterday's close
    N is TR's 20 days average
    ATR : average TR
-   N = (19¡ÁPDN+TR)/20  PDN : yesterday's N
+   N = (19Ã—PDN+TR)/20  PDN : yesterday's N
 /********************************************************************************/
 double analyzeDailyData::turtleAnalyze(stockDate start, stockDate end, int ATRdays, double unit, getType priceType) {
 	struct AvgTureRange { float ATR; stockDate date;};

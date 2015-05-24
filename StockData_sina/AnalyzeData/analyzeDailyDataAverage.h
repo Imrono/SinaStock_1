@@ -1,4 +1,4 @@
-#ifndef ANALYZE_DAILY_DATA_AVERAGE_H
+﻿#ifndef ANALYZE_DAILY_DATA_AVERAGE_H
 #define ANALYZE_DAILY_DATA_AVERAGE_H
 #include "..//Common//stockData.h"
 #include "..//Data_sina//DataHistory.h"

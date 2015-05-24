@@ -1,4 +1,4 @@
-#ifndef GLOBAL_PARAM_H
+﻿#ifndef GLOBAL_PARAM_H
 #define GLOBAL_PARAM_H
 
 #define TIME_STEP	2700

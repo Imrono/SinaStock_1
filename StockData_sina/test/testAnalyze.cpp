@@ -1,4 +1,4 @@
-#include "testAnalyze.h"
+﻿#include "testAnalyze.h"
 #include <time.h>
 #include <vector>
 using namespace std;

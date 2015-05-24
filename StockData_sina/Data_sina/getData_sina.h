@@ -1,4 +1,4 @@
-#ifndef GET_DATA_SINA_H
+﻿#ifndef GET_DATA_SINA_H
 #define GET_DATA_SINA_H
 #include <cstring>
 #include <windows.h>

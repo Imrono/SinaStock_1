@@ -1,4 +1,4 @@
-#include "stockData.h"
+﻿#include "stockData.h"
 
 stockStatus::stockStatus()
 {

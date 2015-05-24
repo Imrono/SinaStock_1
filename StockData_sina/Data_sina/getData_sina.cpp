@@ -1,4 +1,4 @@
-#include <cstdio>
+Ôªø#include <cstdio>
 #include <string>
 #include <iostream>
 using namespace std;
@@ -118,7 +118,7 @@ int data_analyseAll(const char* const In_data, Data_sina *Out_data, int data_len
 }
 const char* data_analyseOne(const char* const In_data, Data_sina &Out_data)
 {
-	//var hq_str_sh600820="ÀÌµ¿π…∑›,10.20,10.19,10.22,10.41,10.07,10.21,10.22,94059479
+	//var hq_str_sh600820="ÈößÈÅìËÇ°‰ªΩ,10.20,10.19,10.22,10.41,10.07,10.21,10.22,94059479
 		//,963103849,103200,10.21,890466,10.20,304837,10.19,248400,10.18,59300,10.17,18300
 		//,10.22,368525,10.24,785450,10.25,211552,10.26,184150,10.27,2015-03-27,15:03:04,0
 		//0";
@@ -377,23 +377,23 @@ char *PrepareAttentionData(const Data_Monitor& In_data, char* Out_str, int len)
 			In_data.time.hour, In_data.time.minute, In_data.time.second);
 
 		if (In_data.need2Record & WEIMAI3_THRESHOLD_TOUCH) {
-			sprintf_s(pTmp, 128, "ŒØ¬Ú: large touch %.2fw @ price %.2f\n", In_data.bLargeMoneyIn5[MONEY_IDX]/10000, In_data.bLargeMoneyIn5[PRICE_IDX]);
-			INFO("ATTENTION>> %s ŒØ¬Ú: %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.bLargeMoneyIn5[MONEY_IDX]/10000, In_data.bLargeMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "Âßî‰π∞: large touch %.2fw @ price %.2f\n", In_data.bLargeMoneyIn5[MONEY_IDX]/10000, In_data.bLargeMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s Âßî‰π∞: %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.bLargeMoneyIn5[MONEY_IDX]/10000, In_data.bLargeMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		if (In_data.need2Record & WEIMAI4_THRESHOLD_TOUCH) {
-			sprintf_s(pTmp, 128, "ŒØ¬Ù: large touch %.2fw @ price %.2f\n", In_data.sLargeMoneyIn5[MONEY_IDX]/10000, In_data.sLargeMoneyIn5[PRICE_IDX]);
-			INFO("ATTENTION>> %s ŒØ¬Ù: %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.sLargeMoneyIn5[MONEY_IDX]/10000, In_data.sLargeMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "ÂßîÂçñ: large touch %.2fw @ price %.2f\n", In_data.sLargeMoneyIn5[MONEY_IDX]/10000, In_data.sLargeMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s ÂßîÂçñ: %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.sLargeMoneyIn5[MONEY_IDX]/10000, In_data.sLargeMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		if (In_data.need2Record & WEIMAI3_TOTAL_TOUCH) {
-			sprintf_s(pTmp, 128, "ŒØ¬Ú: total touch %.2fw now @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
-			INFO("ATTENTION>> %s ŒØ¬Ú: total %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "Âßî‰π∞: total touch %.2fw now @ price %.2f\n", In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s Âßî‰π∞: total %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.bTotalMoneyIn5[MONEY_IDX]/10000, In_data.bTotalMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		if (In_data.need2Record & WEIMAI4_TOTAL_TOUCH) {
-			sprintf_s(pTmp, 128, "ŒØ¬Ù: total touch %.2fw now @ price %.2f\n", In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
-			INFO("ATTENTION>> %s ŒØ¬Ù: total %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
+			sprintf_s(pTmp, 128, "ÂßîÂçñ: total touch %.2fw now @ price %.2f\n", In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
+			INFO("ATTENTION>> %s ÂßîÂçñ: total %.2fw @ %.2f\n", In_data.strSymbol.c_str(), In_data.sTotalMoneyIn5[MONEY_IDX]/10000, In_data.sTotalMoneyIn5[PRICE_IDX]);
 			pTmp += strlen(pTmp);
 		}
 		return Out_str;

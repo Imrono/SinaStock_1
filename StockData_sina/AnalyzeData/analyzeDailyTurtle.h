@@ -1,4 +1,4 @@
-#ifndef ANALYZE_DAILY_DATA_TURTLE_H
+﻿#ifndef ANALYZE_DAILY_DATA_TURTLE_H
 #define ANALYZE_DAILY_DATA_TURTLE_H
 #include <vector>
 using namespace std;

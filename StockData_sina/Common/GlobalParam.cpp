@@ -1,4 +1,4 @@
-#include "GlobalParam.h"
+﻿#include "GlobalParam.h"
 
 int time_step = TIME_STEP;
 int times_get = TIMES_GET;

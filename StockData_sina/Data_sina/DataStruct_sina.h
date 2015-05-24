@@ -1,4 +1,4 @@
-#ifndef DATA_STRUCT_SINA_H
+﻿#ifndef DATA_STRUCT_SINA_H
 #define DATA_STRUCT_SINA_H
 #include <tchar.h>
 #include <cstring>

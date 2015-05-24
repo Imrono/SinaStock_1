@@ -1,4 +1,4 @@
-#include "Write2Buffer.h"
+﻿#include "Write2Buffer.h"
 #include "TraceMicro.h"
 
 Write2Buffer::Write2Buffer() :_buffer(nullptr), _bufferSize(0), _round(false), _writeCount(0), _1stLength(0), _2ndLength(0), 

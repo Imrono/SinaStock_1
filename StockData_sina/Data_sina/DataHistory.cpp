@@ -1,4 +1,4 @@
-#include "DataHistory.h"
+Ôªø#include "DataHistory.h"
 #include "..//Common//GlobalParam.h"
 #include "..//Common//Write2Buffer.h"
 #include "..//Common//TraceMicro.h"
@@ -30,7 +30,7 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 	const char* endCheck = nullptr;
 	int count = 0;
 	// check begin
-	if (nullptr == (tmp = strstr(rawData, "<!--¿˙ ∑Ωª“◊begin-->")))
+	if (nullptr == (tmp = strstr(rawData, "<!--ÂéÜÂè≤‰∫§Êòìbegin-->")))
 		return -1;
 	endCheck = tmp;
 	const char* tmpYearBegin = nullptr, *tmpYearEnd = nullptr;
@@ -82,7 +82,7 @@ int DataInSeason::DataAnalyze(const char* rawData, stockHistoryStatus &status) {
 			}
 		}
 	}
-	if (nullptr != strstr(tmp, "∏¥»®“Ú◊”"))
+	if (nullptr != strstr(tmp, "Â§çÊùÉÂõ†Â≠ê"))
 		HasFactor = true;
 	// get daily date
 	if (nullptr != (tmp = strstr(tmp, "<table id=\"FundHoldSharesTable\">"))) {
@@ -188,8 +188,8 @@ vector<sinaDailyData> * HistoryData::URL2Data(int year, int quarter, string stoc
 
 	//loop + read & analyze all data
 	Write2Buffer w2b(true, MAX_RECV_BUF_SIZE);
-// 	w2b.AddSearchString("<!--¿˙ ∑Ωª“◊begin-->", "<!--¿˙ ∑Ωª“◊end-->", HISTORY_EXCHANGE);
-	w2b.AddSearchString("<!--¿˙ ∑Ωª“◊begin-->", "<!--  ◊“≥±Í◊ºŒ≤_END -->", HISTORY_EXCHANGE);
+// 	w2b.AddSearchString("<!--ÂéÜÂè≤‰∫§Êòìbegin-->", "<!--ÂéÜÂè≤‰∫§Êòìend-->", HISTORY_EXCHANGE);
+	w2b.AddSearchString("<!--ÂéÜÂè≤‰∫§Êòìbegin-->", "<!-- È¶ñÈ°µÊ†áÂáÜÂ∞æ_END -->", HISTORY_EXCHANGE);
 	int len = 0;
 	char* buf;
 	int ReadTimes = 0;

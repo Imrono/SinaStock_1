@@ -1,4 +1,4 @@
-#include "ErrorCode2String.h"
+﻿#include "ErrorCode2String.h"
 #include <wininet.h>
 
 char* ErrorCode2Str(DWORD errCode)

@@ -1,4 +1,4 @@
-#ifndef HTTP_URL_GET_H
+﻿#ifndef HTTP_URL_GET_H
 #define HTTP_URL_GET_H
 #include <vector>
 #include <cstring>

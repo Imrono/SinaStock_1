@@ -1,3 +1,3 @@
-#include<windows.h>
+﻿#include<windows.h>
 
 char* ErrorCode2Str(DWORD errCode);

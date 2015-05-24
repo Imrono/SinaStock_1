@@ -1,4 +1,4 @@
-#ifndef STOCK_2_FP_TABLE_H
+﻿#ifndef STOCK_2_FP_TABLE_H
 #define STOCK_2_FP_TABLE_H
 #include <cstdio>
 #include <map>

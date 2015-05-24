@@ -1,4 +1,4 @@
-#include "analyzeDailyTurtle.h"
+﻿#include "analyzeDailyTurtle.h"
 #include "..//Common//TraceMicro.h"
 
 // rawData recent -> previous

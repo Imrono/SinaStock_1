@@ -1,4 +1,4 @@
-#include "stock2fpTable.h"
+﻿#include "stock2fpTable.h"
 
 int stockFile::openedFiles = 0;
 void stockFile::getFiles(string path, vector<string>& files)

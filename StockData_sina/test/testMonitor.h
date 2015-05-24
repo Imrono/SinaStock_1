@@ -1,6 +1,7 @@
-#include <time.h>
+﻿#include <time.h>
 #include <string>
 using namespace std;
+#include "..//Common//TraceMicro.h"
 
 class testTime
 {

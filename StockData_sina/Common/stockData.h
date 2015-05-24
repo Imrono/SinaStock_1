@@ -1,4 +1,4 @@
-#ifndef STOCK_DATA_H
+﻿#ifndef STOCK_DATA_H
 #define STOCK_DATA_H
 
 enum stockMarkets

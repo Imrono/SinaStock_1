@@ -1,4 +1,4 @@
-#ifndef TRACE_MICRO_H
+﻿#ifndef TRACE_MICRO_H
 #define TRACE_MICRO_H
 #include "GlobalParam.h"
 #include <cstdio>

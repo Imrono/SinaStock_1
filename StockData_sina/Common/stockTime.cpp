@@ -1,4 +1,4 @@
-#include "stockTime.h"
+﻿#include "stockTime.h"
 
 time_t stockTimeHandler::_tmNow;
 tm stockTimeHandler::_tm;

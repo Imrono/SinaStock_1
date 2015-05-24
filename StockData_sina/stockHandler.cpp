@@ -1,4 +1,4 @@
-#include "stockHandler.h"
+﻿#include "stockHandler.h"
 
 StockHandler::StockHandler() {
 	char filepath[128] = {0};

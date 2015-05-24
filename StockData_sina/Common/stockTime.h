@@ -1,4 +1,4 @@
-#include "time.h"
+﻿#include "time.h"
 #include "stockData.h"
 #include "TraceMicro.h"
 #include <windows.h>

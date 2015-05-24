@@ -1,4 +1,4 @@
-#ifndef ANALYZE_DAILY_DATA_H
+﻿#ifndef ANALYZE_DAILY_DATA_H
 #define ANALYZE_DAILY_DATA_H
 
 #include <cstring>
