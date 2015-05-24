@@ -5,28 +5,37 @@ using namespace std;
 #include "..//Common//stockData.h"
 #include "..//Data_sina//DataHistory.h"
 
-class turtleData {
+struct turtleRawData {
+	float lastClose;
+	float thisTop;
+	float thisButtom;
+};
+
+class turtleATRData {
 public:
-	turtleData () {
+	turtleATRData () {
 		clear();
 	}
 	stockDate date;
 	float price;
 
-	inline turtleData operator+ (const sinaDailyData &aR) {
-		turtleData ans;
-		ans.date = aR.date;
-		ans.price = price + aR.close;
+	inline turtleATRData operator+ (const turtleRawData &rawData) {
+		turtleATRData ans;
+		ans.price = price + _turtleTR(rawData);
 		return ans;
 	}
-	inline turtleData operator* (float scalar) {
-		turtleData ans;
-		ans.date = date;
+	inline turtleATRData operator+ (float add) {
+		turtleATRData ans;
+		ans.price = price + add;
 		return ans;
 	}
-	inline turtleData operator/ (float scalar) {
-		turtleData ans;
-		ans.date = date;
+	inline turtleATRData operator* (float scalar) {
+		turtleATRData ans;
+		ans.price = price * scalar;
+		return ans;
+	}
+	inline turtleATRData operator/ (float scalar) {
+		turtleATRData ans;
 		ans.price = price / scalar;
 		return ans;
 	}
@@ -34,18 +43,22 @@ public:
 		memset(&date, 0, sizeof(stockDate));
 		price = 0.0;
 	}
-};
-
-class WayOfTurtle {
-public:
-	int GetATR(vector<sinaDailyData> &rawData, int *avgDay, vector<turtleData> *N, int atrNum);
-
 private:
 	inline float _turtleTR(float H, float L, float PDC) {
 		return H-L > H-PDC
 			? (H-L >= PDC-L ? H-L : PDC-L)
 			: (H-PDC >= PDC-L ? H-PDC : PDC-L);
 	}
+	inline float _turtleTR(const turtleRawData & rawData) {
+		return _turtleTR(rawData.thisTop, rawData.thisButtom, rawData.lastClose);
+	}
+};
+
+class WayOfTurtle {
+public:
+	int GetATR(vector<sinaDailyData> &rawData, int *avgDay, vector<turtleATRData> *N, int atrNum);
+
+
 };
 
 #endif

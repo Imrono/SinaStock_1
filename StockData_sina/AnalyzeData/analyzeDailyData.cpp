@@ -185,7 +185,7 @@ double analyzeDailyData::turtleAnalyze(stockDate start, stockDate end, int ATRda
 		ExtractionData(priceType);
 
 	int avgDay[2] = {20,55};
-	vector<turtleData> N[2];
+	vector<turtleATRData> N[2];
 	_turtle.GetATR(*getExtractData(), avgDay, N, 2);
 	return 0.0;
 }
