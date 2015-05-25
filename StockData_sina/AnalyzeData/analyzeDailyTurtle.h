@@ -64,10 +64,10 @@ class WayOfTurtle {
 public:
 	int GetATR(vector<sinaDailyData> &rawData, int *avgDay, vector<turtleATRData> *N, int atrNum);
 private:
-	float getMin(float a, float b) {
+	inline float getMin(float a, float b) {
 		return a < b ? a : b;
 	}
-	float getMax(float a, float b) {
+	inline float getMax(float a, float b) {
 		return a > b ? a : b;
 	}
 

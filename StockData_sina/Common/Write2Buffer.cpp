@@ -215,13 +215,14 @@ void Write2Buffer::updateAfterWrite(int len) {
 const searchResult* Write2Buffer::getData(int idx) {
 	for (vector<bufferStatus>::iterator it = searchStatus.begin(); it != searchStatus.end(); ++it) {
 		if (it->NaviNum == idx) {
+			// 不管有没有finish都返回读取到的sinaDailyData
 			if (true != it->IsFinished) {
-				INFO("Unexpected end when analyze daily history data, mostly on impact!\n");
-			} else {
-				return &mapSearchResult[it->NaviNum];
+				INFO("Unexpected end when analyze daily history data, mostly no impact!\n");
 			}
+			return &mapSearchResult[it->NaviNum];
 		}
 	}
+	// 没有找到index则返回NULL
 	ERRR("Can not find index %d in searchResult\n", idx);
 	return nullptr;
 }
