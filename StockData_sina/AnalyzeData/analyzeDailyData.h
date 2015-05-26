@@ -29,14 +29,15 @@ public:
 	void ResetStatus();
 
 	void ExtractionData(getType priceType);
-	int GetnDayAverage(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
 
 	double turtleAnalyze(stockDate start, stockDate end, int ATRdays, double unit, getType priceType);
-
+	void averageAnalyze(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
 private:
 	vector<sinaDailyData> *_GetDailyDataFromFile(int year, int data_Jidu, getType priceType);
 
 	//////////////////////////////////////////////////////////////////////////
+	// 这里添加不同的分析方法
+	WayOfAverage _average;
 	WayOfTurtle _turtle;
 
 	//////////////////////////////////////////////////////////////////////////
@@ -44,7 +45,7 @@ private:
 	// class status
 	// now class is used for this stock
 	string _stockID;
-	// _vecTmpDailyData 28(size)*260(work days/year) < 7.5 kB/year
+	// _vecExtractData 28(size)*260(work days/year) < 7.5 kB/year
 	vector<sinaDailyData> _vecExtractData;
 };
 

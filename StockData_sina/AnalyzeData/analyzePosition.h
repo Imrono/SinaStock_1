@@ -1,8 +1,8 @@
-#include "..//Common//TraceMicro.h"
+ï»¿#include "..//Common//TraceMicro.h"
 
 class PositionAndGain
 {
-	// Ê²Ã´¼ÛÇ®Âò¶àÉÙ
+	// ä»€ä¹ˆä»·é’±ä¹°å¤šå°‘
 	inline bool buy(float price, float position) {
 		float buyPosition = price*position;
 		if (_remain > buyPosition) {
@@ -10,7 +10,7 @@ class PositionAndGain
 			_remain -= buyPosition;
 			return true;
 		} else {
-			ERRR("ÂòÈëÁ¿´óÓÚÊ£ÓàÁ¿£¡\n");
+			ERRR("ä¹°å…¥é‡å¤§äºå‰©ä½™é‡ï¼\n");
 			return false;
 		}
 	}
@@ -20,11 +20,11 @@ class PositionAndGain
 			_remain -= buyPosition;
 			return true;
 		} else {
-			ERRR("ÂòÈëÁ¿´óÓÚÊ£ÓàÁ¿£¡\n");
+			ERRR("ä¹°å…¥é‡å¤§äºå‰©ä½™é‡ï¼\n");
 			return false;
 		}
 	}
-	// Ê²Ã´¼ÛÂô¶àÉÙ
+	// ä»€ä¹ˆä»·å–å¤šå°‘
 	inline bool sell(float price, float position) {
 		float sellPosition = price*position;
 		if (_keeps >sellPosition ) {
@@ -32,7 +32,7 @@ class PositionAndGain
 			_remain += sellPosition;
 			return true;
 		} else {
-			ERRR("Âô³öÁ¿´óÓÚ³ÖÓĞÁ¿£¡\n");
+			ERRR("å–å‡ºé‡å¤§äºæŒæœ‰é‡ï¼\n");
 			return false;
 		}
 	}
@@ -42,7 +42,7 @@ class PositionAndGain
 			_remain += sellPosition;
 			return true;
 		} else {
-			ERRR("Âô³öÁ¿´óÓÚ³ÖÓĞÁ¿£¡\n");
+			ERRR("å–å‡ºé‡å¤§äºæŒæœ‰é‡ï¼\n");
 			return false;
 		}
 	}

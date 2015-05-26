@@ -55,4 +55,11 @@ public:
 		factor = 0.0;
 	}
 };
+
+class WayOfAverage {
+public:
+	int GetnDayAverage(vector<sinaDailyData> &rawData, int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
+
+};
+
 #endif

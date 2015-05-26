@@ -3,6 +3,7 @@
 #include <vector>
 using namespace std;
 #include "testMonitor.h"
+#include "..//AnalyzeData//analyzeDailyData.h"
 
 void testAnalyzeAverage() {
 	printf_s("\n######################################\n");
@@ -10,7 +11,6 @@ void testAnalyzeAverage() {
 	printf_s("######################################\n\n");
 	printf_s("enter return to start!\n");
 	getchar();
-
 	testTime tst_Tm("testAnalyzeAverage");
 
 	string testStockID = "000001";
@@ -32,9 +32,24 @@ void testAnalyzeAverage() {
 	float *pwt[2] = {nullptr};
 	pwt[0] = wt[0];
 	pwt[1] = wt[1];
-	alzDailyData.GetnDayAverage(Days, pwt, ans, 2);
+	alzDailyData.averageAnalyze(Days, pwt, ans, 2);
 
 	printf_s("######################################\n");
 	printf_s("# Now test Analyze Average finished! #\n");
+	printf_s("######################################\n\n");
+}
+
+void testAnalyzeTurtle() {
+	printf_s("\n######################################\n");
+	printf_s("# Now begin to test Turtle Average!  #\n");
+	printf_s("######################################\n\n");
+	printf_s("enter return to start!\n");
+	getchar();
+	testTime tst_Tm("testAnalyzeTurtle");
+
+
+
+	printf_s("######################################\n");
+	printf_s("# Now test Analyze Turtle finished!  #\n");
 	printf_s("######################################\n\n");
 }
