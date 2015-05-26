@@ -63,6 +63,10 @@ private:
 class WayOfTurtle {
 public:
 	int GetATR(vector<sinaDailyData> &rawData, int *avgDay, vector<turtleATRData> *N, int atrNum);
+
+	// 默认NV的单位为100股的价格，N以股票价格为单位
+	static float unitPosition(float N, float unit = 100.0) {return (float)(0.01/(N*unit));}
+
 private:
 	inline float getMin(float a, float b) {
 		return a < b ? a : b;
