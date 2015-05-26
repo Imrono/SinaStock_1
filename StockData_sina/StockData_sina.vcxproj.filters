@@ -93,6 +93,9 @@
     <ClCompile Include="AnalyzeData\analyzeDailyTurtle.cpp">
       <Filter>Source Files\AnalyzeData</Filter>
     </ClCompile>
+    <ClCompile Include="AnalyzeData\analyzePosition.cpp">
+      <Filter>Source Files\AnalyzeData</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stockData.h">
@@ -144,6 +147,9 @@
       <Filter>Header Files\AnalyzeData</Filter>
     </ClInclude>
     <ClInclude Include="AnalyzeData\analyzeDailyTurtle.h">
+      <Filter>Header Files\AnalyzeData</Filter>
+    </ClInclude>
+    <ClInclude Include="AnalyzeData\analyzePosition.h">
       <Filter>Header Files\AnalyzeData</Filter>
     </ClInclude>
   </ItemGroup>
