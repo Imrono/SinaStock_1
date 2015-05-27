@@ -1,7 +1,28 @@
 ﻿#include "..//Common//TraceMicro.h"
 
-class PositionAndGain
+class PositionAndTrade
 {
+	PositionAndTrade(float total = 0.0f) {
+		_total = total;
+		_remain = 0.0f;
+		_keeps = 0.0f;
+	}
+	// 增加资金
+	inline void add (float money) {
+		_total += money;
+		_remain += money;
+	}
+
+	// 减少资金
+	inline float sub(float money) {
+		if (_remain < money) return false;
+		else {
+			_total -= money;
+			_remain -= money;
+			return true;
+		}
+	}
+
 	// 什么价钱买多少
 	inline bool buy(float price, float position) {
 		float buyPosition = price*position;

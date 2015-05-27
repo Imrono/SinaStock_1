@@ -10,6 +10,12 @@ enum stockMarkets
 #define NEED_UPDATE false
 #define HAVE_UPDATED true
 
+enum stockTrade {
+	BUY_UP = 0,
+	SELL_UP = 1,
+	BUY_DOWN = 2,
+	SELL_DOWN = 3
+};
 struct stockDate
 {
 	int year;
@@ -43,6 +49,13 @@ public:
 
 	bool seasons[4];	// (true)have updated, (false)need updated
 	bool prepare[4];
+};
+
+struct TradingPoint {
+	stockDate date;
+	float price;
+	stockTrade trade;
+	int amount;
 };
 
 #endif

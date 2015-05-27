@@ -10,6 +10,10 @@ enum getType {
 	NO_FUQUAN = 1
 };
 
+#define _in_
+#define _out_
+#define _in_out_
+
 extern int time_step;
 extern int times_get;
 

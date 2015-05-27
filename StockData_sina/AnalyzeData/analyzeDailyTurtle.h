@@ -3,6 +3,7 @@
 #include <vector>
 using namespace std;
 #include "..//Common//stockData.h"
+#include "..//Common//GlobalParam.h"
 #include "..//Data_sina//DataHistory.h"
 
 struct turtleTopButtom {
@@ -21,8 +22,11 @@ public:
 	turtleATRData () {
 		clear();
 	}
+	// 日期
 	stockDate date;
+	// N（n天的平均波动）
 	float price;
+	// 最高最低点（n天的）
 	turtleTopButtom lastTopButtom;
 
 	inline turtleATRData operator+ (const turtleRawData &rawData) {
@@ -55,14 +59,17 @@ private:
 			? (H-L >= PDC-L ? H-L : PDC-L)
 			: (H-PDC >= PDC-L ? H-PDC : PDC-L);
 	}
-	inline float _turtleTR(const turtleRawData & rawData) {
+	inline float _turtleTR(_in_ const turtleRawData & rawData) {
 		return _turtleTR(rawData.thisTop, rawData.thisButtom, rawData.lastClose);
 	}
 };
 
 class WayOfTurtle {
 public:
-	int GetATR(vector<sinaDailyData> &rawData, int *avgDay, vector<turtleATRData> *N, int atrNum);
+	// 计算N和avgDay内的最高最低点
+	int GetATR(_in_ vector<sinaDailyData> &rawData, _in_ int *avgDay, _out_ vector<turtleATRData> *N_TopButtom, _in_ int atrNum);
+
+	void GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleATRData> &N_TopButtom, _out_ vector<TradingPoint> &trading);
 
 	// 默认NV的单位为100股的价格，N以股票价格为单位
 	static float unitPosition(float N, float unit = 100.0) {return (float)(0.01/(N*unit));}
