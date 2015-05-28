@@ -5,6 +5,7 @@ using namespace std;
 #include "..//Common//stockData.h"
 #include "..//Common//GlobalParam.h"
 #include "..//Data_sina//DataHistory.h"
+#include "analyzePosition.h"
 
 struct turtleTopButtom {
 	float Top;
@@ -69,12 +70,18 @@ public:
 	// 计算N和avgDay内的最高最低点
 	int GetATR(_in_ vector<sinaDailyData> &rawData, _in_ int *avgDay, _out_ vector<turtleATRData> *N_TopButtom, _in_ int atrNum);
 
-	void GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleATRData> &N_TopButtom, _out_ vector<TradingPoint> &trading);
+	void GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleATRData> *N_TopButtom
+		, _in_ int atrNum, _out_ vector<TradingPoint> &trading, _in_out_ PositionAndTrade &pt, _in_ int StopLoss);
 
 	// 默认NV的单位为100股的价格，N以股票价格为单位
 	static float unitPosition(float N, float unit = 100.0) {return (float)(0.01/(N*unit));}
 
 private:
+	void _StopLoss();
+	void _CreatePosition();
+	void _AddPosition();
+	void _ClearPosition();
+
 	inline float getMin(float a, float b) {
 		return a < b ? a : b;
 	}

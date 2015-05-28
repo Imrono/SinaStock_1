@@ -1,4 +1,20 @@
 ﻿#include "..//Common//TraceMicro.h"
+#include "..//Common//stockData.h"
+
+enum stockTrade {
+	BUY_UP = 0,
+	SELL_UP = 1,
+	BUY_DOWN = 2,
+	SELL_DOWN = 3
+};
+
+struct TradingPoint {
+	stockDate date;
+	float price;
+	stockTrade trade;
+	int amount;
+};
+
 
 class PositionAndTrade
 {

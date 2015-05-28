@@ -64,34 +64,75 @@ int WayOfTurtle::GetATR(_in_ vector<sinaDailyData> &rawData, _in_ int *avgDay, _
 
 // 注意nDays要和vector<turtleATRData>匹配
 // vector<turtleATRData>不包含前期不满nDays的数据
-void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleATRData> &N_TopButtom, _out_ vector<TradingPoint> &trading)
+// 止损位 depend 仓位
+void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleATRData> *N_TopButtom
+	, _in_ int atrNum, _out_ vector<TradingPoint> &trading, _in_out_ PositionAndTrade &pt, _in_ int StopLoss)
 {
-	if (0 == N_TopButtom.size()) ERRR("turtleATRData中不包含数据!\n");
+	// 这些变量可能要定义成接口
+	float maxPosition;
+	const float factorN = 0.5f;
+
+	for (int i = 0; i < atrNum; i++)
+		if (0 == N_TopButtom[i].size()) ERRR("turtleATRData中不包含数据!\n");
+
+	// N与TopButtom数据的迭代器，N有若干种
+	vector<turtleATRData>::iterator *it_begin = new vector<turtleATRData>::iterator[atrNum];
+	vector<turtleATRData>::iterator *it_end = new vector<turtleATRData>::iterator[atrNum];
+	vector<turtleATRData>::iterator *it = new vector<turtleATRData>::iterator[atrNum];
+	for (int i = 0; i < atrNum; i++) {
+		it_begin[i] = N_TopButtom[i].begin()+1; // 第一个数据没有分析价值
+		it_end[i] = N_TopButtom[i].end();
+	}
 
 	int count = 0;
-	// N与TopButtom数据的迭代器
-	vector<turtleATRData>::iterator it_begin = N_TopButtom.begin()+1; // 第一个数据没有分析价值
-	vector<turtleATRData>::iterator it_end = N_TopButtom.end();
-	vector<turtleATRData>::iterator it = it_begin;
+	bool IsIgnore = false;
+	TradingPoint tmpTradePoint;
 	// 价格时间数据的迭代器
 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
 	vector<sinaDailyData>::reverse_iterator r_it_end = rawData.rend();
-	vector<sinaDailyData>::reverse_iterator r_it = r_it_begin;
-	while (memcmp(&(r_it->date), &(it->date), sizeof(stockDate))) {
-		++r_it;
-	}
+	for (vector<sinaDailyData>::reverse_iterator r_it = r_it_begin; r_it != r_it_end; ++r_it) {
+		for (int i = 0; i < atrNum; i++) {
+			// 日期不同则不处理
+			if (memcmp(&(r_it->date), &(it[i]->date), sizeof(stockDate)))
+				continue;
 
-	for (; it != it_end && r_it != r_it_end; ++it, ++r_it) {
-		// check the mismatch of date
-		if (!(memcmp(&(r_it->date), &(it->date), sizeof(stockDate))))
-			INFO ("turtleATRData & sinaDailyData do not have common date!\n");
+			// 确定turtle交易法的买点和卖点
+			// 要是一天同时有买入，卖出信号则提示，并默认先买后卖
+			if (0) {
 
-		// 确定turtle交易法的买点和卖点
-		if ((it-1)->lastTopButtom.Top < r_it->top) {
-			// 买入
+			}
+			// 买入条件
+			if ((it[i]-1)->lastTopButtom.Top < r_it->top) {
+				if (!IsIgnore) {
+					IsIgnore = true;
+					tmpTradePoint.date = r_it->date;
+					tmpTradePoint.price = (it[i]-1)->lastTopButtom.Top;
+					tmpTradePoint.trade = BUY_UP;
+				}
+			}
+
+			// 卖出条件
+			else if((it[i]-1)->lastTopButtom.Top < r_it->top) {
+
+			}
+			// 观望条件
+			else {
+
+			}
+
+			// 将N向前移动
+			for (int j = 0; j < atrNum; j++) {
+				// 日期相同则往前移动
+				if (!memcmp(&(it[j]->date), &(r_it->date), sizeof(stockDate))) {
+					++it[j];
+				} else {
+					continue;
+				}
+			}
 		}
 	}
-	if ((it == it_end && r_it != r_it_end) || (it != it_end && r_it == r_it_end)) {
-		ERRR ("turtleATRData & sinaDailyData do not have common end!\n");
-	}
+
+	delete []it_begin;
+	delete []it_end;
+	delete []it;
 }
