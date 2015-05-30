@@ -115,6 +115,7 @@ void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vec
 			else if((it[i]-1)->lastTopButtom.Top < r_it->top) {
 
 			}
+
 			// 观望条件
 			else {
 
