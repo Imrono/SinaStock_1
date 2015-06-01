@@ -53,3 +53,8 @@ void testAnalyzeTurtle() {
 	printf_s("# Now test Analyze Turtle finished!  #\n");
 	printf_s("######################################\n\n");
 }
+
+void testOnTimeData() {
+	HistoryData historyData;
+// 	historyData.URL2Data()
+}

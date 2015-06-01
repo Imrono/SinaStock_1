@@ -28,7 +28,8 @@ class MY_HTML
 	enum RowType {
 		head_type = 0,
 		body_type = 1,
-		foot_type = 2
+		foot_type = 2,
+		other_type = 3
 	};
 
 public:

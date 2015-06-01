@@ -12,7 +12,7 @@
     这是决定成败的关键因素，却往往被忽略。
     海龟交易法则中采用基于波动性的头寸管理策略（止损同样是基于波动性），因此必须理解波动性（用N来表示）的含意。
     波动性N：实际波动幅度的20日指数移动平均。也就是我们常用行情软件中的ATR指标（一般是按简单移动平均计算的）。
-    价值量波动性NV：波动性代表的货币价值，通俗的讲这个波动性值多少钱。对于A股股票波动性是直接以货币计量的，最小交易单位是100股，所以NV = N * 100。对于股指期货就不同了，波动是以点数计量，必须转换成货币，NV = N * 每点价值。举例说明：沪深300股指期货规定的每点价值300元人民币，因此NV = N * 300。
+    价值量波动性NV：波动性代表的货币价值，通俗的讲这个波动性值多少钱。对于A股股票波动性是直接以货币计量的，最小交易单位是100股，所以NV = N * 100。对于股指期货就不同了，波动是以点数计量，必须转换成货币，NV = N * 每点价值。 举例说明：沪深300股指期货规定的每点价值300元人民币，因此NV = N * 300。
     账户规模C：能交易价值多少的商品。C = 投入的资本 * 杠杆，对于A股市场没有杠杆（杠杆为1），C = 投入的资本。
     头寸单位U：海龟在建立头寸时每次买多少。U = (C * 1%) / NV
     实例说明：假设帐户规模为10万人民币，A股市场的股票001在某一天出现买入信号，日线上这天的ATR指标为0.55，我们应该买入多少呢？U = （100000*0.01) / (0.55*100) = 18 手。
@@ -75,3 +75,105 @@
     海龟有2种离市规则，一旦触发，头寸中的所有单位都要退出。
     离市规则1：最近10日反向突破（多头头寸是创10日最低价，空头头寸是创10日最高价）
     离市规则2：最近20日反向突破
+	
+	
+///////////////////////////////////////////////////////////////////////////////////////////////////
+input:trn(20,5,30),hn(20,5,30),ln(10,5,20);
+
+VARIABLE:dayCount=1,PositionCount=1,SellSign=0,dK=0;//加多空标志，1：多，-1：空 0：空仓
+VARIABLE:EntAndExitSign=1,EntPoint=0,ExitPoint=0;
+VARIABLE:N=0;
+//MA(X,N)，求X的N日移动平均值。算法：(X1+X2+X3+，，，+Xn)/N
+N:=MA(TR,trn);
+
+BUYHHV:=HHV(H,hn);
+SELLLLV:=LLV(L,ln);
+sellshortllv:=llv(l,hn);
+buyshorthhv:=hhv(h,ln);
+
+IF BARPOS >=hn THEN
+BEGIN
+	IF BARPOS=hn THEN
+		IF DayCount=hn/2 OR BARPOS=hn THEN
+			BEGIN{hn/2天调整N值}
+			N:=((hn-1)*N+TR)/hn;{计算N值}
+			DayCount:=2;
+		END
+
+		DayCount:=DayCount+1;
+		EntPoint:=ENTERBARS+1;
+
+		IF EntPoint=EntAndExitSign THEN
+		BEGIN{说明STOP指令买进头寸成功}
+			PositionCount:=PositionCount+1;{头寸计数}
+			SellSign:=True;{可以平仓信号，如果达到指定的价格}
+		END
+
+		IF PositionCount=1 THEN BEGIN{第一头寸}
+			HOW:=CASH(0)*0.01/N;{波动性百分比决定头寸规模}
+			IF high=buyhhv then
+			BEGIN
+				dk:=1;
+				多开1:BUY(1,HOW,STOP,BUYHHV);{在20日新高STOP指令买进}
+			END;
+  
+			IF low=sellshortllv then
+				begin
+				dk:=-1;
+				空开1:buyshort(1,HOW,STOP,sellshortllv);{在20日新低STOP指令空开}
+			END;
+		END
+		
+		IF PositionCount=2 THEN BEGIN{如到第二头寸}
+			HOW:=CASH(0)*0.01/N;{波动性百分比决定头寸规模}
+			if dk=1 then 多开2:BUY(1,HOW,STOP,ENTERPRICE+0.5*N);{在上头寸(即第一头寸)+0.5个N以STOP指令买进}
+			if dk=-1 then 空开2:buyshort(1,HOW,STOP,ENTERPRICE-0.5*N);
+		END
+		IF PositionCount=3 THEN BEGIN{如到第三头寸}
+			HOW:=CASH(0)*0.01/N;
+			if dk=1 then 多开3:BUY(1,HOW,STOP,ENTERPRICE+0.5*N);{在上头寸(即第二头寸)+0.5个N以STOP指令买进}
+			if dk=-1 then 空开3:buyshort(1,HOW,STOP,ENTERPRICE-0.5*N);
+		END
+		IF PositionCount=4 THEN BEGIN
+			HOW:=CASH(0)*0.01/N;
+			if dk=1 then 多开4:BUY(1,HOW,STOP,ENTERPRICE+0.5*N);
+			if dk=-1 then 空开4:buyshort(1,HOW,STOP,ENTERPRICE-0.5*N); 
+		END
+		
+		IF SellSign=True THEN
+		BEGIN
+			ExitPoint:=EXITBARS+1;
+			IF dk=1 then
+			BEGIN
+				IF ExitPoint=EntAndExitSign THEN
+				BEGIN {说明卖出成功}
+					PositionCount:=1;{头寸计算复原}
+					SellSign:=False;
+					dk:=0;
+				END
+			END
+
+			IF ENTERPRICE-2*N then
+				SELL(1,100%,STOP,SELLLLV);{退出离盈利头寸}
+			ELSE
+				SELL(1,100%,STOP,ENTERPRICE-2*N);{退出亏损头寸}
+			END;
+
+			IF dk=-1 then
+			BEGIN
+				IF ExitPoint=EntAndExitSign THEN
+				BEGIN
+					PositionCount:=1;
+					SellSign:=False;
+					dk:=0;
+				END
+			END
+
+		IF ENTERPRICE+2*N then
+			sellSHORT(1,100%,STOP,BUYSHORTHHV);
+		ELSE
+			sellSHORT(1,100%,STOP,ENTERPRICE+2*N);
+		END;
+	END
+    
+END;

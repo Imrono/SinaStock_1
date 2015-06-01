@@ -33,4 +33,5 @@ extern const char *getPriceType(getType priceType);
 
 #define g_szPath	128
 
+extern float g_EPS;
 #endif

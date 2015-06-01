@@ -66,10 +66,10 @@ int WayOfTurtle::GetATR(_in_ vector<sinaDailyData> &rawData, _in_ int *avgDay, _
 // vector<turtleATRData>不包含前期不满nDays的数据
 // 止损位 depend 仓位
 void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleATRData> *N_TopButtom
-	, _in_ int atrNum, _out_ vector<TradingPoint> &trading, _in_out_ PositionAndTrade &pt, _in_ int StopLoss)
+	, _in_ int atrNum, _out_ vector<TradingPoint> &trading, _in_out_ HoldPosition &pt, _in_ int StopLoss)
 {
 	// 这些变量可能要定义成接口
-	float maxPosition;
+	float maxPosition = pt.getTotal();
 	const float factorN = 0.5f;
 
 	for (int i = 0; i < atrNum; i++)
@@ -79,61 +79,79 @@ void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vec
 	vector<turtleATRData>::iterator *it_begin = new vector<turtleATRData>::iterator[atrNum];
 	vector<turtleATRData>::iterator *it_end = new vector<turtleATRData>::iterator[atrNum];
 	vector<turtleATRData>::iterator *it = new vector<turtleATRData>::iterator[atrNum];
+	bool *DataEnable = new bool[atrNum];
 	for (int i = 0; i < atrNum; i++) {
 		it_begin[i] = N_TopButtom[i].begin()+1; // 第一个数据没有分析价值
 		it_end[i] = N_TopButtom[i].end();
+		DataEnable[i] = false;
 	}
 
 	int count = 0;
-	bool IsIgnore = false;
 	TradingPoint tmpTradePoint;
+	bool HasEnable = false;
 	// 价格时间数据的迭代器
 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
 	vector<sinaDailyData>::reverse_iterator r_it_end = rawData.rend();
 	for (vector<sinaDailyData>::reverse_iterator r_it = r_it_begin; r_it != r_it_end; ++r_it) {
+		// 指标日期跟随数据日期
 		for (int i = 0; i < atrNum; i++) {
-			// 日期不同则不处理
-			if (memcmp(&(r_it->date), &(it[i]->date), sizeof(stockDate)))
+			while (r_it->date > it[i]->date)
+				++it[i];
+			if (r_it->date < it[i]->date)
 				continue;
-
-			// 确定turtle交易法的买点和卖点
-			// 要是一天同时有买入，卖出信号则提示，并默认先买后卖
-			if (0) {
-
-			}
-			// 买入条件
-			if ((it[i]-1)->lastTopButtom.Top < r_it->top) {
-				if (!IsIgnore) {
-					IsIgnore = true;
-					tmpTradePoint.date = r_it->date;
-					tmpTradePoint.price = (it[i]-1)->lastTopButtom.Top;
-					tmpTradePoint.trade = BUY_UP;
-				}
-			}
-
-			// 卖出条件
-			else if((it[i]-1)->lastTopButtom.Top < r_it->top) {
-
-			}
-
-			// 观望条件
-			else {
-
-			}
-
-			// 将N向前移动
-			for (int j = 0; j < atrNum; j++) {
-				// 日期相同则往前移动
-				if (!memcmp(&(it[j]->date), &(r_it->date), sizeof(stockDate))) {
-					++it[j];
-				} else {
-					continue;
-				}
-			}
+			else if (r_it->date == it[i]->date) {
+				DataEnable[i] = true;
+				HasEnable = true;
+			} else {}
 		}
+		// 冲突处理
+
+		// 建仓
+		if (HasEnable) {
+			if (!_HasPosition()) {
+				_CreatePosition(it, DataEnable, *r_it, tmpTradePoint, atrNum);
+			}
+				// 平仓
+				// 加仓
+
+				// 止损
+		}
+		// 观望
 	}
 
+	delete []DataEnable;
 	delete []it_begin;
 	delete []it_end;
 	delete []it;
+}
+
+void WayOfTurtle::_StopLoss() {
+
+}
+
+// 只能建一个仓，若有两种指标同时满足，不能同时建两个仓
+bool WayOfTurtle::_CreatePosition(vector<turtleATRData>::iterator *it, bool *DataEnable, sinaDailyData today, TradingPoint &Trade, _in_ int atrNum) {
+	// 已经有了持仓就不再建立
+	if (_position.getKeeps() > g_EPS) return false;
+
+	// 建仓条件 1.有剩余头寸 2.现在不持有头寸 3.做多突破长期或短期n日的上轨
+	if (_position.getTotal() > 1.0f &&			// 1.有剩余头寸
+		_position.getKeeps() < g_EPS) {			// 2.现在不持有头寸
+		for (int i = 0; i < atrNum; i++) {
+			if (DataEnable) {
+				if ((it[i]-1)->lastTopButtom.Top < today.top) { // 3.做多突破长期或短期n日的上轨
+					Trade.date = today.date;
+					Trade.price = (it[i]-1)->lastTopButtom.Top;
+					Trade.trade = BUY_UP;
+					return true;
+				}
+			} else continue;
+		}
+	} else return false;
+}
+void WayOfTurtle::_AddPosition() {
+
+}
+void WayOfTurtle::_ClearPosition() {
+
 }

@@ -15,6 +15,41 @@ struct stockDate
 	int year;
 	int month;
 	int day;
+
+	inline bool operator> (stockDate a) {
+		return year > a.year ? true :
+			year < a.year ? false :
+			month > a.month ? true :
+			month < a.month ? false :
+			day > a.day ? true : false;
+	}
+	inline bool operator< (stockDate a) {
+		return year < a.year ? true :
+			year > a.year ? false :
+			month < a.month ? true :
+			month > a.month ? false :
+			day < a.day ? true : false;
+	}
+	inline bool operator>= (stockDate a) {
+		return year > a.year ? true :
+			year < a.year ? false :
+			month > a.month ? true :
+			month < a.month ? false :
+			day >= a.day ? true : false;
+	}
+	inline bool operator<= (stockDate a) {
+		return year < a.year ? true :
+			year > a.year ? false :
+			month < a.month ? true :
+			month > a.month ? false :
+			day <= a.day ? true : false;
+	}
+	inline bool operator== (stockDate a) {
+		return year != a.year ? false :
+			month != a.month ? false :
+			day != a.day ? false : true;
+	}
+
 };
 
 struct stockTime

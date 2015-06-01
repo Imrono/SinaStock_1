@@ -63,7 +63,7 @@ public:
 	HistoryData();
 	HistoryData(string stockID);
 	~HistoryData();
-
+	HttpUrlGetSyn &getHttpUrl() {return _synHttpUrl;}
 	vector<sinaDailyData> * URL2Data(int year, int quarter, string stockID, getType priceType, stockHistoryStatus &status);
 	const char* PrepareURL(int year, int quarter, string stockID, getType priceType);
 	void StockDailyData(string stockID, getType priceType);

@@ -16,9 +16,10 @@ struct TradingPoint {
 };
 
 
-class PositionAndTrade
+class HoldPosition
 {
-	PositionAndTrade(float total = 0.0f) {
+public:
+	HoldPosition(float total = 0.0f) {
 		_total = total;
 		_remain = 0.0f;
 		_keeps = 0.0f;
