@@ -2,17 +2,22 @@
 #include "..//Common//stockData.h"
 
 enum stockTrade {
+	// 做多
 	BUY_UP = 0,
-	SELL_UP = 1,
-	BUY_DOWN = 2,
-	SELL_DOWN = 3
+	SELL_DOWN = 1,
+	// 做空
+	SELL_SHORT = 2,
+	BUY_COVER = 3,
+	// 止损
+	STOP_LOSS_SELL_DOWN = 4,
+	STOP_LOSS_BUY_COVER = 5
 };
 
 struct TradingPoint {
 	stockDate date;
 	float price;
 	stockTrade trade;
-	int amount;
+	float amount;
 };
 
 
