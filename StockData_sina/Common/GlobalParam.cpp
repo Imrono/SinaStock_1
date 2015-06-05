@@ -21,4 +21,4 @@ extern inline const char *getPriceType(getType priceType) {
 	else return ".dstk";
 }
 
-extern float g_EPS = 0.00001;
+extern float g_EPS = 0.00001f;

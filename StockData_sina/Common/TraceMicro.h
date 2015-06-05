@@ -10,9 +10,10 @@ using namespace std;
 #define FILE_TRACE		3
 #define ANALYZE_TRACE	4
 #define PROGRESS_TRACE	5
+#define TRADE_TRACE		6
 #define DATA_TRACE		8
 
-#define NUM_TRACES				9
+#define NUM_TRACES		9
 #define TRACE_CONFIG_BUF_SIZE	128
 
 #define TRACE_NAME_TABLE(n) ( \

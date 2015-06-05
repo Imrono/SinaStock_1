@@ -18,6 +18,11 @@ struct TradingPoint {
 	float price;
 	stockTrade trade;
 	float amount;
+	static void ShowTradeInfo(const TradingPoint &Trade, const char *s) {
+		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s %s @%.2f, mount:%.0f\n", 
+			Trade.date.year, Trade.date.month, Trade.date.day, s, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
+	}
+	static char *stockTradeStr[];
 };
 
 

@@ -78,22 +78,35 @@ private:
 //////////////////////////////////////////////////////////////////////////
 class WayOfTurtle {
 public:
-	WayOfTurtle(float TurtleUnit = 1.0) {_turtleUnit = TurtleUnit; _sendOrderThisBar = false;}
+	WayOfTurtle(float RiskRatio = 0.01f, float PointValue = 1.0f) {
+		_riskRatio = RiskRatio; 
+		_pointValue = PointValue; 
+		_sendOrderThisBar = false; 
+		_avgN = 0;
+		_tbNumCreate = 0;
+		_tbNumLeave = 0;
+		_avgTopButtomCreate = nullptr;
+		_topButtomCreate = nullptr;
+		_avgTopButtomLeave = nullptr;
+		_topButtomLeave = nullptr;
+		_minPoint = 1.0f;
+	}
 	// 计算N和avgDay内的最高最低点
-	int SetNandTopBottom(vector<sinaDailyData> &rawData, int *avgN, int atrNum, int *avgTopButtom, int tbNum);
+	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int tbNumCreate, int *avgTopButtomLeave, int tbNumLeave);
 
-	void GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ vector<turtleAvgTRData> N, _in_ vector<turtleAvgTopButtomData> *TopButtom
-		, _out_ vector<TradingPoint> &trading, _in_out_ HoldPosition &pt, _in_ int StopLoss);
+	void GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_out_ HoldPosition &pt, _in_ int StopLoss);
 
 	// 默认NV的单位为100股的价格，N以股票价格为单位
 	static float unitPosition(float N, float unit = 100.0) {return (float)(0.01/(N*unit));}
 
+	vector<turtleAvgTRData> &getN() {return _N;}
+
 private:
 	// 目前只考虑多头情况
-	bool _CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, bool DataEnable, sinaDailyData today, TradingPoint &Trade);
-	bool _ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, sinaDailyData today, TradingPoint &Trade);
-	void _AddPosition(vector<turtleAvgTRData>::iterator *it_N, sinaDailyData today, TradingPoint &Trade);
-	void _StopLoss(vector<turtleAvgTRData>::iterator *it_N, sinaDailyData today, TradingPoint &Trade);
+	bool _CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, bool DataEnable, const sinaDailyData &today, TradingPoint &Trade);
+	bool _ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade);
+	void _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
+	void _StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 
 	bool _HasPosition() { return _position.getKeeps() > g_EPS;}
 
@@ -104,22 +117,27 @@ private:
 		return a > b ? a : b;
 	}
 
-	float _turtleUnit;
 	// 前一半是建仓数据，后一半是平仓数据
-	int _atrNum;
-	int *_avgN;
-	int _tbNum;
-	int *_avgTopButtom;
-	vector<turtleAvgTRData> *_N;
-	vector<turtleAvgTopButtomData> *_topButtom;
+	int _avgN;
+	vector<turtleAvgTRData> _N; // 本日的数据也计算在内
+	// 建仓信息Comein与离场信息Leave应该一一对应
+	int _tbNumCreate;
+	int *_avgTopButtomCreate;
+	vector<turtleAvgTopButtomData> *_topButtomCreate; // 本日的数据也计算在内
+	int _tbNumLeave;
+	int *_avgTopButtomLeave;
+	vector<turtleAvgTopButtomData> *_topButtomLeave; // 本日的数据也计算在内
 
-	int _statusType;
-	float _preEntryPrice;
-	bool _sendOrderThisBar;
+	float _lastEntryPrice;
+	bool _sendOrderThisBar; // 同一天内加仓就不止损
 	bool _preBreakoutFailure; // 是否有止损
 
 	vector<TradingPoint> _tradeHistory;
 	HoldPosition _position;
+	float _turtleUnit;
+	float _riskRatio;
+	float _pointValue;
+	float _minPoint;
 };
 
 #endif
