@@ -197,6 +197,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	vector<turtleAvgTRData>::iterator it_N = it_N_begin;
 	// 2. 建仓n日最高最低点
 	bool TopButtomCreate_HasEnable = false;
+	bool *TmpCreateEnable = new bool[_tbNumCreate];
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomCreate_begin = new vector<turtleAvgTopButtomData>::iterator[_tbNumCreate];
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomCreate_end = new vector<turtleAvgTopButtomData>::iterator[_tbNumCreate];
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomCreate = new vector<turtleAvgTopButtomData>::iterator[_tbNumCreate];
@@ -204,9 +205,11 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		it_TopButtomCreate_begin[i] = _topButtomCreate[i].begin()+1; // 第一个数据没有分析价值，之后分析时要-1
 		it_TopButtomCreate_end[i] = _topButtomCreate[i].end();
 		it_TopButtomCreate[i] = it_TopButtomCreate_begin[i];
+		TmpCreateEnable[i] = false;
 	}
 	// 3. 平仓n日最高最低点
 	bool TopButtomLeave_HasEnable = false;
+	bool *TmpLeaveEnable = new bool[_tbNumLeave];
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomLeave_begin = new vector<turtleAvgTopButtomData>::iterator[_tbNumLeave];
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomLeave_end = new vector<turtleAvgTopButtomData>::iterator[_tbNumLeave];
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomLeave = new vector<turtleAvgTopButtomData>::iterator[_tbNumLeave];
@@ -214,6 +217,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		it_TopButtomLeave_begin[i] = _topButtomLeave[i].begin()+1; // 第一个数据没有分析价值，之后分析时要-1
 		it_TopButtomLeave_end[i] = _topButtomLeave[i].end();
 		it_TopButtomLeave[i] = it_TopButtomLeave_begin[i];
+		TmpLeaveEnable[i] = false;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	int Count = 0;
@@ -234,22 +238,36 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		for (int i = 0; i < _tbNumCreate; i++) {
 			while (r_it->date > it_TopButtomCreate[i]->date)
 				++it_TopButtomCreate[i];
-			if (r_it->date == it_TopButtomCreate[i]->date) {
-				TopButtomCreate_HasEnable = true;
-			} else {}
+			if (!TopButtomCreate_HasEnable) {
+				if (r_it->date == it_TopButtomCreate[i]->date) {
+					TmpCreateEnable[i] = true;
+					for (int j = 0; j < _tbNumCreate; j++) {
+						if (0 == j)	TopButtomCreate_HasEnable = TmpCreateEnable[j];
+						else		TopButtomCreate_HasEnable = TopButtomCreate_HasEnable && TmpCreateEnable[j];
+					}
+				} else {}
+			}
 		}
 		// 3. 平仓用n日最高最低点
 		for (int i = 0; i < _tbNumLeave; i++) {
 			while (r_it->date > it_TopButtomLeave[i]->date)
 				++it_TopButtomLeave[i];
-			if (r_it->date == it_TopButtomLeave[i]->date) {
-				TopButtomLeave_HasEnable = true;
-			} else {}
+			if (!TopButtomLeave_HasEnable) {
+				if (r_it->date == it_TopButtomLeave[i]->date) {
+					TmpLeaveEnable[i] = true;
+					for (int j = 0; j < _tbNumLeave; j++) {
+						if (0 == j)	TopButtomLeave_HasEnable = TmpLeaveEnable[j];
+						else		TopButtomLeave_HasEnable = TopButtomLeave_HasEnable && TmpLeaveEnable[j];
+					}
+				} else {}
+			}
 		}
 
 		// U = (C * 1%) / (N * 每点价值);
 		// 对于A股， it_N->price为每一股的单价波动，_pointValue = 100（1手为单位），_turtleUnit的单位为（股）
 		_turtleUnit = (int)((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue));
+		printf_s("raw date:%4d-%2d-%2d -> N date:%4d-%2d-%2d, N:%f, unit:%d\n", r_it->date.year, r_it->date.month, r_it->date.day, 
+			it_N->date.year, it_N->date.month, it_N->date.day, it_N->price, _turtleUnit);
 
 		// 冲突处理（交易规则）
 		// 一日内顺序：1.建仓，2.平仓，3.加仓，4.止损
@@ -279,9 +297,11 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	delete []it_TopButtomLeave;
 	delete []it_TopButtomLeave_end;
 	delete []it_TopButtomLeave_begin;
+	delete []TmpLeaveEnable;
 	delete []it_TopButtomCreate;
 	delete []it_TopButtomCreate_end;
 	delete []it_TopButtomCreate_begin;
+	delete []TmpCreateEnable;
 	return &_tradeHistory;
 }
 
@@ -308,7 +328,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 					Trade.price = EntryPrice+_minPoint;
 				}
 				Trade.trade = BUY_UP;
-				Trade.amount = _turtleUnit;
+				Trade.amount = _turtleUnit*100;
 				if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
 					// 显示
 					Trade.ShowThisTradeInfo("建仓");
@@ -347,8 +367,8 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 				Trade.price = ExitPrice-_minPoint;
 			}
 			Trade.trade = SELL_DOWN;
-			Trade.amount = _position.getKeeps();
-			_position.sellAll();
+			Trade.amount = _position.getMount();
+			_position.sellAll(Trade.price);
 			// 显示
 			Trade.ShowThisTradeInfo("平仓");
 			_position.getInfo();
@@ -379,7 +399,7 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 			Trade.price = AddPrice + _minPoint;
 		}
 		Trade.trade = BUY_UP;
-		Trade.amount = _turtleUnit;
+		Trade.amount = _turtleUnit*100;
 		if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
 			// 显示
 			Trade.ShowThisTradeInfo("加仓");
@@ -411,8 +431,8 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 			Trade.price = StopLossPrice - _minPoint;
 		}
 		Trade.trade = STOP_LOSS_SELL_DOWN;
-		Trade.amount = _position.getKeeps();
-		_position.sellAll();
+		Trade.amount = _position.getMount();
+		_position.sellAll(Trade.price);
 		// 显示
 		Trade.ShowThisTradeInfo("止损");
 		_position.getInfo();

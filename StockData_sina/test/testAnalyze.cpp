@@ -62,6 +62,7 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 	alzDailyData.setStockID(testStockID);
 	alzDailyData.ExtractionData(FUQUAN);
 	vector<sinaDailyData> *pData = alzDailyData.getExtractData(); // raw data
+
 // 	getchar();
 	// 1. test 建仓和平仓的TopButtom，平滑波动N
 	// 1.1 param
@@ -69,7 +70,7 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 	int CreateTopButtom[2] = {20, 55};
 	int LeaveTopButtom[2] = {10, 20};
 
-	float TotalMoney = 50000.0f;
+	float TotalMoney = 500000.0f;
 	HoldPosition Chip;
 	Chip.setTotal(TotalMoney);
 	INFO("alzDailyData.turtleAnalyze\n");

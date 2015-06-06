@@ -28,7 +28,7 @@ public:
 
 private:
 	static void _showTradeInfo(const TradingPoint &Trade, const char *s = "") {
-		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s %s @%.2f, mount:%.0f\n", 
+		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s %s @%.2f, mount:%d\n", 
 			Trade.date.year, Trade.date.month, Trade.date.day, s, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
 	}
 
@@ -66,6 +66,7 @@ public:
 		if (_remain > buyPosition) {
 			_keeps += buyPosition;
 			_remain -= buyPosition;
+			_mount += position;
 			return true;
 		} else {
 			ERRR("买入量大于剩余量！\n");
@@ -85,9 +86,10 @@ public:
 	// 什么价卖多少
 	inline bool sell(float price, int position) {
 		float sellPosition = price*(float)position;
-		if (_keeps >sellPosition ) {
+		if (_keeps > sellPosition && _mount >= position) {
 			_keeps -= sellPosition;
 			_remain += sellPosition;
+			_mount -= position;
 			return true;
 		} else {
 			ERRR("卖出量大于持有量！\n");
@@ -104,17 +106,22 @@ public:
 			return false;
 		}
 	}
-	inline void sellAll() {
+	inline void sellAll(float Price) {
+		_keeps = Price*_mount;
+		_total = _keeps + _remain;
 		_keeps = 0.0f;
 		_remain = _total;
+		_mount = 0;
 	}
 
 	inline float getKeeps() {return _keeps;}
+	inline int getMount() {return _mount;}
 	inline float getTotal() {return _total;}
 	inline bool setTotal(float Total) {
 		if (_keeps < Total) {
 			_total = Total;
 			_remain = _total - _keeps;
+			_mount = 0;
 			return true;
 		} else {
 			return false;
@@ -123,7 +130,7 @@ public:
 	inline float getRemain() {return _remain;}
 
 	inline void getInfo() {
-		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,keeps:%.2f,remain:%.2f\n", _total, _keeps, _remain);
+		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,keeps:%.2f,remain:%.2f,mount:%d\n", _total, _keeps, _remain,_mount);
 	}
 	int ShowThisCmp(HoldPosition *hp) {
 		float ThisTotal = _keeps+_remain;
@@ -137,19 +144,28 @@ public:
 		case -1:
 			s = "Down";
 			ratio = (ThisTotal-InTotal)/ThisTotal;
+			break;
 		case 0:
 			s = "Draw";
 			ratio = 0.0;
+			break;
 		case 1:
 			s = "Up";
 			ratio = (InTotal-ThisTotal)/ThisTotal;
+			break;
+		default:
+			s = "Unknown";
+			ratio = 0.0;
+			break;
 		}
-		DYNAMIC_TRACE(POSITION_TRACE, "ThisTotal:%.2f, InTotal:%.2f, %s%.2f\n", ThisTotal, InTotal, s, ratio);
+		DYNAMIC_TRACE(POSITION_TRACE, "ThisTotal:%.2f, InTotal:%.2f, %s%.2f%%\n", ThisTotal, InTotal, s, ratio*100.0f);
 		return ans;
 	}
 
 private:
+	float _getRemain() {return _total - _keeps;}
 	float _total;
 	float _keeps;
 	float _remain;
+	int _mount;
 };
