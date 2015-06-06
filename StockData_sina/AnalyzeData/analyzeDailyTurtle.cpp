@@ -1,6 +1,46 @@
 ﻿#include "analyzeDailyTurtle.h"
 #include "..//Common//TraceMicro.h"
 
+WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue) {
+	_position.setTotal(TotalPosition);
+	_riskRatio = RiskRatio;
+	_pointValue = PointValue;
+	_sendOrderThisBar = false;
+	_lastEntryPrice = 0.0;
+	_turtleUnit = 0;
+	_avgN = 0;
+	_tbNumCreate = 0;
+	_tbNumLeave = 0;
+	_avgTopButtomCreate = nullptr;
+	_topButtomCreate = nullptr;
+	_avgTopButtomLeave = nullptr;
+	_topButtomLeave = nullptr;
+	_minPoint = 1.0f;
+}
+WayOfTurtle::~WayOfTurtle() {
+	if (nullptr != _avgTopButtomCreate)
+		delete []_avgTopButtomCreate;
+	if (nullptr != _topButtomCreate)
+		delete []_topButtomCreate;
+	if (nullptr != _avgTopButtomLeave)
+		delete []_avgTopButtomLeave;
+	if (nullptr != _topButtomLeave)
+		delete []_topButtomLeave;
+}
+
+void WayOfTurtle::InitTopButtom(int NumCreate, int NumLeave) {
+	_tbNumCreate = NumCreate;
+	if (nullptr == _avgTopButtomCreate)
+		_avgTopButtomCreate = new int[NumCreate];
+	if (nullptr == _topButtomCreate)
+		_topButtomCreate = new vector<turtleAvgTopButtomData>[NumCreate];
+	_tbNumLeave = NumLeave;
+	if (nullptr == _avgTopButtomLeave)
+		_avgTopButtomLeave = new int[NumCreate];
+	if (nullptr == _topButtomLeave)
+		_topButtomLeave = new vector<turtleAvgTopButtomData>[NumCreate];
+}
+
 // rawData recent -> previous
 // turtleATRData previou -> recent
 // 历史数据处理，若要时时处理，则要将N前移一位
@@ -15,18 +55,26 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 	// 1. N的平均天数
 	_avgN = avgN;
 	// 2. 建仓的平均天数
-	for (int i = 0; i < tbNumCreate; i++) {
-		_avgTopButtomCreate[i] = avgTopButtomCreate[i];
+	if (_tbNumCreate == tbNumCreate) {
+		for (int i = 0; i < tbNumCreate; i++) {
+			_avgTopButtomCreate[i] = avgTopButtomCreate[i];
+		}
+	} else {
+		ERRR("_tbNumCreate != tbNumCreate\n");
+		return -1;
 	}
-	_tbNumCreate = tbNumCreate;
 	// 3. 平仓的平均天数
-	for (int i = 0; i < tbNumLeave; i++) {
-		_avgTopButtomLeave[i] = avgTopButtomLeave[i];
+	if (_tbNumLeave == tbNumLeave) {
+		for (int i = 0; i < tbNumLeave; i++) {
+			_avgTopButtomLeave[i] = avgTopButtomLeave[i];
+		}
+	} else {
+		ERRR("_tbNumLeave != tbNumLeave\n");
+		return -1;
 	}
-	_tbNumLeave = tbNumLeave;
 	//////////////////////////////////////////////////////////////////////////
 
-	int count = 0;
+	int Count = 0;
 	turtleRawData turtlePrepare;
 	turtleAvgTRData tmpN;
 	memset(&tmpN, 0, sizeof(turtleAvgTRData));
@@ -47,28 +95,27 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 
 		//////////////////////////////////////////////////////////////////////////
 		// 处理ATR平均天数
-		tmpN.date = r_it->date;
 		// 不满一个周期的部分
-		if (count < _avgN) {
+		if (Count < _avgN) {
 			tmpN = tmpN + turtlePrepare;
 			tmpN = tmpN / (float)(_avgN);
-			// count < avgDay[i]-1开始新循环，不存储数据
-			if (count < _avgN-1) {
-				continue;
-			}
 		} else { // 之后的周期部分
 			// N = (19×PDN+TR)/20
 			// TR (True Range) = max(H-L,H-PDC,PDC-L)
 			// 前2*avgDay[i]-1不稳定，之后前avgDay[i]位所占的比重就确定了
 			tmpN = (tmpN*(float)(_avgN-1)+turtlePrepare) / (float)(_avgN);
 		}
-		_N.push_back(tmpN);
+		// count .= avgDay[i]-1时，才开始存储数据
+		if (Count >= _avgN-1) {
+			tmpN.date = r_it->date;
+			_N.push_back(tmpN);
+		}
 
 		//////////////////////////////////////////////////////////////////////////
 		// 处理n天的最高最低点
 		// 1. 建仓时的n日最高点和n是最低点
 		for (int i = 0; i < tbNumCreate; i++) {
-			if (count < avgTopButtomCreate[i]) continue; // 前面不足平均天数的数据直接跳过
+			if (Count < avgTopButtomCreate[i]-1) continue; // 前面不足平均天数的数据直接跳过
 			// 求得周期内的最大，最小值（包括当天的数据）
 			memset(&TopButtom, 0, sizeof(TopButtom));
 			for (int j = 0; j < avgTopButtomCreate[i]; j++) {
@@ -79,11 +126,12 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 					TopButtom.Buttom = getMin((r_it-j)->buttom, TopButtom.Buttom);
 				}
 			}
+			TopButtom.date = r_it->date;
 			_topButtomCreate[i].push_back(TopButtom);
 		}
 		// 2. 平仓时的tbNumLeave
 		for (int i = 0; i < tbNumLeave; i++) {
-			if (count < avgTopButtomLeave[i]) continue; // 前面不足平均天数的数据直接跳过
+			if (Count < avgTopButtomLeave[i]-1) continue; // 前面不足平均天数的数据直接跳过
 			// 求得周期内的最大，最小值（包括当天的数据）
 			memset(&TopButtom, 0, sizeof(TopButtom));
 			for (int j = 0; j < avgTopButtomLeave[i]; j++) {
@@ -94,12 +142,13 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 					TopButtom.Buttom = getMin((r_it-j)->buttom, TopButtom.Buttom);
 				}
 			}
+			TopButtom.date = r_it->date;
 			_topButtomLeave[i].push_back(TopButtom);
 		}
 		//////////////////////////////////////////////////////////////////////////
-		count ++;
+		Count ++;
 	}
-	return count;
+	return Count;
 }
 
 // 注意nDays要和vector<turtleATRData>匹配
@@ -145,7 +194,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	bool N_HasEnable = false;
 	vector<turtleAvgTRData>::iterator it_N_begin = _N.begin()+1;
 	vector<turtleAvgTRData>::iterator it_N_end = _N.end();
-	vector<turtleAvgTRData>::iterator it_N;
+	vector<turtleAvgTRData>::iterator it_N = it_N_begin;
 	// 2. 建仓n日最高最低点
 	bool TopButtomCreate_HasEnable = false;
 	vector<turtleAvgTopButtomData>::iterator *it_TopButtomCreate_begin = new vector<turtleAvgTopButtomData>::iterator[_tbNumCreate];
@@ -154,6 +203,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	for (int i = 0; i < _tbNumCreate; i++) {
 		it_TopButtomCreate_begin[i] = _topButtomCreate[i].begin()+1; // 第一个数据没有分析价值，之后分析时要-1
 		it_TopButtomCreate_end[i] = _topButtomCreate[i].end();
+		it_TopButtomCreate[i] = it_TopButtomCreate_begin[i];
 	}
 	// 3. 平仓n日最高最低点
 	bool TopButtomLeave_HasEnable = false;
@@ -163,9 +213,10 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	for (int i = 0; i < _tbNumLeave; i++) {
 		it_TopButtomLeave_begin[i] = _topButtomLeave[i].begin()+1; // 第一个数据没有分析价值，之后分析时要-1
 		it_TopButtomLeave_end[i] = _topButtomLeave[i].end();
+		it_TopButtomLeave[i] = it_TopButtomLeave_begin[i];
 	}
 	//////////////////////////////////////////////////////////////////////////
-	int count = 0;
+	int Count = 0;
 	TradingPoint tmpTradePoint;
 	// 价格时间数据的迭代器
 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
@@ -176,18 +227,14 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		// 1. 真实波动 N
 		while (r_it->date > it_N->date)
 			++it_N;
-		if (r_it->date < it_N->date)
-			continue;
-		else if (r_it->date == it_N->date) {
+		if (r_it->date == it_N->date) {
 			N_HasEnable = true;
 		} else {}
 		// 2. 建仓用n日最高最低点
 		for (int i = 0; i < _tbNumCreate; i++) {
 			while (r_it->date > it_TopButtomCreate[i]->date)
 				++it_TopButtomCreate[i];
-			if (r_it->date < it_TopButtomCreate[i]->date)
-				continue;
-			else if (r_it->date == it_TopButtomCreate[i]->date) {
+			if (r_it->date == it_TopButtomCreate[i]->date) {
 				TopButtomCreate_HasEnable = true;
 			} else {}
 		}
@@ -195,16 +242,14 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		for (int i = 0; i < _tbNumLeave; i++) {
 			while (r_it->date > it_TopButtomLeave[i]->date)
 				++it_TopButtomLeave[i];
-			if (r_it->date < it_TopButtomLeave[i]->date)
-				continue;
-			else if (r_it->date == it_TopButtomLeave[i]->date) {
+			if (r_it->date == it_TopButtomLeave[i]->date) {
 				TopButtomLeave_HasEnable = true;
 			} else {}
 		}
 
 		// U = (C * 1%) / (N * 每点价值);
-		// 对于A股， it_N->price为每一股的单价波动，_pointValue = 1（1股为单位），_turtleUnit的单位为（股）
-		_turtleUnit = (_position.getTotal()*_riskRatio)/(it_N->price*_pointValue);
+		// 对于A股， it_N->price为每一股的单价波动，_pointValue = 100（1手为单位），_turtleUnit的单位为（股）
+		_turtleUnit = (int)((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue));
 
 		// 冲突处理（交易规则）
 		// 一日内顺序：1.建仓，2.平仓，3.加仓，4.止损
@@ -343,8 +388,9 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 			_lastEntryPrice = Trade.price;
 			_sendOrderThisBar = true;
 			_tradeHistory.push_back(Trade);
+			AddPrice = _lastEntryPrice + 0.5f*N; // （单价/股）
 			Count++;
-		} else {}
+		} else {break;}
 	}
 	return Count;
 }

@@ -40,6 +40,7 @@ public:
 	float price;
 
 	inline turtleAvgTRData operator+ (const turtleRawData &rawData) {
+		// 日期会被0000-00-00复盖
 		turtleAvgTRData ans;
 		ans.price = price + _turtleTR(rawData);
 		return ans;
@@ -78,23 +79,11 @@ private:
 //////////////////////////////////////////////////////////////////////////
 class WayOfTurtle {
 public:
-	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 1.0f) {
-		_position.setTotal(TotalPosition);
-		_riskRatio = RiskRatio; 
-		_pointValue = PointValue; 
-		_sendOrderThisBar = false; 
-		_avgN = 0;
-		_tbNumCreate = 0;
-		_tbNumLeave = 0;
-		_avgTopButtomCreate = nullptr;
-		_topButtomCreate = nullptr;
-		_avgTopButtomLeave = nullptr;
-		_topButtomLeave = nullptr;
-		_minPoint = 0.01f;
-	}
+	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 100.0f);
+	~WayOfTurtle();
 	// 计算N和avgDay内的最高最低点
 	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int tbNumCreate, int *avgTopButtomLeave, int tbNumLeave);
-
+	void InitTopButtom(int NumCreate, int NumLeave);
 	vector<TradingPoint> *GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ int StopLoss);
 
 	// 默认NV的单位为100股的价格，N以股票价格为单位
@@ -138,7 +127,7 @@ private:
 
 	vector<TradingPoint> _tradeHistory;
 	HoldPosition _position;
-	float _turtleUnit;
+	int _turtleUnit;
 	float _riskRatio;
 	float _pointValue; //每点价值，A股中为0.01元
 	float _minPoint; // 加减一个单位，确保能成交

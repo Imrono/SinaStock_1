@@ -53,16 +53,16 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 
 	// 0.1 得到历史数据并存至文件
 	string testStockID = "000333";
-	printf_s("# begin get history data of %s\n", testStockID.c_str());
+	INFO("# begin get history data of %s\n", testStockID.c_str());
 	HistoryData historyData;
-	historyData.StockDailyData(testStockID, NO_FUQUAN);
+	historyData.StockDailyData(testStockID, FUQUAN);
 	// 0.2 提取文件中数据
-	printf_s("# begin to extraction data\n");
+	INFO("# begin to extraction data\n");
 	analyzeDailyData alzDailyData;
 	alzDailyData.setStockID(testStockID);
 	alzDailyData.ExtractionData(FUQUAN);
 	vector<sinaDailyData> *pData = alzDailyData.getExtractData(); // raw data
-
+// 	getchar();
 	// 1. test 建仓和平仓的TopButtom，平滑波动N
 	// 1.1 param
 	int numN = 20;
@@ -72,8 +72,9 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 	float TotalMoney = 50000.0f;
 	HoldPosition Chip;
 	Chip.setTotal(TotalMoney);
+	INFO("alzDailyData.turtleAnalyze\n");
 	vector<TradingPoint> *ans = alzDailyData.turtleAnalyze(numN, CreateTopButtom, 2, LeaveTopButtom, 2, TotalMoney);
-
+	getchar();
 	// 2. test 打印交易过程及盈亏
 	vector<TradingPoint>::iterator it_begin = (*ans).begin();
 	vector<TradingPoint>::iterator it_end = (*ans).end();
@@ -81,7 +82,7 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 		it->ShowThisTradeInfo();
 	}
 	Chip.ShowThisCmp(&alzDailyData.getPosition(TURTLE_ANALYZE));
-
+	getchar();
 	printf_s("######################################\n");
 	printf_s("# Now test Analyze Turtle finished!  #\n");
 	printf_s("######################################\n\n");

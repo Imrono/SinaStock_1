@@ -21,7 +21,7 @@ public:
 	stockDate date;
 	float price;
 	stockTrade trade;
-	float amount;
+	int amount;
 	void ShowThisTradeInfo(const char *s = "") {
 		TradingPoint::_showTradeInfo(*this, s);
 	}
@@ -61,8 +61,8 @@ public:
 	}
 
 	// 什么价钱买多少
-	inline bool buy(float price, float position) {
-		float buyPosition = price*position;
+	inline bool buy(float price, int position) {
+		float buyPosition = price*(float)position;
 		if (_remain > buyPosition) {
 			_keeps += buyPosition;
 			_remain -= buyPosition;
@@ -83,8 +83,8 @@ public:
 		}
 	}
 	// 什么价卖多少
-	inline bool sell(float price, float position) {
-		float sellPosition = price*position;
+	inline bool sell(float price, int position) {
+		float sellPosition = price*(float)position;
 		if (_keeps >sellPosition ) {
 			_keeps -= sellPosition;
 			_remain += sellPosition;
@@ -112,7 +112,7 @@ public:
 	inline float getKeeps() {return _keeps;}
 	inline float getTotal() {return _total;}
 	inline bool setTotal(float Total) {
-		if (_keeps > Total) {
+		if (_keeps < Total) {
 			_total = Total;
 			_remain = _total - _keeps;
 			return true;

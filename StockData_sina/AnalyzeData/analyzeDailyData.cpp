@@ -110,10 +110,16 @@ vector<TradingPoint> *analyzeDailyData::turtleAnalyze(int DaysN, int *CreateTB, 
 	struct AvgTureRange { float ATR; stockDate date;};
 	// 设置总金额
 	_turtle.SetPosition(Chip);
+
 	// 计算N，Top&Buttom
-	_turtle.SetNandTopBottom(*getExtractData(), DaysN, CreateTB, 2, LeaveTB, 2);
+	INFO("SetNandTopBottom\n");
+	_turtle.InitTopButtom(DaysCreateTB, DaysLeaveTB);
+	_turtle.SetNandTopBottom(*getExtractData(), DaysN, CreateTB, DaysCreateTB, LeaveTB, DaysLeaveTB);
+
 	// 交易过程
+	INFO("GetPositionPoint\n");
 	vector<TradingPoint> *ans = _turtle.GetPositionPoint(*getExtractData(), 0);
+
 	if (nullptr == ans)	return nullptr;
 	else				return ans;
 }
