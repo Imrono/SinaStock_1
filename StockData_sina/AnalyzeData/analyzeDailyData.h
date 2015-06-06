@@ -12,6 +12,11 @@ using namespace std;
 #include "analyzeDailyDataAverage.h"
 #include "analyzeDailyTurtle.h"
 
+enum AnalyzeType {
+	TURTLE_ANALYZE = 0,
+	AVERAGE_ANALYZE = 1
+};
+
 class analyzeDailyData
 {
 public:
@@ -30,8 +35,13 @@ public:
 
 	void ExtractionData(getType priceType);
 
-	double turtleAnalyze(stockDate start, stockDate end, int ATRdays, double unit, getType priceType);
+	vector<TradingPoint> *turtleAnalyze(int DaysN, int *CreateTB, int DaysCreateTB, int *LeaveTB, int DaysLeaveTB, float Chip);
 	void averageAnalyze(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
+
+	HoldPosition &getPosition(AnalyzeType tpye) {
+// 		if (TURTLE_ANALYZE == tpye)
+			return _turtle.GetPosition();
+	}
 private:
 	vector<sinaDailyData> *_GetDailyDataFromFile(int year, int data_Jidu, getType priceType);
 

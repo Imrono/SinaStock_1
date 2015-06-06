@@ -105,38 +105,37 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 // 注意nDays要和vector<turtleATRData>匹配
 // vector<turtleATRData>不包含前期不满nDays的数据
 // 止损位 depend 仓位
-void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_out_ HoldPosition &pt, _in_ int StopLoss)
+vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ int StopLoss)
 {
 	// 这些变量可能要定义成接口
-	float maxPosition = pt.getTotal();
 	const float factorN = 0.5f;
 	//////////////////////////////////////////////////////////////////////////
 	// 1. check N
 	if (0 == _N.size() || 0 == _avgN) {
 		ERRR("turtleATRData中不包含数据!\n");
-		return;
+		return nullptr;
 	}
 	// 2. check create Top&Buttom
 	if (0 == _tbNumCreate) {
 		ERRR("turtle Create Position Top&Buttom 中不包含数据!\n");
-		return;
+		return nullptr;
 	} else {
 		for (int i = 0; i < _tbNumCreate; i++) {
 			if (0 == _topButtomCreate[i].size() || 0 == _tbNumCreate) {
 				ERRR("turtle Create Position Top&Buttom[%d]中不包含数据!\n", i);
-				return;
+				return nullptr;
 			}
 		}
 	}
 	// 3. check leave Top&Buttom
 	if (0 == _tbNumLeave) {
 		ERRR("turtle Create Position Top&Buttom 中不包含数据!\n");
-		return;
+		return nullptr;
 	} else {
 		for (int i = 0; i < _tbNumLeave; i++) {
 			if (0 == _topButtomLeave[i].size() || 0 == _tbNumLeave) {
 				ERRR("turtle Leave Position Top&Buttom[%d]中不包含数据!\n", i);
-				return;
+				return nullptr;
 			}
 		}
 	}
@@ -238,7 +237,7 @@ void WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_out_
 	delete []it_TopButtomCreate;
 	delete []it_TopButtomCreate_end;
 	delete []it_TopButtomCreate_begin;
-	return;
+	return &_tradeHistory;
 }
 
 // 只能建一个仓，若有两种指标同时满足，不能同时建两个仓
@@ -249,13 +248,13 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 		return false;
 	}
 
-	float EntryPrice; // 单价/股
+	float EntryPrice; // （单价/股）
 	// 建仓条件：做多突破长期或短期n日的上轨
-	if (1 || _preBreakoutFailure) {			// 附加的条件
+	if (1 || _preBreakoutFailure) {				// 附加的条件
 		// 有一个入场条件满足，就开始建仓
 		for (int i = 0; i < _tbNumCreate; i++) {
 			EntryPrice = (it_TopButtom[i]-1)->Top;
-			if (EntryPrice < today.top) {	// 做多突破长期或短期n日的上轨
+			if (EntryPrice < today.top) {		// 做多突破长期或短期n日的上轨
 				// 操作
 				Trade.date = today.date;
 				if (today.open > EntryPrice) {	// 如果开盘就突破，则直接用开盘价建仓。
@@ -290,11 +289,11 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 		return false;
 	}
 
-	float ExitPrice; // 单价/股
+	float ExitPrice; // （单价/股）
 	// 有一个离场条件满足，就全部平仓
 	for (int i = 0; i < _tbNumLeave; i++) {
 		ExitPrice = (it_TopButtom[i]-1)->Buttom;
-		if (today.buttom < ExitPrice) { // 做多反向突破长期或短期n日的下轨
+		if (today.buttom < ExitPrice) {		// 做多反向突破长期或短期n日的下轨
 			// 操作
 			Trade.date = today.date;
 			if (today.open < ExitPrice) {	// 如果开盘直接反向突破，则直接用开盘价平仓。
@@ -324,7 +323,7 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 	}
 
 	float N = (it_N-1)->price;
-	float AddPrice = _lastEntryPrice + 0.5f*N; // 单价/股
+	float AddPrice = _lastEntryPrice + 0.5f*N; // （单价/股）
 	// 一天可以加多次仓
 	while (today.top > AddPrice) {		// 以突破最高价为标准，可以进行几次增仓
 		// 操作
@@ -356,13 +355,13 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 		return false;
 	}
 	float N = (it_N-1)->price;
-	float StopLossPrice = _lastEntryPrice - 2.0f*N; // 单价/股
+	float StopLossPrice = _lastEntryPrice - 2.0f*N; // （单价/股）
 	if ((today.buttom < StopLossPrice) && _sendOrderThisBar == false) { // 加仓Bar不止损
 		// 操作
 		Trade.date = today.date;
-		if (today.open < StopLossPrice) {		// 如果开盘反射突破2N，则直接用开盘价止损
+		if (today.open < StopLossPrice) {	// 如果开盘反射突破2N，则直接用开盘价止损
 			Trade.price = today.open - _minPoint;
-		} else {										// 正常平仓的情况
+		} else {							// 正常平仓的情况
 			Trade.price = StopLossPrice - _minPoint;
 		}
 		Trade.trade = STOP_LOSS_SELL_DOWN;

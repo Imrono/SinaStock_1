@@ -5,7 +5,9 @@ using namespace std;
 #include "testMonitor.h"
 #include "..//AnalyzeData//analyzeDailyData.h"
 
-void testAnalyzeAverage() {
+void testAnalyzeAverage(bool IsNeedTest) {
+	if (!IsNeedTest) return;
+
 	printf_s("\n######################################\n");
 	printf_s("# Now begin to test Analyze Average! #\n");
 	printf_s("######################################\n\n");
@@ -39,7 +41,9 @@ void testAnalyzeAverage() {
 	printf_s("######################################\n\n");
 }
 
-void testAnalyzeTurtle() {
+void testAnalyzeTurtle(bool IsNeedTest) {
+	if (!IsNeedTest) return;
+
 	printf_s("\n######################################\n");
 	printf_s("# Now begin to test Turtle Average!  #\n");
 	printf_s("######################################\n\n");
@@ -47,14 +51,45 @@ void testAnalyzeTurtle() {
 	getchar();
 	testTime tst_Tm("testAnalyzeTurtle");
 
+	// 0.1 得到历史数据并存至文件
+	string testStockID = "000333";
+	printf_s("# begin get history data of %s\n", testStockID.c_str());
+	HistoryData historyData;
+	historyData.StockDailyData(testStockID, NO_FUQUAN);
+	// 0.2 提取文件中数据
+	printf_s("# begin to extraction data\n");
+	analyzeDailyData alzDailyData;
+	alzDailyData.setStockID(testStockID);
+	alzDailyData.ExtractionData(FUQUAN);
+	vector<sinaDailyData> *pData = alzDailyData.getExtractData(); // raw data
 
+	// 1. test 建仓和平仓的TopButtom，平滑波动N
+	// 1.1 param
+	int numN = 20;
+	int CreateTopButtom[2] = {20, 55};
+	int LeaveTopButtom[2] = {10, 20};
+
+	float TotalMoney = 50000.0f;
+	HoldPosition Chip;
+	Chip.setTotal(TotalMoney);
+	vector<TradingPoint> *ans = alzDailyData.turtleAnalyze(numN, CreateTopButtom, 2, LeaveTopButtom, 2, TotalMoney);
+
+	// 2. test 打印交易过程及盈亏
+	vector<TradingPoint>::iterator it_begin = (*ans).begin();
+	vector<TradingPoint>::iterator it_end = (*ans).end();
+	for (vector<TradingPoint>::iterator it = it_begin; it != it_end; ++it) {
+		it->ShowThisTradeInfo();
+	}
+	Chip.ShowThisCmp(&alzDailyData.getPosition(TURTLE_ANALYZE));
 
 	printf_s("######################################\n");
 	printf_s("# Now test Analyze Turtle finished!  #\n");
 	printf_s("######################################\n\n");
 }
 
-void testOnTimeData() {
+void testOnTimeData(bool IsNeedTest) {
+	if (!IsNeedTest) return;
+
 	HistoryData historyData;
 // 	historyData.URL2Data()
 }

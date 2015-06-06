@@ -78,7 +78,8 @@ private:
 //////////////////////////////////////////////////////////////////////////
 class WayOfTurtle {
 public:
-	WayOfTurtle(float RiskRatio = 0.01f, float PointValue = 1.0f) {
+	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 1.0f) {
+		_position.setTotal(TotalPosition);
 		_riskRatio = RiskRatio; 
 		_pointValue = PointValue; 
 		_sendOrderThisBar = false; 
@@ -94,12 +95,15 @@ public:
 	// 计算N和avgDay内的最高最低点
 	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int tbNumCreate, int *avgTopButtomLeave, int tbNumLeave);
 
-	void GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_out_ HoldPosition &pt, _in_ int StopLoss);
+	vector<TradingPoint> *GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ int StopLoss);
 
 	// 默认NV的单位为100股的价格，N以股票价格为单位
 	static float unitPosition(float N, float unit = 100.0) {return (float)(0.01/(N*unit));}
 
 	vector<turtleAvgTRData> &getN() {return _N;}
+
+	HoldPosition &GetPosition() {return _position;}
+	bool SetPosition(float Total) { return _position.setTotal(Total);}
 
 private:
 	// 目前只考虑多头情况

@@ -10,7 +10,10 @@ enum stockTrade {
 	BUY_COVER = 3,
 	// 止损
 	STOP_LOSS_SELL_DOWN = 4,
-	STOP_LOSS_BUY_COVER = 5
+	STOP_LOSS_BUY_COVER = 5,
+
+	// 初始量
+	ORIGIN = 6
 };
 
 struct TradingPoint {
@@ -108,12 +111,43 @@ public:
 
 	inline float getKeeps() {return _keeps;}
 	inline float getTotal() {return _total;}
-	inline float setTotal(float total) {_total = total;}
+	inline bool setTotal(float Total) {
+		if (_keeps > Total) {
+			_total = Total;
+			_remain = _total - _keeps;
+			return true;
+		} else {
+			return false;
+		}
+	}
 	inline float getRemain() {return _remain;}
 
 	inline void getInfo() {
-		DYNAMIC_TRACE(POSITION_TRACE, "total:%2f,keeps:%2f,remain:%2f\n", _total, _keeps, _remain);
+		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,keeps:%.2f,remain:%.2f\n", _total, _keeps, _remain);
 	}
+	int ShowThisCmp(HoldPosition *hp) {
+		float ThisTotal = _keeps+_remain;
+		float InTotal = hp->getKeeps()+hp->getRemain();
+		int ans = InTotal > ThisTotal ?
+				  1 : InTotal == ThisTotal ?
+				  0 : -1;
+		char *s;
+		float ratio;
+		switch (ans) {
+		case -1:
+			s = "Down";
+			ratio = (ThisTotal-InTotal)/ThisTotal;
+		case 0:
+			s = "Draw";
+			ratio = 0.0;
+		case 1:
+			s = "Up";
+			ratio = (InTotal-ThisTotal)/ThisTotal;
+		}
+		DYNAMIC_TRACE(POSITION_TRACE, "ThisTotal:%.2f, InTotal:%.2f, %s%.2f\n", ThisTotal, InTotal, s, ratio);
+		return ans;
+	}
+
 private:
 	float _total;
 	float _keeps;

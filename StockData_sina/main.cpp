@@ -27,13 +27,12 @@ int main()
 
 	getTraceConfigFromFile();
 	for (int i = 0; i < NUM_TRACES; i++) {
-		STATIC_TRACE(i, "static trace(%d) %s ok!!\n", i, "test");
-		DYNAMIC_TRACE(i, "dynamic trace(%d) %s ok!!\n", i, "test");
+		STATIC_TRACE(i, "(on) static trace(%d) %s ok!!\n", i, "test");
+		DYNAMIC_TRACE(i, "(on) dynamic trace(%d) %s ok!!\n", i, "test");
 	}
 
-	testAnalyzeAverage();
-	getchar();
-	testAnalyzeTurtle();
+	testAnalyzeAverage(false);
+	testAnalyzeTurtle(true);
 	getchar();
 
 //////////////////////////////////////////////////////////////////////////

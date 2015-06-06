@@ -2,8 +2,8 @@
 #define TEST_ANALYZE_AVERAGE_H
 
 
-void testAnalyzeAverage();
-void testAnalyzeTurtle();
+void testAnalyzeAverage(bool IsNeedTest);
+void testAnalyzeTurtle(bool IsNeedTest);
 
-void testOnTimeData();
+void testOnTimeData(bool IsNeedTest);
 #endif

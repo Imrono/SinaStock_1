@@ -7,4 +7,5 @@ char *TradingPoint::stockTradeStr[] = {	"BUY_UP",
 									"BUY_COVER",
 									// 止损
 									"STOP_LOSS_SELL_DOWN",
-									"STOP_LOSS_BUY_COVER"};
+									"STOP_LOSS_BUY_COVER",
+									"ORIGIN"};

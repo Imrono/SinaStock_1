@@ -103,14 +103,18 @@ void analyzeDailyData::averageAnalyze(int *avgDay, float **avgWeight, vector<ave
    ATR : average TR
    N = (19×PDN+TR)/20  PDN : yesterday's N
 /********************************************************************************/
-double analyzeDailyData::turtleAnalyze(stockDate start, stockDate end, int ATRdays, double unit, getType priceType) {
-	struct AvgTureRange { float ATR; stockDate date;};
-	if (0 == _vecExtractData.size())
-		ExtractionData(priceType);
+vector<TradingPoint> *analyzeDailyData::turtleAnalyze(int DaysN, int *CreateTB, int DaysCreateTB, int *LeaveTB, int DaysLeaveTB, float Chip) {
+// 	// 只处理复权数据
+// 	if (FUQUAN != priceType) return 0.0;
 
-	int avgDay[2] = {20,55};
-// 	vector<turtleATRData> N[2];
-// 	_turtle.SetNandTopBottom(*getExtractData(), avgDay, 2);
-	return 0.0;
+	struct AvgTureRange { float ATR; stockDate date;};
+	// 设置总金额
+	_turtle.SetPosition(Chip);
+	// 计算N，Top&Buttom
+	_turtle.SetNandTopBottom(*getExtractData(), DaysN, CreateTB, 2, LeaveTB, 2);
+	// 交易过程
+	vector<TradingPoint> *ans = _turtle.GetPositionPoint(*getExtractData(), 0);
+	if (nullptr == ans)	return nullptr;
+	else				return ans;
 }
 //////////////////////////////////////////////////////////////////////////
