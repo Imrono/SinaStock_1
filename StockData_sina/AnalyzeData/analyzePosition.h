@@ -22,6 +22,11 @@ struct TradingPoint {
 		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s %s @%.2f, mount:%.0f\n", 
 			Trade.date.year, Trade.date.month, Trade.date.day, s, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
 	}
+	static void ShowTradeInfo(const TradingPoint &Trade) {
+		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s @%.2f, mount:%.0f\n", 
+			Trade.date.year, Trade.date.month, Trade.date.day, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
+	}
+
 	static char *stockTradeStr[];
 };
 
@@ -93,6 +98,10 @@ public:
 			ERRR("卖出量大于持有量！\n");
 			return false;
 		}
+	}
+	inline void sellAll() {
+		_keeps = 0.0f;
+		_remain = _total;
 	}
 
 	inline float getKeeps() {return _keeps;}

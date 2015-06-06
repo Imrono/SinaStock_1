@@ -95,7 +95,7 @@ IF BARPOS >=hn THEN
 BEGIN
 	IF BARPOS=hn THEN
 		IF DayCount=hn/2 OR BARPOS=hn THEN
-			BEGIN{hn/2天调整N值}
+		BEGIN{hn/2天调整N值}
 			N:=((hn-1)*N+TR)/hn;{计算N值}
 			DayCount:=2;
 		END
@@ -116,7 +116,7 @@ BEGIN
 				dk:=1;
 				多开1:BUY(1,HOW,STOP,BUYHHV);{在20日新高STOP指令买进}
 			END;
-  
+
 			IF low=sellshortllv then
 				begin
 				dk:=-1;
@@ -169,11 +169,11 @@ BEGIN
 				END
 			END
 
-		IF ENTERPRICE+2*N then
-			sellSHORT(1,100%,STOP,BUYSHORTHHV);
-		ELSE
-			sellSHORT(1,100%,STOP,ENTERPRICE+2*N);
-		END;
-	END
+			IF ENTERPRICE+2*N then
+				sellSHORT(1,100%,STOP,BUYSHORTHHV);
+			ELSE
+				sellSHORT(1,100%,STOP,ENTERPRICE+2*N);
+			END;
+		END
     
 END;

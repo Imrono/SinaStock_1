@@ -251,24 +251,26 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 	// 已经有了持仓就不再建立
 	if (_position.getKeeps() > g_EPS) return false;
 	float EntryPrice;
-	// 建仓条件 1.有剩余头寸 2.现在不持有头寸 3.做多突破长期或短期n日的上轨
-	if (_position.getTotal() > 1.0f &&			// 1.有剩余头寸
-		_position.getKeeps() < g_EPS &&			// 2.现在不持有头寸
-		(1 || _preBreakoutFailure)) {			// 4.附加的条件
+	// 建仓条件 1.现在不持有头寸 2.做多突破长期或短期n日的上轨
+	if (_position.getKeeps() < g_EPS &&			// 1.现在不持有头寸
+		(1 || _preBreakoutFailure)) {			// 3.附加的条件
 		// 有一个入场条件满足，就开始建仓
 		for (int i = 0; i < _tbNumCreate; i++) {
 			if (DataEnable) {
 				EntryPrice = (it_TopButtom[i]-1)->Top;
-				if (EntryPrice < today.top) { // 3.做多突破长期或短期n日的上轨
+				if (EntryPrice < today.top) { // 2.做多突破长期或短期n日的上轨
 					Trade.date = today.date;
 					Trade.price = EntryPrice;
 					Trade.trade = BUY_UP;
 					Trade.amount = _turtleUnit;
-					_position.buy(Trade.price, Trade.amount);
-					_sendOrderThisBar = true;
-					_tradeHistory.push_back(Trade);
-					TradingPoint::ShowTradeInfo(Trade, "建仓");
-					return true;
+					if (_position.buy(Trade.price, Trade.amount)) { // 检查有剩余头寸
+						_sendOrderThisBar = true;
+						_tradeHistory.push_back(Trade);
+						TradingPoint::ShowTradeInfo(Trade, "建仓");
+						return true;
+					} else { // 没有足够余额
+						return false;
+					}
 				}
 			} else continue; // !DataEnable
 		}
@@ -286,7 +288,7 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 			Trade.trade = SELL_DOWN;
 			Trade.amount = _position.getKeeps();
 			_lastEntryPrice = Trade.price;
-			_position.sell(Trade.price, Trade.amount);
+			_position.sellAll();
 			TradingPoint::ShowTradeInfo(Trade, "平仓");
 			_tradeHistory.push_back(Trade);
 			return true;
@@ -304,10 +306,11 @@ void WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sin
 			Trade.trade = BUY_UP;
 			Trade.amount = _turtleUnit;
 			_lastEntryPrice = Trade.price;
-			_position.buy(Trade.price, Trade.amount);
-			TradingPoint::ShowTradeInfo(Trade, "加仓");
-			_sendOrderThisBar = true;
-			_tradeHistory.push_back(Trade);
+			if (_position.buy(Trade.price, Trade.amount)) { // 1.有剩余头寸
+				TradingPoint::ShowTradeInfo(Trade, "加仓");
+				_sendOrderThisBar = true;
+				_tradeHistory.push_back(Trade);
+			}
 		}
 		// 一天可以加多次仓
 		while (today.top >= _lastEntryPrice-g_EPS + 0.5f*N)// 以最高价为标准，判断能进行几次增仓
@@ -317,10 +320,11 @@ void WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sin
 			Trade.trade = BUY_UP;
 			Trade.amount = _turtleUnit;
 			_lastEntryPrice = Trade.price;
-			_position.buy(Trade.price, Trade.amount);
-			TradingPoint::ShowTradeInfo(Trade, "平仓");
-			_sendOrderThisBar = true;
-			_tradeHistory.push_back(Trade);
+			if (_position.buy(Trade.price, Trade.amount)) { // 1.有剩余头寸
+				TradingPoint::ShowTradeInfo(Trade, "加仓");
+				_sendOrderThisBar = true;
+				_tradeHistory.push_back(Trade);
+			}
 		}
 	}
 }
@@ -333,11 +337,11 @@ void WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 	float N = (it_N-1)->price;
 	if (today.buttom <= (_lastEntryPrice-g_EPS - 2.0f*N) && _sendOrderThisBar == false) { // 加仓Bar不止损
 		Trade.date = today.date;
-		Trade.price = _lastEntryPrice - 2.0f * N;
+		Trade.price = _lastEntryPrice - 2.0f*N;
 		Trade.trade = STOP_LOSS_SELL_DOWN;
 		Trade.amount = _position.getKeeps();
-		_position.sell(Trade.price, Trade.amount);
-			TradingPoint::ShowTradeInfo(Trade, "止损");
+		_position.sellAll();
+		TradingPoint::ShowTradeInfo(Trade, "止损");
 		_preBreakoutFailure = true;
 		_tradeHistory.push_back(Trade);
 	}
