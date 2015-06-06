@@ -11,19 +11,22 @@ using namespace std;
 #define ANALYZE_TRACE	4
 #define PROGRESS_TRACE	5
 #define TRADE_TRACE		6
+#define POSITION_TRACE	7
 #define DATA_TRACE		8
 
 #define NUM_TRACES		9
 #define TRACE_CONFIG_BUF_SIZE	128
 
-#define TRACE_NAME_TABLE(n) ( \
-		   0 == n ? "URL: " \
+#define TRACE_NAME_TABLE(n) \
+		  (0 == n ? "URL: " \
 		: (1 == n ? "CALLBACK: " \
 		: (2 == n ? "ASYN_WAIT: " \
 		: (3 == n ? "FILE: " \
 		: (4 == n ? "ANALYZE: " \
 		: (5 == n ? "PROGRESS: " \
-		: "UNEXPECT: "))))))
+		: (6 == n ? "TRADE: " \
+		: (7 == n ? "POSITION: " \
+		: "UNEXPECT: " /*0*/)/*1*/)/*2*/)/*3*/)/*4*/)/*5*/)/*6*/)/*7*/)
 
 #ifdef _DEBUG
 #define STATIC_TRACE(n, ...) \

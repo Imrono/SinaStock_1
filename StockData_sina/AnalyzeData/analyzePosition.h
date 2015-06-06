@@ -14,17 +14,19 @@ enum stockTrade {
 };
 
 struct TradingPoint {
+public:
 	stockDate date;
 	float price;
 	stockTrade trade;
 	float amount;
-	static void ShowTradeInfo(const TradingPoint &Trade, const char *s) {
+	void ShowThisTradeInfo(const char *s = "") {
+		TradingPoint::_showTradeInfo(*this, s);
+	}
+
+private:
+	static void _showTradeInfo(const TradingPoint &Trade, const char *s = "") {
 		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s %s @%.2f, mount:%.0f\n", 
 			Trade.date.year, Trade.date.month, Trade.date.day, s, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
-	}
-	static void ShowTradeInfo(const TradingPoint &Trade) {
-		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s @%.2f, mount:%.0f\n", 
-			Trade.date.year, Trade.date.month, Trade.date.day, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
 	}
 
 	static char *stockTradeStr[];
@@ -110,7 +112,7 @@ public:
 	inline float getRemain() {return _remain;}
 
 	inline void getInfo() {
-		INFO("total:%3f,keeps:%3f,remain:%3f\n", _total, _keeps, _remain);
+		DYNAMIC_TRACE(POSITION_TRACE, "total:%2f,keeps:%2f,remain:%2f\n", _total, _keeps, _remain);
 	}
 private:
 	float _total;

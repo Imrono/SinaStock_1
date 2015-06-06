@@ -89,7 +89,7 @@ public:
 		_topButtomCreate = nullptr;
 		_avgTopButtomLeave = nullptr;
 		_topButtomLeave = nullptr;
-		_minPoint = 1.0f;
+		_minPoint = 0.01f;
 	}
 	// 计算N和avgDay内的最高最低点
 	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int tbNumCreate, int *avgTopButtomLeave, int tbNumLeave);
@@ -103,10 +103,10 @@ public:
 
 private:
 	// 目前只考虑多头情况
-	bool _CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, bool DataEnable, const sinaDailyData &today, TradingPoint &Trade);
+	bool _CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade);
 	bool _ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade);
-	void _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
-	void _StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
+	int _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
+	bool _StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 
 	bool _HasPosition() { return _position.getKeeps() > g_EPS;}
 
@@ -128,16 +128,16 @@ private:
 	int *_avgTopButtomLeave;
 	vector<turtleAvgTopButtomData> *_topButtomLeave; // 本日的数据也计算在内
 
-	float _lastEntryPrice;
+	float _lastEntryPrice; // 最近一次买入价
 	bool _sendOrderThisBar; // 同一天内加仓就不止损
-	bool _preBreakoutFailure; // 是否有止损
+	bool _preBreakoutFailure; // 是否有止损，用于判断止损后还要不要建仓
 
 	vector<TradingPoint> _tradeHistory;
 	HoldPosition _position;
 	float _turtleUnit;
 	float _riskRatio;
-	float _pointValue;
-	float _minPoint;
+	float _pointValue; //每点价值，A股中为0.01元
+	float _minPoint; // 加减一个单位，确保能成交
 };
 
 #endif
