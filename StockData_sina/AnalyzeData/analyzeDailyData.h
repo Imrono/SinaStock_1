@@ -35,7 +35,7 @@ public:
 
 	void ExtractionData(getType priceType);
 
-	vector<TradingPoint> *turtleAnalyze(int DaysN, int *CreateTB, int DaysCreateTB, int *LeaveTB, int DaysLeaveTB, float Chip);
+	vector<TradingPoint> *turtleAnalyze(int DaysN, int *CreateTB, int *LeaveTB, int DaysTB, float Chip);
 	void averageAnalyze(int *avgDay, float **avgWeight, vector<averageData> *avgData, int avgNum);
 
 	HoldPosition &getPosition(AnalyzeType tpye) {

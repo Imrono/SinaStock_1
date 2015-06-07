@@ -1,8 +1,12 @@
 ﻿#include "stock2fpTable.h"
 
 int stockFile::openedFiles = 0;
-void stockFile::getFiles(string path, vector<string>& files)
+void stockFile::getFiles(string path, vector<string>& files, const char *suffix)
 {  
+	int SuffixLength = 0;
+	if (nullptr != suffix) {
+		SuffixLength = strlen(suffix);
+	}
 	long hFile = 0;
 	struct _finddata_t fileinfo;
 	string p;
@@ -11,9 +15,22 @@ void stockFile::getFiles(string path, vector<string>& files)
 		do {
 			if((fileinfo.attrib &  _A_SUBDIR)) {	//if directory, iterate
 				if(strcmp(fileinfo.name,".") != 0  &&  strcmp(fileinfo.name,"..") != 0)
-					getFiles(p.assign(path).append("\\").append(fileinfo.name), files);
+					getFiles(p.assign(path).append("\\").append(fileinfo.name), files, suffix);
 			} else {			//if not directory, add it
-				files.push_back(p.assign(path).append("\\").append(fileinfo.name));
+				if (nullptr == suffix) {
+					files.push_back(p.assign(path).append("\\").append(fileinfo.name));
+				} else {
+					const char *tmp = fileinfo.name;
+					const char *ans = ""; // file does not contain ext
+					while (*tmp) {
+						if (!memcmp(".", tmp, sizeof(char)))
+							ans = tmp;
+						tmp ++;
+					}
+					if (!memcmp(suffix, ans, SuffixLength)) {
+						files.push_back(p.assign(path).append("\\").append(fileinfo.name));
+					}
+				}
 			}
 		}while(_findnext(hFile, &fileinfo)  == 0);
 		_findclose(hFile);

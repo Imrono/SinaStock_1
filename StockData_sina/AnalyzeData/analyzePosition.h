@@ -22,14 +22,15 @@ public:
 	float price;
 	stockTrade trade;
 	int amount;
+	int tmpData;
 	void ShowThisTradeInfo(const char *s = "") {
 		TradingPoint::_showTradeInfo(*this, s);
 	}
 
 private:
 	static void _showTradeInfo(const TradingPoint &Trade, const char *s = "") {
-		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s %s @%.2f, mount:%d\n", 
-			Trade.date.year, Trade.date.month, Trade.date.day, s, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
+		DYNAMIC_TRACE(TRADE_TRACE, "date:%4d-%2d-%2d -> %s(%2d) %s @%.2f, mount:%d\n", 
+			Trade.date.year, Trade.date.month, Trade.date.day, s, Trade.tmpData, stockTradeStr[Trade.trade], Trade.price, Trade.amount);
 	}
 
 	static char *stockTradeStr[];

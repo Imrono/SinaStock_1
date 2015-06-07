@@ -82,8 +82,9 @@ public:
 	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 100.0f);
 	~WayOfTurtle();
 	// 计算N和avgDay内的最高最低点
-	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int tbNumCreate, int *avgTopButtomLeave, int tbNumLeave);
-	void InitTopButtom(int NumCreate, int NumLeave);
+	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int *avgTopButtomLeave, int tbNum);
+	void InitTopButtom(int TbNum);
+	void Clear();
 	vector<TradingPoint> *GetPositionPoint(_in_ vector<sinaDailyData> &rawData, _in_ int StopLoss);
 
 	// 默认NV的单位为100股的价格，N以股票价格为单位
@@ -114,12 +115,12 @@ private:
 	int _avgN;
 	vector<turtleAvgTRData> _N; // 本日的数据也计算在内
 	// 建仓信息Comein与离场信息Leave应该一一对应
-	int _tbNumCreate;
+	int _tbNum;
+	bool *_witchTopButtom;
 	int *_avgTopButtomCreate;
 	vector<turtleAvgTopButtomData> *_topButtomCreate; // 本日的数据也计算在内
-	int _tbNumLeave;
 	int *_avgTopButtomLeave;
-	vector<turtleAvgTopButtomData> *_topButtomLeave; // 本日的数据也计算在内
+	vector<turtleAvgTopButtomData> *_topButtomLeave;  // 本日的数据也计算在内
 
 	float _lastEntryPrice; // 最近一次买入价
 	bool _sendOrderThisBar; // 同一天内加仓就不止损

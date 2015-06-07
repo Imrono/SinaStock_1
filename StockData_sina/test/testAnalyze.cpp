@@ -63,6 +63,14 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 	alzDailyData.ExtractionData(FUQUAN);
 	vector<sinaDailyData> *pData = alzDailyData.getExtractData(); // raw data
 
+// 	vector<sinaDailyData> rawData = *pData;
+// 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
+// 	vector<sinaDailyData>::reverse_iterator r_it_end = rawData.rend();
+// 	for (vector<sinaDailyData>::reverse_iterator r_it = r_it_begin; r_it != r_it_end; ++r_it) {
+// 		printf_s("(raw date:%4d-%2d-%2d) open:%.3f, top:%.3f, close:%.3f, buttom:%.3f\n", r_it->date.year, r_it->date.month, r_it->date.day, 
+// 			r_it->open, r_it->top, r_it->close, r_it->buttom);
+// 	}
+
 // 	getchar();
 	// 1. test 建仓和平仓的TopButtom，平滑波动N
 	// 1.1 param
@@ -74,7 +82,7 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 	HoldPosition Chip;
 	Chip.setTotal(TotalMoney);
 	INFO("alzDailyData.turtleAnalyze\n");
-	vector<TradingPoint> *ans = alzDailyData.turtleAnalyze(numN, CreateTopButtom, 2, LeaveTopButtom, 2, TotalMoney);
+	vector<TradingPoint> *ans = alzDailyData.turtleAnalyze(numN, CreateTopButtom, LeaveTopButtom, 2, TotalMoney);
 	getchar();
 	// 2. test 打印交易过程及盈亏
 	vector<TradingPoint>::iterator it_begin = (*ans).begin();

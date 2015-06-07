@@ -61,7 +61,7 @@ void analyzeDailyData::ExtractionData(getType priceType) {
 	// get file information to status
 	stockHistoryStatus status;
 	vector<string> files;
-	stockFile::getFiles(tmp, files);
+	stockFile::getFiles(tmp, files, pt);
 	string id;
 	// For all files of one stock
 	// [*]recent -> previous
@@ -103,7 +103,7 @@ void analyzeDailyData::averageAnalyze(int *avgDay, float **avgWeight, vector<ave
    ATR : average TR
    N = (19×PDN+TR)/20  PDN : yesterday's N
 /********************************************************************************/
-vector<TradingPoint> *analyzeDailyData::turtleAnalyze(int DaysN, int *CreateTB, int DaysCreateTB, int *LeaveTB, int DaysLeaveTB, float Chip) {
+vector<TradingPoint> *analyzeDailyData::turtleAnalyze(int DaysN, int *CreateTB, int *LeaveTB, int DaysTB, float Chip) {
 // 	// 只处理复权数据
 // 	if (FUQUAN != priceType) return 0.0;
 
@@ -113,8 +113,8 @@ vector<TradingPoint> *analyzeDailyData::turtleAnalyze(int DaysN, int *CreateTB, 
 
 	// 计算N，Top&Buttom
 	INFO("SetNandTopBottom\n");
-	_turtle.InitTopButtom(DaysCreateTB, DaysLeaveTB);
-	_turtle.SetNandTopBottom(*getExtractData(), DaysN, CreateTB, DaysCreateTB, LeaveTB, DaysLeaveTB);
+	_turtle.InitTopButtom(DaysTB);
+	_turtle.SetNandTopBottom(*getExtractData(), DaysN, CreateTB, LeaveTB, DaysTB);
 
 	// 交易过程
 	INFO("GetPositionPoint\n");

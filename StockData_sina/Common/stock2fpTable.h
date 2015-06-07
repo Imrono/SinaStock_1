@@ -72,7 +72,7 @@ public:
 	static bool IsAccessable(const char *path) {
 		return -1 != _access(path, 0);	//#define F_OK 0 /* Test for existence. */
 	}
-	static void getFiles(string path, vector<string>& files);
+	static void getFiles(string path, vector<string>& files, const char *suffix = nullptr);
 	static bool createFile(string path);
 	static bool FileWriteTime(string path, SYSTEMTIME &s_t);
 
