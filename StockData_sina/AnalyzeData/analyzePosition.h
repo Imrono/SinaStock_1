@@ -44,6 +44,8 @@ public:
 		_total = total;
 		_remain = 0.0f;
 		_keeps = 0.0f;
+		_mount = 0;
+		_lastTotal = 0.0f;
 	}
 	// 增加资金
 	inline void add (float money) {
@@ -62,22 +64,14 @@ public:
 	}
 
 	// 什么价钱买多少
-	inline bool buy(float price, int position) {
-		float buyPosition = price*(float)position;
-		if (_remain > buyPosition) {
-			_keeps += buyPosition;
-			_remain -= buyPosition;
-			_mount += position;
-			return true;
-		} else {
-			ERRR("买入量大于剩余量！\n");
-			return false;
-		}
-	}
-	inline bool buy(float buyPosition) {
-		if (_remain > buyPosition) {
-			_keeps += buyPosition;
-			_remain -= buyPosition;
+	inline bool buy(float Price, int Position) {
+		float BuyPosition = Price*(float)Position;
+		if (_remain > BuyPosition) {
+			_lastTotal = _total;
+			_keeps = (float)_mount*Price + BuyPosition;
+			_remain -= BuyPosition;
+			_mount += Position;
+			_total = _keeps + _remain;
 			return true;
 		} else {
 			ERRR("买入量大于剩余量！\n");
@@ -85,22 +79,14 @@ public:
 		}
 	}
 	// 什么价卖多少
-	inline bool sell(float price, int position) {
-		float sellPosition = price*(float)position;
-		if (_keeps > sellPosition && _mount >= position) {
-			_keeps -= sellPosition;
-			_remain += sellPosition;
-			_mount -= position;
-			return true;
-		} else {
-			ERRR("卖出量大于持有量！\n");
-			return false;
-		}
-	}
-	inline bool sell(float sellPosition) {
-		if (_keeps >sellPosition ) {
-			_keeps -= sellPosition;
-			_remain += sellPosition;
+	inline bool sell(float Price, int Position) {
+		float SellPosition = Price*(float)Position;
+		if (_keeps > SellPosition && _mount >= Position) {
+			_lastTotal = _total;
+			_keeps = (float)_mount*Price - SellPosition;
+			_remain += SellPosition;
+			_mount -= Position;
+			_total = _keeps + _remain;
 			return true;
 		} else {
 			ERRR("卖出量大于持有量！\n");
@@ -108,6 +94,7 @@ public:
 		}
 	}
 	inline void sellAll(float Price) {
+		_lastTotal = _total;
 		_keeps = Price*_mount;
 		_total = _keeps + _remain;
 		_keeps = 0.0f;
@@ -123,6 +110,7 @@ public:
 			_total = Total;
 			_remain = _total - _keeps;
 			_mount = 0;
+			_lastTotal = 0.0f;
 			return true;
 		} else {
 			return false;
@@ -164,9 +152,12 @@ public:
 	}
 
 private:
-	float _getRemain() {return _total - _keeps;}
-	float _total;
-	float _keeps;
-	float _remain;
-	int _mount;
+	void _setLastTotal(float Price) {
+		_lastTotal = _remain + _mount*Price;
+	}
+	float _total; // 总资产
+	float _keeps; // 现有市值
+	float _remain; // 可用余额
+	int _mount; // 持有总数
+	float _lastTotal; // 交易前总资产记录
 };

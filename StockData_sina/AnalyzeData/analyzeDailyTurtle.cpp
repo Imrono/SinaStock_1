@@ -435,7 +435,7 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 			Trade.price = AddPrice + _minPoint;
 		}
 		Trade.trade = BUY_UP;
-		Trade.tmpData = 0;
+		Trade.tmpData = -1;
 		Trade.amount = _turtleUnit*100;
 		if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
 			// 显示
@@ -468,7 +468,7 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 			Trade.price = StopLossPrice - _minPoint;
 		}
 		Trade.trade = STOP_LOSS_SELL_DOWN;
-		Trade.tmpData = 0;
+		Trade.tmpData = -2;
 		Trade.amount = _position.getMount();
 		_position.sellAll(Trade.price);
 		// 显示
