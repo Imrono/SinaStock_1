@@ -79,7 +79,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 class WayOfTurtle {
 public:
-	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 100.0f);
+	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.005f, float PointValue = 100.0f);
 	~WayOfTurtle();
 	// 计算N和avgDay内的最高最低点
 	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int *avgTopButtomLeave, int tbNum);

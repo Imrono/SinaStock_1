@@ -22,7 +22,7 @@ public:
 	float price;
 	stockTrade trade;
 	int amount;
-	int tmpData;
+	int tmpData; // 辅助数据，如突破哪条均线
 	void ShowThisTradeInfo(const char *s = "") {
 		TradingPoint::_showTradeInfo(*this, s);
 	}
@@ -46,44 +46,53 @@ public:
 		_keeps = 0.0f;
 		_mount = 0;
 		_lastTotal = 0.0f;
+		_buyCount = 0;
 	}
 	// 增加资金
-	inline void add (float money) {
+	inline float add (float money) {
 		_total += money;
 		_remain += money;
+		return _total;
 	}
-
 	// 减少资金
 	inline float sub(float money) {
-		if (_remain < money) return false;
-		else {
+		if (_remain >= money) {
 			_total -= money;
 			_remain -= money;
-			return true;
 		}
+		return _total;
+	}
+	// 最大买入次数
+	inline void setMaxBuyCount(int MaxBuyCount) {
+		_maxBuyCount = MaxBuyCount;
 	}
 
 	// 什么价钱买多少
 	inline bool buy(float Price, int Position) {
 		float BuyPosition = Price*(float)Position;
-		if (_remain > BuyPosition) {
+		if (_remain >= BuyPosition && _buyCount <= _maxBuyCount) {
 			_lastTotal = _total;
 			_keeps = (float)_mount*Price + BuyPosition;
 			_remain -= BuyPosition;
 			_mount += Position;
 			_total = _keeps + _remain;
+			_buyCount ++;
 			return true;
 		} else {
-			ERRR("买入量大于剩余量！\n");
+			if (_buyCount > _maxBuyCount)
+				INFO("超过最大买入次数%d\n", _maxBuyCount);
+			else
+				INFO("买入量%.2f大于剩余量%.2f。买入次数%d\n", BuyPosition, _remain, _buyCount);
 			return false;
 		}
 	}
 	// 什么价卖多少
 	inline bool sell(float Price, int Position) {
-		float SellPosition = Price*(float)Position;
-		if (_keeps > SellPosition && _mount >= Position) {
+		if (_mount >= Position) {
 			_lastTotal = _total;
-			_keeps = (float)_mount*Price - SellPosition;
+			float SellPosition = Price*(float)Position;
+			if (_mount == Position)	_keeps = 0.0f;
+			else					_keeps = (float)_mount*Price - SellPosition;
 			_remain += SellPosition;
 			_mount -= Position;
 			_total = _keeps + _remain;
@@ -94,29 +103,38 @@ public:
 		}
 	}
 	inline void sellAll(float Price) {
-		_lastTotal = _total;
-		_keeps = Price*_mount;
-		_total = _keeps + _remain;
-		_keeps = 0.0f;
-		_remain = _total;
-		_mount = 0;
+		sell(Price, _mount);
+		_buyCount = 0;
+		showUPorDOWN();
 	}
 
+	void showUPorDOWN() {
+		DYNAMIC_TRACE(POSITION_TRACE, "lastTotal:%.2f, Total:%.2f, %s:%.2f%%\n", _lastTotal, _total
+			, _total>_lastTotal ? "UP" : "DOWN", (_total>_lastTotal ? (_total-_lastTotal) : (_lastTotal-_total))/_lastTotal*100.0f);
+	}
 	inline float getKeeps() {return _keeps;}
-	inline int getMount() {return _mount;}
+	inline int   getMount() {return _mount;}
 	inline float getTotal() {return _total;}
+	inline float getRemain() {return _remain;}
+	inline float updateTotal(float Price) {
+		_lastTotal = _total;
+		_total = _remain + Price*(float)_mount;
+		showUPorDOWN();
+		return _total;
+	}
+
 	inline bool setTotal(float Total) {
 		if (_keeps < Total) {
 			_total = Total;
 			_remain = _total - _keeps;
 			_mount = 0;
 			_lastTotal = 0.0f;
+
 			return true;
 		} else {
 			return false;
 		}
 	}
-	inline float getRemain() {return _remain;}
 
 	inline void getInfo() {
 		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,keeps:%.2f,remain:%.2f,mount:%d\n", _total, _keeps, _remain,_mount);
@@ -160,4 +178,6 @@ private:
 	float _remain; // 可用余额
 	int _mount; // 持有总数
 	float _lastTotal; // 交易前总资产记录
+	int _maxBuyCount; //最大买入次数
+	int _buyCount; // 买入次数
 };

@@ -291,7 +291,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		// 一日内顺序：1.建仓，2.平仓，3.加仓，4.止损
 		// 日内有建仓||平仓||加仓，则不止损
 		// 一天只做一个操作，但一天可以加几次仓
-
+		_position.setMaxBuyCount(4);
 		// 交易过程
 		// 建仓，平仓的n是最高最低点及TR的n日移动平均线都available，则开始交易过程
 		DataEnable = N_HasEnable && TopButtomCreate_HasEnable && TopButtomLeave_HasEnable;
