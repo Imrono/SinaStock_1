@@ -1,6 +1,10 @@
 ﻿#ifndef GLOBAL_PARAM_H
 #define GLOBAL_PARAM_H
 
+#ifndef nullptr
+#define nullptr NULL
+#endif
+
 #define TIME_STEP	2700
 #define TIMES_GET	2
 #define THRESHOLD	5000000

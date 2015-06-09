@@ -2,6 +2,7 @@
 #include <string>
 using namespace std;
 #include "..//Common//TraceMicro.h"
+#include "..//Common//GlobalParam.h"
 
 class testTime
 {
