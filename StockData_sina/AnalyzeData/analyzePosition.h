@@ -40,28 +40,11 @@ private:
 class HoldPosition
 {
 public:
-	HoldPosition(float total = 0.0f) {
-		_total = total;
-		_remain = 0.0f;
-		_keeps = 0.0f;
-		_mount = 0;
-		_lastTotal = 0.0f;
-		_buyCount = 0;
-	}
+	HoldPosition(float Total = 0.0f);
 	// 增加资金
-	inline float add (float money) {
-		_total += money;
-		_remain += money;
-		return _total;
-	}
+	float add (float Money);
 	// 减少资金
-	inline float sub(float money) {
-		if (_remain >= money) {
-			_total -= money;
-			_remain -= money;
-		}
-		return _total;
-	}
+	float sub(float money);
 	// 最大买入次数
 	inline void setMaxBuyCount(int MaxBuyCount) {
 		_maxBuyCount = MaxBuyCount;

@@ -212,6 +212,10 @@
 					RelativePath=".\AnalyzeData\analyzePosition.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\AnalyzeData\PositionEx.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Data_sina"
@@ -308,6 +312,10 @@
 				</File>
 				<File
 					RelativePath=".\AnalyzeData\analyzePosition.h"
+					>
+				</File>
+				<File
+					RelativePath=".\AnalyzeData\PositionEx.h"
 					>
 				</File>
 			</Filter>
