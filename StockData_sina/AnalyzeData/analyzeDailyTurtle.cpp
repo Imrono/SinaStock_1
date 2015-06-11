@@ -101,10 +101,10 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 		// 处理ATR平均天数
 		// 不满一个周期的部分
 		if (Count < _avgN) {
-			tmpN = tmpN + turtlePrepare;
-			tmpN = tmpN / (float)(_avgN);
+			// N = (N1+N2+...+Nn)/n
+			tmpN.AddNewAvgElement(turtlePrepare, _avgN);
 		} else { // 之后的周期部分
-			// N = (19×PDN+TR)/20
+			// N = (19*PDN+TR)/20
 			// TR (True Range) = max(H-L,H-PDC,PDC-L)
 			// 前2*avgDay[i]-1不稳定，之后前avgDay[i]位所占的比重就确定了
 			tmpN = (tmpN*(float)(_avgN-1)+turtlePrepare) / (float)(_avgN);
@@ -167,12 +167,17 @@ int WayOfTurtle::SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int 
 	it_end[0] = _topButtomCreate[0].end();
 	it_end[1] = _topButtomCreate[1].end();
 	vector<turtleAvgTopButtomData>::iterator it[2];
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 1; i++) {
 		for (it[i] = it_begin[i]; it[i] != it_end[i]; ++it[i]) {
 			printf_s("Create: %d-> (%4d-%2d-%2d) Top:%.3f, Buttom:%.3f\n", _avgTopButtomCreate[i], it[i]->date.year, it[i]->date.month, it[i]->date.day
 				, it[i]->Top, it[i]->Buttom);
 		}
 	}
+	vector<turtleAvgTRData>::iterator it_N;
+	for (it_N = _N.begin(); it_N != _N.end(); ++it_N) {
+		printf_s("Create: %d-> (%4d-%2d-%2d) N:%.2f\n", _avgN, it_N->date.year, it_N->date.month, it_N->date.day , it_N->price);
+	}
+
 
 	return Count;
 }

@@ -45,6 +45,12 @@ public:
 		ans.price = price + _turtleTR(rawData);
 		return ans;
 	}
+
+	turtleAvgTRData AddNewAvgElement(const turtleRawData &rawData, float avg) {
+		price += _turtleTR(rawData)/avg;
+		return *this;
+	}
+
 	inline turtleAvgTRData operator+ (float add) {
 		turtleAvgTRData ans;
 		ans.price = price + add;
