@@ -1,9 +1,12 @@
-﻿#include "analyzeDailyTurtle.h"
+﻿#include <cmath> 
+using namespace std;
+#include "analyzeDailyTurtle.h"
 #include "..//Common//TraceMicro.h"
 
 WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue) {
 	_position.setTotal(TotalPosition);
 	_riskRatio = RiskRatio;
+// 	_riskRatio = 0.005f;
 	_pointValue = PointValue;
 	_sendOrderThisBar = false;
 	_lastEntryPrice = 0.0;
@@ -14,7 +17,7 @@ WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue)
 	_topButtomCreate = nullptr;
 	_avgTopButtomLeave = nullptr;
 	_topButtomLeave = nullptr;
-	_minPoint = 1.0f;
+	_minPoint = 0.01f;
 	_witchTopButtom = nullptr;
 }
 WayOfTurtle::~WayOfTurtle() {
@@ -249,15 +252,18 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	// 价格时间数据的迭代器
 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
 	vector<sinaDailyData>::reverse_iterator r_it_end = rawData.rend();
-	for (vector<sinaDailyData>::reverse_iterator r_it = r_it_begin; r_it != r_it_end; ++r_it) {
+	vector<sinaDailyData>::reverse_iterator r_it;
+	for (r_it = r_it_begin; r_it != r_it_end; ++r_it) {
 		_sendOrderThisBar = false;
 		// 指标日期跟随数据日期
 		// 1. 真实波动 N
 		while (r_it->date > it_N->date)
 			++it_N;
-		if (r_it->date == it_N->date) {
-			N_HasEnable = true;
-		} else {}
+		if (!N_HasEnable) {
+			if (r_it->date == it_N->date) {
+				N_HasEnable = true;
+			} else {}
+		}
 		for (int i = 0; i < _tbNum; i++) {
 		// 2. 建仓用n日最高最低点
 			while (r_it->date > it_TopButtomCreate[i]->date)
@@ -287,7 +293,8 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 
 		// U = (C * 1%) / (N * 每点价值);
 		// 对于A股， it_N->price为每一股的单价波动，_pointValue = 100（1手为单位），_turtleUnit的单位为（股）
-		_turtleUnit = (int)((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue));
+		_turtleUnit = floor((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue)+g_EPS); // 向下取整
+		if (0 == _turtleUnit) INFO("date:%4d-%2d-%2d, _turtleUnit == 0\n", r_it->date.year, r_it->date.month, r_it->date.day);
 // 		printf_s("raw date:%4d-%2d-%2d -> N date:%4d-%2d-%2d, N:%f, unit:%d\n", r_it->date.year, r_it->date.month, r_it->date.day, 
 // 			it_N->date.year, it_N->date.month, it_N->date.day, it_N->price, _turtleUnit*100);
 // 		_position.getInfo();
@@ -345,7 +352,8 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 
 	float EntryPrice; // （单价/股）
 	// 建仓条件：做多突破长期或短期n日的上轨
-	if (1 || _preBreakoutFailure) {				// 附加的条件
+	if ((1 || _preBreakoutFailure) &&
+		 _turtleUnit > 0) {				// 附加的条件
 		// 有一个入场条件满足，就开始建仓
 		for (int i = 0; i < _tbNum; i++) {
 			EntryPrice = (it_TopButtom[i]-1)->Top;
@@ -431,7 +439,8 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 	float N = (it_N-1)->price;
 	float AddPrice = _lastEntryPrice + 0.5f*N; // （单价/股）
 	// 一天可以加多次仓
-	while (today.top > AddPrice) {		// 以突破最高价为标准，可以进行几次增仓
+	while (today.top > AddPrice &&		// 以突破最高价为标准，可以进行几次增仓
+		   _turtleUnit > 0) {			// 单位头寸数大于0，至少为1
 		// 操作
 		Trade.date = today.date;
 		if (today.open > AddPrice) {	// 如果开盘就突破1/2N，则直接用开盘价增仓。

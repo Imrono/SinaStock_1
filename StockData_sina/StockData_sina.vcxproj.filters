@@ -99,6 +99,9 @@
     <ClCompile Include="Common\html.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
+    <ClCompile Include="AnalyzeData\PositionEx.cpp">
+      <Filter>Source Files\AnalyzeData</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stockData.h">
@@ -157,6 +160,9 @@
     </ClInclude>
     <ClInclude Include="Common\html.h">
       <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="AnalyzeData\PositionEx.h">
+      <Filter>Header Files\AnalyzeData</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

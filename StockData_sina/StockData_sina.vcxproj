@@ -66,6 +66,7 @@
     <ClCompile Include="AnalyzeData\analyzeDailyDataAverage.cpp" />
     <ClCompile Include="AnalyzeData\analyzeDailyTurtle.cpp" />
     <ClCompile Include="AnalyzeData\analyzePosition.cpp" />
+    <ClCompile Include="AnalyzeData\PositionEx.cpp" />
     <ClCompile Include="Common\ErrorCode2String.cpp" />
     <ClCompile Include="Common\GlobalParam.cpp" />
     <ClCompile Include="Common\html.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="AnalyzeData\analyzeDailyDataAverage.h" />
     <ClInclude Include="AnalyzeData\analyzeDailyTurtle.h" />
     <ClInclude Include="AnalyzeData\analyzePosition.h" />
+    <ClInclude Include="AnalyzeData\PositionEx.h" />
     <ClInclude Include="Common\ErrorCode2String.h" />
     <ClInclude Include="Common\GlobalParam.h" />
     <ClInclude Include="Common\html.h" />
