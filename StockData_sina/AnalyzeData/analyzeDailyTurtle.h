@@ -122,7 +122,7 @@ private:
 	vector<turtleAvgTRData> _N; // 本日的数据也计算在内
 	// 建仓信息Comein与离场信息Leave应该一一对应
 	int _tbNum;
-	bool *_witchTopButtom;
+	bool *_isCreate;
 	int *_avgTopButtomCreate;
 	vector<turtleAvgTopButtomData> *_topButtomCreate; // 本日的数据也计算在内
 	int *_avgTopButtomLeave;
@@ -138,6 +138,9 @@ private:
 	float _riskRatio;
 	float _pointValue; //每点价值，A股中为0.01元
 	float _minPoint; // 加减一个单位，确保能成交
+
+	float _stoplossFactor;
+	float _addFactor;
 };
 
 #endif

@@ -4,21 +4,25 @@ using namespace std;
 #include "..//Common//TraceMicro.h"
 
 WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue) {
+	// 参数
 	_position.setTotal(TotalPosition);
 	_riskRatio = RiskRatio;
 // 	_riskRatio = 0.005f;
+	_stoplossFactor = 2.0f;
+	_addFactor = 0.5f;
+	// 状态
 	_pointValue = PointValue;
+	_minPoint = 0.01f;
+	_turtleUnit = 0;
 	_sendOrderThisBar = false;
 	_lastEntryPrice = 0.0;
-	_turtleUnit = 0;
 	_avgN = 0;
 	_tbNum = 0;
 	_avgTopButtomCreate = nullptr;
 	_topButtomCreate = nullptr;
 	_avgTopButtomLeave = nullptr;
 	_topButtomLeave = nullptr;
-	_minPoint = 0.01f;
-	_witchTopButtom = nullptr;
+	_isCreate = nullptr;
 }
 WayOfTurtle::~WayOfTurtle() {
 	Clear();
@@ -33,10 +37,10 @@ void WayOfTurtle::InitTopButtom(int TbNum) {
 		_avgTopButtomLeave = new int[_tbNum];
 	if (nullptr == _topButtomLeave)
 		_topButtomLeave = new vector<turtleAvgTopButtomData>[_tbNum];
-	if (nullptr == _witchTopButtom)
-		_witchTopButtom = new bool[_tbNum];
+	if (nullptr == _isCreate)
+		_isCreate = new bool[_tbNum];
 	for (int i = 0; i < _tbNum; i++) {
-		_witchTopButtom[i] = false;
+		_isCreate[i] = false;
 	}
 }
 void WayOfTurtle::Clear() {
@@ -48,8 +52,8 @@ void WayOfTurtle::Clear() {
 		delete []_avgTopButtomLeave;
 	if (nullptr != _topButtomLeave)
 		delete []_topButtomLeave;
-	if (nullptr != _witchTopButtom)
-		delete []_witchTopButtom;
+	if (nullptr != _isCreate)
+		delete []_isCreate;
 }
 
 // rawData recent -> previous
@@ -293,7 +297,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 
 		// U = (C * 1%) / (N * 每点价值);
 		// 对于A股， it_N->price为每一股的单价波动，_pointValue = 100（1手为单位），_turtleUnit的单位为（股）
-		_turtleUnit = floor((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue)+g_EPS); // 向下取整
+		_turtleUnit = (int)((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue)+g_EPS); // 向下取整
 		if (0 == _turtleUnit) INFO("date:%4d-%2d-%2d, _turtleUnit == 0\n", r_it->date.year, r_it->date.month, r_it->date.day);
 // 		printf_s("raw date:%4d-%2d-%2d -> N date:%4d-%2d-%2d, N:%f, unit:%d\n", r_it->date.year, r_it->date.month, r_it->date.day, 
 // 			it_N->date.year, it_N->date.month, it_N->date.day, it_N->price, _turtleUnit*100);
@@ -344,7 +348,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 	// 已经有了持仓就不再建立
 	bool HasCreate = false;
 	for (int i = 0; i < _tbNum; i++)
-		HasCreate = HasCreate || _witchTopButtom[i];
+		HasCreate = HasCreate || _isCreate[i];
 	if (_HasPosition() || HasCreate) {
 // 		ERRR("建仓时已有头寸\n");
 		return false;
@@ -376,7 +380,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 					_lastEntryPrice = Trade.price;
 					_sendOrderThisBar = true;
 					_tradeHistory.push_back(Trade);
-					_witchTopButtom[i] = true;
+					_isCreate[i] = true;
 					return true;
 				} else { // 没有足够余额
 					return false;
@@ -397,7 +401,7 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 	float ExitPrice; // （单价/股）
 	int idx = 0;
 	for (int i = 0; i < _tbNum; i++) {
-		if (true == _witchTopButtom[i]) {
+		if (true == _isCreate[i]) {
 			idx = i;
 			break;
 		}
@@ -422,7 +426,7 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 		// 记录
 		_tradeHistory.push_back(Trade);
 		for (int i = 0; i < _tbNum; i++) {
-			_witchTopButtom[idx] = false;
+			_isCreate[idx] = false;
 		}
 		return true;
 	} else {}
@@ -437,7 +441,7 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 	}
 
 	float N = (it_N-1)->price;
-	float AddPrice = _lastEntryPrice + 0.5f*N; // （单价/股）
+	float AddPrice = _lastEntryPrice + _addFactor*N; // （单价/股）
 	// 一天可以加多次仓
 	while (today.top > AddPrice &&		// 以突破最高价为标准，可以进行几次增仓
 		   _turtleUnit > 0) {			// 单位头寸数大于0，至少为1
@@ -472,7 +476,7 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 		return false;
 	}
 	float N = (it_N-1)->price;
-	float StopLossPrice = _lastEntryPrice - 2.0f*N; // （单价/股）
+	float StopLossPrice = _lastEntryPrice - _stoplossFactor*N; // （单价/股）
 	if ((today.buttom < StopLossPrice) && _sendOrderThisBar == false) { // 加仓Bar不止损
 		// 操作
 		Trade.date = today.date;
@@ -492,7 +496,7 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 		_preBreakoutFailure = true;
 		_tradeHistory.push_back(Trade);
 		for (int i = 0; i < _tbNum; i++) {
-			_witchTopButtom[i] = false;
+			_isCreate[i] = false;
 		}
 		return true;
 	}
