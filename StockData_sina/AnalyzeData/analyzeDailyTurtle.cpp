@@ -348,15 +348,6 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 
 // 只能建一个仓，若有两种指标同时满足，不能同时建两个仓
 bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade) {
-	// 已经有了持仓就不再建立
-	bool HasCreate = false;
-	for (int i = 0; i < _tbNum; i++)
-		HasCreate = HasCreate || _isCreate[i];
-	if (_HasPosition() || HasCreate) {
-// 		ERRR("建仓时已有头寸\n");
-		return false;
-	}
-
 	float EntryPrice; // （单价/股）
 	// 建仓条件：做多突破长期或短期n日的上轨
 	if ((1 || _preBreakoutFailure) &&
@@ -376,7 +367,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 					Trade.trade = BUY_UP;
 					Trade.tmpData = _avgTopButtomCreate[i];
 					Trade.amount = _turtleUnit*100;
-					if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
+					if (_position.buy(Trade.price, Trade.amount, i)) { // 有剩余头寸，买入成功
 						// 显示
 						Trade.ShowThisTradeInfo("建仓");
 						_position.getInfo();
