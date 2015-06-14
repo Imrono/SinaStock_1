@@ -29,6 +29,7 @@ WayOfTurtle::~WayOfTurtle() {
 }
 void WayOfTurtle::InitTopButtom(int TbNum) {
 	_tbNum = TbNum;
+	_position.addType(TbNum);
 	if (nullptr == _avgTopButtomCreate)
 		_avgTopButtomCreate = new int[_tbNum];
 	if (nullptr == _topButtomCreate)
@@ -253,6 +254,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	//////////////////////////////////////////////////////////////////////////
 	int Count = 0;
 	TradingPoint tmpTradePoint;
+	_position.setMaxLoaded(4);
 	// 价格时间数据的迭代器
 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
 	vector<sinaDailyData>::reverse_iterator r_it_end = rawData.rend();
@@ -307,7 +309,8 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		// 一日内顺序：1.建仓，2.平仓，3.加仓，4.止损
 		// 日内有建仓||平仓||加仓，则不止损
 		// 一天只做一个操作，但一天可以加几次仓
-		_position.setMaxBuyCount(4);
+		// 总头寸规模未买时，可以按不同种类的指标可以买入
+
 		// 交易过程
 		// 建仓，平仓的n是最高最低点及TR的n日移动平均线都available，则开始交易过程
 		DataEnable = N_HasEnable && TopButtomCreate_HasEnable && TopButtomLeave_HasEnable;
@@ -360,30 +363,32 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 		 _turtleUnit > 0) {				// 附加的条件
 		// 有一个入场条件满足，就开始建仓
 		for (int i = 0; i < _tbNum; i++) {
-			EntryPrice = (it_TopButtom[i]-1)->Top;
-			if (EntryPrice < today.top) {		// 做多突破长期或短期n日的上轨
-				// 操作
-				Trade.date = today.date;
-				if (today.open > EntryPrice) {	// 如果开盘就突破，则直接用开盘价建仓。
-					Trade.price = today.open+_minPoint;
-				} else {						// 正常建仓的情况
-					Trade.price = EntryPrice+_minPoint;
-				}
-				Trade.trade = BUY_UP;
-				Trade.tmpData = _avgTopButtomCreate[i];
-				Trade.amount = _turtleUnit*100;
-				if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
-					// 显示
-					Trade.ShowThisTradeInfo("建仓");
-					_position.getInfo();
-					// 记录
-					_lastEntryPrice = Trade.price;
-					_sendOrderThisBar = true;
-					_tradeHistory.push_back(Trade);
-					_isCreate[i] = true;
-					return true;
-				} else { // 没有足够余额
-					return false;
+			if (!_isCreate[i] && _position.CheckPosition()) { // 不同的种类分别处理
+				EntryPrice = (it_TopButtom[i]-1)->Top;
+				if (EntryPrice < today.top) {		// 做多突破长期或短期n日的上轨
+					// 操作
+					Trade.date = today.date;
+					if (today.open > EntryPrice) {	// 如果开盘就突破，则直接用开盘价建仓。
+						Trade.price = today.open+_minPoint;
+					} else {						// 正常建仓的情况
+						Trade.price = EntryPrice+_minPoint;
+					}
+					Trade.trade = BUY_UP;
+					Trade.tmpData = _avgTopButtomCreate[i];
+					Trade.amount = _turtleUnit*100;
+					if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
+						// 显示
+						Trade.ShowThisTradeInfo("建仓");
+						_position.getInfo();
+						// 记录
+						_lastEntryPrice = Trade.price;
+						_sendOrderThisBar = true;
+						_tradeHistory.push_back(Trade);
+						_isCreate[i] = true;
+						return true;
+					} else { // 没有足够余额
+						return false;
+					}
 				}
 			}
 		} // *END* for (int i = 0; i < _tbNumCreate; i++)
@@ -432,7 +437,6 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 	} else {}
 	return false;
 }
-
 int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade) {
 	int Count = 0; // 记录加了几次仓
 	if (!_HasPosition()) {
@@ -469,7 +473,6 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 	}
 	return Count;
 }
-
 bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade) {
 	if (!_HasPosition()) {
 // 		ERRR("止损时没有头寸\n");

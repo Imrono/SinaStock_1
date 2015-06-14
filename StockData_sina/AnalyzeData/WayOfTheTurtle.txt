@@ -88,7 +88,7 @@ Params
     Numeric RiskRatio(1);                   // % Risk Per N ( 0 – 100)
     Numeric ATRLength(20);                  // 平均波动周期 ATR Length
     Numeric boLength(20);                   // 短周期 BreakOut Length
-    Numeric fsLength(55);                   // 长周期 FailSafe Length
+    Numeric fsLength(55);                   // 长周期 FailSafe Length（自动保险突破点）
     Numeric teLength(10);                   // 离市周期 Trailing Exit Length
     Bool LastProfitableTradeFilter(True);   // 使用入市过滤条件
 Vars

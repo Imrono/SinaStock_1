@@ -1,4 +1,6 @@
-﻿#include "..//Common//TraceMicro.h"
+﻿#include <vector>
+using namespace std;
+#include "..//Common//TraceMicro.h"
 #include "..//Common//stockData.h"
 
 enum stockTrade {
@@ -40,55 +42,27 @@ private:
 class HoldPosition
 {
 public:
-	HoldPosition(float Total = 0.0f);
+	HoldPosition(int Types = 0, float Total = 0.0f);
 	// 增加资金
 	float add (float Money);
 	// 减少资金
 	float sub(float money);
+	// 设置最大资金
+	bool setTotal(float Total);
 	// 最大买入次数
-	inline void setMaxBuyCount(int MaxBuyCount) {
-		_maxBuyCount = MaxBuyCount;
-	}
+	void setMaxLoaded(int MaxBuyCount);
+	// 插入一种类型
+	int addType(int Num = 1);
 
-	// 什么价钱买多少
-	inline bool buy(float Price, int Position) {
-		float BuyPosition = Price*(float)Position;
-		if (_remain >= BuyPosition && _buyCount <= _maxBuyCount) {
-			_lastTotal = _total;
-			_keeps = (float)_mount*Price + BuyPosition;
-			_remain -= BuyPosition;
-			_mount += Position;
-			_total = _keeps + _remain;
-			_buyCount ++;
-			return true;
-		} else {
-			if (_buyCount > _maxBuyCount)
-				INFO("超过最大买入次数%d\n", _maxBuyCount);
-			else
-				INFO("买入量%.2f大于剩余量%.2f。买入次数%d\n", BuyPosition, _remain, _buyCount);
-			return false;
-		}
-	}
+	// 什么价买多少
+	bool buy(float Price, int Position, int idx = -1);
 	// 什么价卖多少
-	inline bool sell(float Price, int Position) {
-		if (_mount >= Position) {
-			_lastTotal = _total;
-			float SellPosition = Price*(float)Position;
-			if (_mount == Position)	_keeps = 0.0f;
-			else					_keeps = (float)_mount*Price - SellPosition;
-			_remain += SellPosition;
-			_mount -= Position;
-			_total = _keeps + _remain;
-			return true;
-		} else {
-			ERRR("卖出量大于持有量！\n");
-			return false;
-		}
-	}
-	inline void sellAll(float Price) {
-		sell(Price, _mount);
-		_buyCount = 0;
-		showUPorDOWN();
+	bool sell(float Price, int Position, int idx = -1);
+	// 全部卖出
+	void sellAll(float Price);
+	// 检查最大买入头寸
+	inline bool CheckPosition() {
+		return _maxBuyCount >= _buyCount;
 	}
 
 	void showUPorDOWN() {
@@ -106,61 +80,25 @@ public:
 		return _total;
 	}
 
-	inline bool setTotal(float Total) {
-		if (_keeps < Total) {
-			_total = Total;
-			_remain = _total - _keeps;
-			_mount = 0;
-			_lastTotal = 0.0f;
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	inline void getInfo() {
 		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,keeps:%.2f,remain:%.2f,mount:%d\n", _total, _keeps, _remain,_mount);
 	}
-	int ShowThisCmp(HoldPosition *hp) {
-		float ThisTotal = _keeps+_remain;
-		float InTotal = hp->getKeeps()+hp->getRemain();
-		int ans = InTotal > ThisTotal ?
-				  1 : InTotal == ThisTotal ?
-				  0 : -1;
-		char *s;
-		float ratio;
-		switch (ans) {
-		case -1:
-			s = "Down";
-			ratio = (ThisTotal-InTotal)/ThisTotal;
-			break;
-		case 0:
-			s = "Draw";
-			ratio = 0.0;
-			break;
-		case 1:
-			s = "Up";
-			ratio = (InTotal-ThisTotal)/ThisTotal;
-			break;
-		default:
-			s = "Unknown";
-			ratio = 0.0;
-			break;
-		}
-		DYNAMIC_TRACE(POSITION_TRACE, "ThisTotal:%.2f, InTotal:%.2f, %s%.2f%%\n", ThisTotal, InTotal, s, ratio*100.0f);
-		return ans;
-	}
+	int ShowThisCmp(HoldPosition *hp);
 
 private:
-	void _setLastTotal(float Price) {
-		_lastTotal = _remain + _mount*Price;
-	}
+	void _recordTotal(float Price, int idx = -1);
+
 	float _total; // 总资产
 	float _keeps; // 现有市值
 	float _remain; // 可用余额
 	int _mount; // 持有总数
-	float _lastTotal; // 交易前总资产记录
-	int _maxBuyCount; //最大买入次数
+	int _maxBuyCount; // 最大买入次数
+	float _lastTotal; // 操作前的总资产
 	int _buyCount; // 买入次数
+//////////////////////////////////////////////////////////////////////////
+	int _subType;
+	vector<int> _subMount;
+	vector<float> _subLastTotal;
+	vector<float> _subTotal;
+	vector<int> _subBuyCount;
 };

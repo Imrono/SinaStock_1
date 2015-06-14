@@ -108,7 +108,7 @@ private:
 	int _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 	bool _StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 
-	bool _HasPosition() { return _position.getKeeps() > g_EPS;}
+	bool _HasPosition() { return _position.getMount() > 0;}
 
 	inline float getMin(float a, float b) {
 		return a < b ? a : b;
