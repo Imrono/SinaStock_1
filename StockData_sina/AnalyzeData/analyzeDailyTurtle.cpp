@@ -15,7 +15,7 @@ WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue)
 	_minPoint = 0.01f;
 	_turtleUnit = 0;
 	_sendOrderThisBar = false;
-	_lastEntryPrice = 0.0;
+	_lastEntryPrice = nullptr;
 	_avgN = 0;
 	_tbNum = 0;
 	_avgTopButtomCreate = nullptr;
@@ -40,8 +40,12 @@ void WayOfTurtle::InitTopButtom(int TbNum) {
 		_topButtomLeave = new vector<turtleAvgTopButtomData>[_tbNum];
 	if (nullptr == _isCreate)
 		_isCreate = new bool[_tbNum];
+	if (nullptr == _lastEntryPrice)
+		_lastEntryPrice = new float[_tbNum];
+
 	for (int i = 0; i < _tbNum; i++) {
 		_isCreate[i] = false;
+		_lastEntryPrice[i] = 0.0f;
 	}
 }
 void WayOfTurtle::Clear() {
@@ -55,6 +59,8 @@ void WayOfTurtle::Clear() {
 		delete []_topButtomLeave;
 	if (nullptr != _isCreate)
 		delete []_isCreate;
+	if (nullptr != _lastEntryPrice)
+		delete []_lastEntryPrice;
 }
 
 // rawData recent -> previous
@@ -321,18 +327,19 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 
 			// 建仓
 			if (_CreatePosition(it_TopButtomCreate, *r_it, tmpTradePoint))
-				continue;
+				goto UPDATE_CLOSE;
 			// 平仓
 			if (_ClearPosition(it_TopButtomLeave, *r_it, tmpTradePoint))
-				continue;
+				goto UPDATE_CLOSE;
 			// 加仓
 			if (_AddPosition(it_N, *r_it, tmpTradePoint))
-				continue;
+				goto UPDATE_CLOSE;
 			// 止损
 			if (_StopLoss(it_N, *r_it, tmpTradePoint))
-				continue;
+				goto UPDATE_CLOSE;
 		}
-		// 观望
+UPDATE_CLOSE:
+		_position.updateTotal(r_it->close);
 	}
 
 	delete []it_TopButtomLeave;
@@ -350,11 +357,10 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade) {
 	float EntryPrice; // （单价/股）
 	// 建仓条件：做多突破长期或短期n日的上轨
-	if ((1 || _preBreakoutFailure) &&
-		 _turtleUnit > 0) {				// 附加的条件
+	if ((1 || _preBreakoutFailure) && _turtleUnit > 0) {
 		// 有一个入场条件满足，就开始建仓
 		for (int i = 0; i < _tbNum; i++) {
-			if (!_isCreate[i] && _position.CheckPosition()) { // 不同的种类分别处理
+			if (!_isCreate[i] && !_position.GetPosition(i)) {
 				EntryPrice = (it_TopButtom[i]-1)->Top;
 				if (EntryPrice < today.top) {		// 做多突破长期或短期n日的上轨
 					// 操作
@@ -372,7 +378,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 						Trade.ShowThisTradeInfo("建仓");
 						_position.getInfo();
 						// 记录
-						_lastEntryPrice = Trade.price;
+						_lastEntryPrice[i] = Trade.price;
 						_sendOrderThisBar = true;
 						_tradeHistory.push_back(Trade);
 						_isCreate[i] = true;
@@ -395,37 +401,33 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 	}
 
 	float ExitPrice; // （单价/股）
-	int idx = 0;
 	for (int i = 0; i < _tbNum; i++) {
-		if (true == _isCreate[i]) {
-			idx = i;
-			break;
+		if (_isCreate[i] && _position.GetPosition(i) > 0) {		// 这种指标可以平仓
+			// 有一个离场条件满足，就全部平仓
+			ExitPrice = (it_TopButtom[i]-1)->Buttom;
+			if (today.buttom < ExitPrice) {		// 做多反向突破长期或短期n日的下轨
+				// 操作
+				Trade.date = today.date;
+				if (today.open < ExitPrice) {	// 如果开盘直接反向突破，则直接用开盘价平仓。
+					Trade.price = today.open-_minPoint;
+				} else {						// 正常平仓的情况
+					Trade.price = ExitPrice-_minPoint;
+				}
+				Trade.trade = SELL_DOWN;
+				Trade.tmpData = _avgTopButtomLeave[i];
+				Trade.amount = _position.getMount();
+				_position.sellAll(Trade.price, i);
+				// 显示
+				Trade.ShowThisTradeInfo("平仓");
+				_position.getInfo();
+				// 记录
+				_tradeHistory.push_back(Trade);
+				_isCreate[i] = false;
+				return true;
+			} else {}
+			return false;
 		}
 	}
-	// 有一个离场条件满足，就全部平仓
-	ExitPrice = (it_TopButtom[idx]-1)->Buttom;
-	if (today.buttom < ExitPrice) {		// 做多反向突破长期或短期n日的下轨
-		// 操作
-		Trade.date = today.date;
-		if (today.open < ExitPrice) {	// 如果开盘直接反向突破，则直接用开盘价平仓。
-			Trade.price = today.open-_minPoint;
-		} else {						// 正常平仓的情况
-			Trade.price = ExitPrice-_minPoint;
-		}
-		Trade.trade = SELL_DOWN;
-		Trade.tmpData = _avgTopButtomLeave[idx];
-		Trade.amount = _position.getMount();
-		_position.sellAll(Trade.price);
-		// 显示
-		Trade.ShowThisTradeInfo("平仓");
-		_position.getInfo();
-		// 记录
-		_tradeHistory.push_back(Trade);
-		for (int i = 0; i < _tbNum; i++) {
-			_isCreate[idx] = false;
-		}
-		return true;
-	} else {}
 	return false;
 }
 int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade) {
@@ -436,31 +438,36 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 	}
 
 	float N = (it_N-1)->price;
-	float AddPrice = _lastEntryPrice + _addFactor*N; // （单价/股）
-	// 一天可以加多次仓
-	while (today.top > AddPrice &&		// 以突破最高价为标准，可以进行几次增仓
-		   _turtleUnit > 0) {			// 单位头寸数大于0，至少为1
-		// 操作
-		Trade.date = today.date;
-		if (today.open > AddPrice) {	// 如果开盘就突破1/2N，则直接用开盘价增仓。
-			Trade.price = today.open + _minPoint;
-		} else {						// 正常加仓的情况
-			Trade.price = AddPrice + _minPoint;
+	float AddPrice;
+	// 不同参数，不同处理
+	for (int i = 0; i < _tbNum; i++) {
+		if (_isCreate[i] && _position.GetPosition(i) > 0) {
+			float AddPrice = _lastEntryPrice[i] + _addFactor*N; // （单价/股）
+			// 一天可以加多次仓
+			while (today.top > AddPrice && _turtleUnit > 0) {
+				// 操作
+				Trade.date = today.date;
+				if (today.open > AddPrice) {	// 如果开盘就突破1/2N，则直接用开盘价增仓。
+					Trade.price = today.open + _minPoint;
+				} else {						// 正常加仓的情况
+					Trade.price = AddPrice + _minPoint;
+				}
+				Trade.trade = BUY_UP;
+				Trade.tmpData = i;
+				Trade.amount = _turtleUnit*100;
+				if (_position.buy(Trade.price, Trade.amount, i)) { // 有剩余头寸，买入成功
+					// 显示
+					Trade.ShowThisTradeInfo("加仓");
+					_position.getInfo();
+					// 记录
+					_lastEntryPrice[i] = Trade.price;
+					_sendOrderThisBar = true;
+					_tradeHistory.push_back(Trade);
+					AddPrice = _lastEntryPrice[i] + _addFactor*N; // （单价/股）
+					Count++;
+				} else {break;}
+			}
 		}
-		Trade.trade = BUY_UP;
-		Trade.tmpData = -1;
-		Trade.amount = _turtleUnit*100;
-		if (_position.buy(Trade.price, Trade.amount)) { // 有剩余头寸，买入成功
-			// 显示
-			Trade.ShowThisTradeInfo("加仓");
-			_position.getInfo();
-			// 记录
-			_lastEntryPrice = Trade.price;
-			_sendOrderThisBar = true;
-			_tradeHistory.push_back(Trade);
-			AddPrice = _lastEntryPrice + 0.5f*N; // （单价/股）
-			Count++;
-		} else {break;}
 	}
 	return Count;
 }
@@ -470,29 +477,32 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 		return false;
 	}
 	float N = (it_N-1)->price;
-	float StopLossPrice = _lastEntryPrice - _stoplossFactor*N; // （单价/股）
-	if ((today.buttom < StopLossPrice) && _sendOrderThisBar == false) { // 加仓Bar不止损
-		// 操作
-		Trade.date = today.date;
-		if (today.open < StopLossPrice) {	// 如果开盘反射突破2N，则直接用开盘价止损
-			Trade.price = today.open - _minPoint;
-		} else {							// 正常平仓的情况
-			Trade.price = StopLossPrice - _minPoint;
+	float StopLossPrice;
+	for (int i = 0; i < _tbNum; i++) {
+		if (_isCreate[i] && _position.GetPosition(i) > 0) {
+			StopLossPrice = _lastEntryPrice[i] - _stoplossFactor*N; // （单价/股）
+			if ((today.buttom < StopLossPrice)) {
+				// 操作
+				Trade.date = today.date;
+				if (today.open < StopLossPrice) {	// 如果开盘反射突破2N，则直接用开盘价止损
+					Trade.price = today.open - _minPoint;
+				} else {							// 正常平仓的情况
+					Trade.price = StopLossPrice - _minPoint;
+				}
+				Trade.trade = STOP_LOSS_SELL_DOWN;
+				Trade.tmpData = i;
+				Trade.amount = _position.getMount();
+				_position.sellAll(Trade.price, i);
+				// 显示
+				Trade.ShowThisTradeInfo("止损");
+				_position.getInfo();
+				// 记录
+				_preBreakoutFailure = true;
+				_tradeHistory.push_back(Trade);
+				_isCreate[i] = false;
+				return true;
+			}
 		}
-		Trade.trade = STOP_LOSS_SELL_DOWN;
-		Trade.tmpData = -2;
-		Trade.amount = _position.getMount();
-		_position.sellAll(Trade.price);
-		// 显示
-		Trade.ShowThisTradeInfo("止损");
-		_position.getInfo();
-		// 记录
-		_preBreakoutFailure = true;
-		_tradeHistory.push_back(Trade);
-		for (int i = 0; i < _tbNum; i++) {
-			_isCreate[i] = false;
-		}
-		return true;
 	}
 	return false;
 }

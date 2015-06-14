@@ -142,15 +142,19 @@ bool HoldPosition::buy(float Price, int Position, int idx) {
 bool HoldPosition::sell(float Price, int Position, int idx) {
 	float SellPosition = Price*(float)Position;
 	if (_mount >= Position) {
-		_remain += SellPosition;
-		_mount -= Position;
 		if (-1 != idx) {
 			if (_subType > idx) {
-				_subMount[idx] -= Position;
+				if (_subMount[idx] < Position) {
+					return false;
+				} else {
+					_subMount[idx] -= Position;
+				}
 			} else {
 				ERRR("idx:%d >= _subType:%d when sell\n", idx, _subType);
 			}
 		}
+		_remain += SellPosition;
+		_mount -= Position;
 		_recordTotal(Price, idx);
 		return true;
 	} else {
@@ -159,8 +163,9 @@ bool HoldPosition::sell(float Price, int Position, int idx) {
 	}
 }
 // 全部卖出
-void HoldPosition::sellAll(float Price) {
-	sell(Price, _mount);
+void HoldPosition::sellAll(float Price, int idx) {
+	sell(Price, _subMount[idx], idx);
+	_subBuyCount[idx] = 0;
 	_buyCount = 0;
 	showUPorDOWN();
 }

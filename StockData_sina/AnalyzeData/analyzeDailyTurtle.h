@@ -105,10 +105,11 @@ private:
 	// 目前只考虑多头情况
 	bool _CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade);
 	bool _ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_TopButtom, const sinaDailyData &today, TradingPoint &Trade);
-	int _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
+	int  _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 	bool _StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 
 	bool _HasPosition() { return _position.getMount() > 0;}
+	bool _HasPosition(int idx) { return _position.getMount() > 0;}
 
 	inline float getMin(float a, float b) {
 		return a < b ? a : b;
@@ -124,13 +125,14 @@ private:
 	int _tbNum;
 	bool *_isCreate;
 	int *_avgTopButtomCreate;
-	vector<turtleAvgTopButtomData> *_topButtomCreate; // 本日的数据也计算在内
+	vector<turtleAvgTopButtomData> *_topButtomCreate;	// 本日的数据也计算在内
 	int *_avgTopButtomLeave;
-	vector<turtleAvgTopButtomData> *_topButtomLeave;  // 本日的数据也计算在内
+	vector<turtleAvgTopButtomData> *_topButtomLeave;	// 本日的数据也计算在内
+	float *_lastEntryPrice;								// 最近一次买入价
 
-	float _lastEntryPrice; // 最近一次买入价
-	bool _sendOrderThisBar; // 同一天内加仓就不止损
-	bool _preBreakoutFailure; // 是否有止损，用于判断止损后还要不要建仓
+
+	bool _sendOrderThisBar;								// 同一天内加仓就不止损
+	bool _preBreakoutFailure;							// 是否有止损，用于判断止损后还要不要建仓
 
 	vector<TradingPoint> _tradeHistory;
 	HoldPosition _position;

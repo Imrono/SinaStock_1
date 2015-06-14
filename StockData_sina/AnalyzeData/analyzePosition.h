@@ -59,10 +59,20 @@ public:
 	// 什么价卖多少
 	bool sell(float Price, int Position, int idx = -1);
 	// 全部卖出
-	void sellAll(float Price);
+	void sellAll(float Price, int idx = -1);
 	// 检查最大买入头寸
-	inline bool CheckPosition() {
-		return _maxBuyCount >= _buyCount;
+	inline bool CheckPosition() { return _maxBuyCount >= _buyCount;}
+	inline int GetPosition(int idx = -1) {
+		if (-1 != idx) {
+			if (_subType > idx) {
+				return _subBuyCount[idx];
+			} else {
+				ERRR("idx:%d >= _subType:%d when GetPosition\n", idx, _subType);
+				return -1;
+			}
+		} else {
+			return _buyCount;
+		}
 	}
 
 	void showUPorDOWN() {
