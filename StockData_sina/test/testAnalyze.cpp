@@ -22,8 +22,7 @@ void testAnalyzeAverage(bool IsNeedTest) {
 	historyData.StockDailyData(testStockID, NO_FUQUAN);
 
 	printf_s("# begin to extraction data\n");
-	analyzeDailyData alzDailyData;
-	alzDailyData.setStockID(testStockID);
+	analyzeDailyData alzDailyData(testStockID);
 	alzDailyData.ExtractionData(NO_FUQUAN);
 	vector<sinaDailyData> *pData = alzDailyData.getExtractData();
 	vector<averageData> ans[2];
@@ -58,8 +57,7 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 	historyData.StockDailyData(testStockID, FUQUAN);
 	// 0.2 提取文件中数据
 	INFO("# begin to extraction data\n");
-	analyzeDailyData alzDailyData;
-	alzDailyData.setStockID(testStockID);
+	analyzeDailyData alzDailyData(testStockID);
 	alzDailyData.ExtractionData(FUQUAN);
 	vector<sinaDailyData> *pData = alzDailyData.getExtractData(); // raw data
 
@@ -80,7 +78,7 @@ void testAnalyzeTurtle(bool IsNeedTest) {
 
 	float TotalMoney = 500000.0f;
 	HoldPosition Chip;
-	Chip.setTotal(TotalMoney);
+	Chip.setRemain(TotalMoney);
 	INFO("alzDailyData.turtleAnalyze\n");
 	vector<TradingPoint> *ans = alzDailyData.turtleAnalyze(numN, CreateTopButtom, LeaveTopButtom, 2, TotalMoney);
 	getchar();

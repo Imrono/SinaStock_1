@@ -3,9 +3,9 @@ using namespace std;
 #include "analyzeDailyTurtle.h"
 #include "..//Common//TraceMicro.h"
 
-WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue) {
+WayOfTurtle::WayOfTurtle(string StockName, float TotalPosition, float RiskRatio, float PointValue) : _stockID(StockName) {
 	// 参数
-	_position.setTotal(TotalPosition);
+	_position.setRemain(TotalPosition);
 	_riskRatio = RiskRatio;
 // 	_riskRatio = 0.005f;
 	_stoplossFactor = 2.0f;
@@ -23,13 +23,17 @@ WayOfTurtle::WayOfTurtle(float TotalPosition, float RiskRatio, float PointValue)
 	_avgTopButtomLeave = nullptr;
 	_topButtomLeave = nullptr;
 	_isCreate = nullptr;
+
+	if (!_position.AddStock(_stockID)) {
+		ERRR("Add Stock Failed!\n");
+	}
 }
 WayOfTurtle::~WayOfTurtle() {
 	Clear();
 }
 void WayOfTurtle::InitTopButtom(int TbNum) {
 	_tbNum = TbNum;
-	_position.addType(TbNum);
+	_position.addType(_stockID, TbNum);
 	if (nullptr == _avgTopButtomCreate)
 		_avgTopButtomCreate = new int[_tbNum];
 	if (nullptr == _topButtomCreate)
@@ -260,7 +264,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 	//////////////////////////////////////////////////////////////////////////
 	int Count = 0;
 	TradingPoint tmpTradePoint;
-	_position.setMaxLoaded(4);
+	_position.setMaxLoaded(_stockID, 4);
 	// 价格时间数据的迭代器
 	vector<sinaDailyData>::reverse_iterator r_it_begin = rawData.rbegin();
 	vector<sinaDailyData>::reverse_iterator r_it_end = rawData.rend();
@@ -339,7 +343,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 				goto UPDATE_CLOSE;
 		}
 UPDATE_CLOSE:
-		_position.updateTotal(r_it->close);
+		_position.updateTotal(_stockID, r_it->close);
 	}
 
 	delete []it_TopButtomLeave;
@@ -360,7 +364,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 	if ((1 || _preBreakoutFailure) && _turtleUnit > 0) {
 		// 有一个入场条件满足，就开始建仓
 		for (int i = 0; i < _tbNum; i++) {
-			if (!_isCreate[i] && !_position.GetPosition(i)) {
+			if (!_isCreate[i] && !_position.GetPosition(_stockID, i)) {
 				EntryPrice = (it_TopButtom[i]-1)->Top;
 				if (EntryPrice < today.top) {		// 做多突破长期或短期n日的上轨
 					// 操作
@@ -373,7 +377,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 					Trade.trade = BUY_UP;
 					Trade.tmpData = _avgTopButtomCreate[i];
 					Trade.amount = _turtleUnit*100;
-					if (_position.buy(Trade.price, Trade.amount, i)) { // 有剩余头寸，买入成功
+					if (_position.buy(Trade.price, Trade.amount, _stockID, i)) { // 有剩余头寸，买入成功
 						// 显示
 						Trade.ShowThisTradeInfo("建仓");
 						_position.getInfo();
@@ -402,7 +406,7 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 
 	float ExitPrice; // （单价/股）
 	for (int i = 0; i < _tbNum; i++) {
-		if (_isCreate[i] && _position.GetPosition(i) > 0) {		// 这种指标可以平仓
+		if (_isCreate[i] && _position.GetPosition(_stockID, i) > 0) {		// 这种指标可以平仓
 			// 有一个离场条件满足，就全部平仓
 			ExitPrice = (it_TopButtom[i]-1)->Buttom;
 			if (today.buttom < ExitPrice) {		// 做多反向突破长期或短期n日的下轨
@@ -415,8 +419,8 @@ bool WayOfTurtle::_ClearPosition(vector<turtleAvgTopButtomData>::iterator *it_To
 				}
 				Trade.trade = SELL_DOWN;
 				Trade.tmpData = _avgTopButtomLeave[i];
-				Trade.amount = _position.getMount();
-				_position.sellAll(Trade.price, i);
+				Trade.amount = _position.getMount(_stockID);
+				_position.sellAll(Trade.price, _stockID, i);
 				// 显示
 				Trade.ShowThisTradeInfo("平仓");
 				_position.getInfo();
@@ -438,10 +442,9 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 	}
 
 	float N = (it_N-1)->price;
-	float AddPrice;
 	// 不同参数，不同处理
 	for (int i = 0; i < _tbNum; i++) {
-		if (_isCreate[i] && _position.GetPosition(i) > 0) {
+		if (_isCreate[i] && _position.GetPosition(_stockID, i) > 0) {
 			float AddPrice = _lastEntryPrice[i] + _addFactor*N; // （单价/股）
 			// 一天可以加多次仓
 			while (today.top > AddPrice && _turtleUnit > 0) {
@@ -455,7 +458,7 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 				Trade.trade = BUY_UP;
 				Trade.tmpData = i;
 				Trade.amount = _turtleUnit*100;
-				if (_position.buy(Trade.price, Trade.amount, i)) { // 有剩余头寸，买入成功
+				if (_position.buy(Trade.price, Trade.amount, _stockID, i)) { // 有剩余头寸，买入成功
 					// 显示
 					Trade.ShowThisTradeInfo("加仓");
 					_position.getInfo();
@@ -479,7 +482,7 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 	float N = (it_N-1)->price;
 	float StopLossPrice;
 	for (int i = 0; i < _tbNum; i++) {
-		if (_isCreate[i] && _position.GetPosition(i) > 0) {
+		if (_isCreate[i] && _position.GetPosition(_stockID, i) > 0) {
 			StopLossPrice = _lastEntryPrice[i] - _stoplossFactor*N; // （单价/股）
 			if ((today.buttom < StopLossPrice)) {
 				// 操作
@@ -491,8 +494,8 @@ bool WayOfTurtle::_StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDa
 				}
 				Trade.trade = STOP_LOSS_SELL_DOWN;
 				Trade.tmpData = i;
-				Trade.amount = _position.getMount();
-				_position.sellAll(Trade.price, i);
+				Trade.amount = _position.getMount(_stockID);
+				_position.sellAll(Trade.price, _stockID, i);
 				// 显示
 				Trade.ShowThisTradeInfo("止损");
 				_position.getInfo();

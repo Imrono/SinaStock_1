@@ -1,5 +1,10 @@
 ﻿#include "analyzeDailyData.h"
 
+analyzeDailyData::analyzeDailyData(string StockId) : _stockID(StockId), _turtle(StockId) {
+
+}
+
+
 analyzeDailyData::~analyzeDailyData() {
 	ClearDailyData();
 }

@@ -10,18 +10,10 @@ char *TradingPoint::stockTradeStr[] = {	"BUY_UP",
 									"STOP_LOSS_BUY_COVER",
 									"ORIGIN"};
 
-HoldPosition::HoldPosition(int Types, float Total) : _subMount(5, 0), _subLastTotal(5, 0.0f), _subTotal(5, 0.0f), _subBuyCount(5, 0)
-{
-	for (int i = 0; i < Types; i++) {
-		addType();
-	}
-	_subType = Types;
+HoldPosition::HoldPosition(float Total) {
 	_total = Total;
 	_remain = 0.0f;
-	_keeps = 0.0f;
-	_mount = 0;
 	_lastTotal = 0.0f;
-	_buyCount = 0;
 }
 // 增加资金
 float HoldPosition::add (float Money) {
@@ -30,63 +22,75 @@ float HoldPosition::add (float Money) {
 	return _total;
 }
 // 减少资金
-float HoldPosition::sub(float money) {
-	if (_remain >= money) {
-		_total -= money;
-		_remain -= money;
+float HoldPosition::sub(float Money) {
+	if (_remain >= Money) {
+		_total -= Money;
+		_remain -= Money;
 	}
 	return _total;
 }
 
-bool HoldPosition::setTotal(float Total) {
-	if (_keeps < Total) {
-		_total = Total;
-		_remain = _total - _keeps;
-		_mount = 0;
-		_lastTotal = 0.0f;
-
+bool HoldPosition::setRemain(float Remain) {
+	if ( Remain > 0.0f) {
+		_total += (Remain - _remain);
+		_remain = Remain;
 		return true;
 	} else {
 		return false;
 	}
 }
 
-void HoldPosition::setMaxLoaded(int MaxBuyCount) {
-	if (MaxBuyCount >= _buyCount) {	// 增大
-		_maxBuyCount = MaxBuyCount;
-	} else {						// 减小
-		_maxBuyCount = MaxBuyCount;
+int HoldPosition::setMaxLoaded(string StockID, int MaxBuyCount) {
+	HoldPosition4Stock *tmpPosition = nullptr;
+	if (nullptr != (tmpPosition = _checkStockId(StockID))) {
+		if (MaxBuyCount >= tmpPosition->buyCount) {	// 增大
+			tmpPosition->_maxBuyCount = MaxBuyCount;
+		} else {									// 减小
+			tmpPosition->_maxBuyCount = MaxBuyCount;
+		}
+		return tmpPosition->_maxBuyCount;
+	} else {
+		return 0;
 	}
 }
 
-int HoldPosition::addType(int Num){
-	for (int i = 0; i < Num; i++) {
-		_subBuyCount.push_back(0);
-		_subMount.push_back(0);
-		_subLastTotal.push_back(0.0f);
-		_subTotal.push_back(0.0f);
-		_subType ++;
+int HoldPosition::addType(string StockID, int Num){
+	HoldPosition4Stock *tmpPosition = nullptr;
+	if (nullptr != (tmpPosition = _checkStockId(StockID))) {
+		for (int i = 0; i < Num; i++) {
+			tmpPosition->subBuyCount.push_back(0);
+			tmpPosition->subMount.push_back(0);
+			tmpPosition->subLastTotal.push_back(0.0f);
+			tmpPosition->subTotal.push_back(0.0f);
+			tmpPosition->subType ++;
+		}
+		return tmpPosition->subType;
+	} else {
+		return 0;
 	}
-	return _subType;
 }
 
 void HoldPosition::_recordTotal(float Price, int idx) {
 	_lastTotal = _total;
-// 	_keeps = _mount*Price;
-	_total = _remain + _mount*Price;
-	if (-1 != idx) {
-		if (_subType > idx) {
-			_subLastTotal[idx] = _subTotal[idx];
-			_subTotal[idx] = _subMount[idx]*Price;
-		} else {
-			ERRR("idx:%d >= _subType:%d when record\n", idx, _subType);
+	float tmp = 0.0f;
+	for (auto iter = _stockPosition.begin(); iter != _stockPosition.end(); ++iter) {
+		tmp += Price*iter->second.GetMount();
+		if (-1 != idx) {
+			if (iter->second.subType > idx) {
+				iter->second.subLastTotal[idx] = iter->second.subTotal[idx];
+				iter->second.subTotal[idx] = iter->second.subMount[idx]*Price;
+			} else {
+				ERRR("idx:%d >= _subType:%d when record\n", idx, iter->second.subType);
+			}
 		}
+
 	}
+	_total = _remain + tmp;
 }
 
 int HoldPosition::ShowThisCmp(HoldPosition *hp) {
-	float ThisTotal = _keeps+_remain;
-	float InTotal = hp->getKeeps()+hp->getRemain();
+	float ThisTotal = _total;
+	float InTotal = hp->getTotal();
 	int ans = InTotal > ThisTotal ?
 		1 : InTotal == ThisTotal ?
 		0 : -1;
@@ -114,58 +118,69 @@ int HoldPosition::ShowThisCmp(HoldPosition *hp) {
 	return ans;
 }
 
-bool HoldPosition::buy(float Price, int Position, int idx) {
+bool HoldPosition::buy(float Price, int Position, string StockName, int idx) {
 	float BuyPosition = Price*(float)Position;
-	if (_remain >= BuyPosition && _buyCount <= _maxBuyCount) {
-		_remain -= BuyPosition;
-		_mount += Position;
-		_buyCount ++;
-		if (-1 != idx) {
-			if (_subType > idx) {
-				_subMount[idx] += Position;
-				_subBuyCount[idx]++;
+	if (_remain >= BuyPosition) {
+		HoldPosition4Stock *tmpPosition;
+		if (nullptr != (tmpPosition = _checkStockId(StockName))) {
+			if (tmpPosition->Buy(Position, idx)) {
+				_remain -= BuyPosition;
+				_recordTotal(Price, idx);
+				return true;
 			} else {
-				ERRR("idx:%d >= _subType:%d when buy\n", idx, _subType);
+				return false;
 			}
+		} else {
+			ERRR("StockName:%s not exist when buying!\n", StockName.c_str());
+			return false;
 		}
-		_recordTotal(Price, idx);
-		return true;
 	} else {
-		if (_buyCount > _maxBuyCount)
-			INFO("超过最大买入次数%d\n", _maxBuyCount);
-		else
-			INFO("买入量%.2f大于剩余量%.2f。买入次数%d\n", BuyPosition, _remain, _buyCount);
+		INFO("买入量%.2f大于剩余量%.2f\n", BuyPosition, _remain);
 		return false;
 	}
 }
 // 什么价卖多少
-bool HoldPosition::sell(float Price, int Position, int idx) {
+bool HoldPosition::sell(float Price, int Position, string StockName, int idx) {
 	float SellPosition = Price*(float)Position;
-	if (_mount >= Position) {
-		if (-1 != idx) {
-			if (_subType > idx) {
-				if (_subMount[idx] < Position) {
-					return false;
-				} else {
-					_subMount[idx] -= Position;
-				}
-			} else {
-				ERRR("idx:%d >= _subType:%d when sell\n", idx, _subType);
-			}
+	HoldPosition4Stock *tmpPosition;
+	if (nullptr != (tmpPosition = _checkStockId(StockName))) {
+		if (tmpPosition->Sell(Position, idx)) {
+			_remain += SellPosition;
+			_recordTotal(Price, idx);
+			return true;
+		} else {
+			return false;
 		}
-		_remain += SellPosition;
-		_mount -= Position;
-		_recordTotal(Price, idx);
-		return true;
 	} else {
-		ERRR("卖出量大于持有量！\n");
+		ERRR("StockName:%s not exist when selling!\n", StockName.c_str());
 		return false;
 	}
 }
 // 全部卖出
-void HoldPosition::sellAll(float Price, int idx) {
-	sell(Price, _subMount[idx], idx);
-	_subBuyCount[idx] = 0;
-	_buyCount = 0;
+void HoldPosition::sellAll(float Price, string StockName, int idx) {
+	HoldPosition4Stock *tmpPosition;
+	if (nullptr != (tmpPosition = _checkStockId(StockName))) {
+		sell(Price, tmpPosition->subMount[idx], StockName, idx);
+		tmpPosition->subBuyCount[idx] = 0;
+		tmpPosition->buyCount = 0;
+	}
 	showUPorDOWN();
 }
+
+bool HoldPosition::AddStock(string StockName) {
+	HoldPosition4Stock tmpPosition;
+	tmpPosition.SetName(StockName);
+	pair<map<string, HoldPosition4Stock>::iterator, bool> Insert_Pair;
+	Insert_Pair = _stockPosition.insert(map<string, HoldPosition4Stock>::value_type(StockName, tmpPosition));
+	return Insert_Pair.second;
+}
+HoldPosition4Stock *HoldPosition::_checkStockId(string StockID) {
+	if (_stockPosition.count(StockID) > 0) {
+		return &_stockPosition[StockID];
+	} else {
+		return nullptr;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////

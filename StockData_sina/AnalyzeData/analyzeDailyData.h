@@ -20,7 +20,7 @@ enum AnalyzeType {
 class analyzeDailyData
 {
 public:
-	analyzeDailyData(){}
+	analyzeDailyData(string StockId);
 	~analyzeDailyData();
 
 	vector<sinaDailyData> *getExtractData() {return &_vecExtractData;}

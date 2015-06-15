@@ -85,7 +85,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 class WayOfTurtle {
 public:
-	WayOfTurtle(float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 100.0f);
+	WayOfTurtle(string StockName, float TotalPosition = 0.0f, float RiskRatio = 0.01f, float PointValue = 100.0f);
 	~WayOfTurtle();
 	// 计算N和avgDay内的最高最低点
 	int SetNandTopBottom(vector<sinaDailyData> &rawData, int avgN, int *avgTopButtomCreate, int *avgTopButtomLeave, int tbNum);
@@ -99,7 +99,7 @@ public:
 	vector<turtleAvgTRData> &getN() {return _N;}
 
 	HoldPosition &GetPosition() {return _position;}
-	bool SetPosition(float Total) { return _position.setTotal(Total);}
+	bool SetPosition(float Total) { return _position.setRemain(Total);}
 
 private:
 	// 目前只考虑多头情况
@@ -108,8 +108,8 @@ private:
 	int  _AddPosition(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 	bool _StopLoss(vector<turtleAvgTRData>::iterator it_N, const sinaDailyData &today, TradingPoint &Trade);
 
-	bool _HasPosition() { return _position.getMount() > 0;}
-	bool _HasPosition(int idx) { return _position.getMount() > 0;}
+	bool _HasPosition() { return _position.getMount(_stockID) > 0;}
+	bool _HasPosition(int idx) { return _position.getMount(_stockID) > 0;}
 
 	inline float getMin(float a, float b) {
 		return a < b ? a : b;
@@ -118,6 +118,7 @@ private:
 		return a > b ? a : b;
 	}
 
+	string _stockID;
 	// 前一半是建仓数据，后一半是平仓数据
 	int _avgN;
 	vector<turtleAvgTRData> _N; // 本日的数据也计算在内

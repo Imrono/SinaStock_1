@@ -1,7 +1,11 @@
 ﻿#include <vector>
+#include <map>
+#include <utility>
+#include <string>
 using namespace std;
 #include "..//Common//TraceMicro.h"
 #include "..//Common//stockData.h"
+#include "stockPosition.h"
 
 enum stockTrade {
 	// 做多
@@ -38,40 +42,45 @@ private:
 	static char *stockTradeStr[];
 };
 
-
 class HoldPosition
 {
 public:
-	HoldPosition(int Types = 0, float Total = 0.0f);
+	HoldPosition(float Total = 0.0f);
 	// 增加资金
 	float add (float Money);
 	// 减少资金
 	float sub(float money);
 	// 设置最大资金
-	bool setTotal(float Total);
+	bool setRemain(float Total);
 	// 最大买入次数
-	void setMaxLoaded(int MaxBuyCount);
+	int setMaxLoaded(string StockID, int MaxBuyCount);
 	// 插入一种类型
-	int addType(int Num = 1);
+	int addType(string StockID, int Num = 1);
 
 	// 什么价买多少
-	bool buy(float Price, int Position, int idx = -1);
+	bool buy(float Price, int Position, string StockName = "test", int idx = -1);
 	// 什么价卖多少
-	bool sell(float Price, int Position, int idx = -1);
+	bool sell(float Price, int Position, string StockName = "test", int idx = -1);
 	// 全部卖出
-	void sellAll(float Price, int idx = -1);
-	// 检查最大买入头寸
-	inline bool CheckPosition() { return _maxBuyCount >= _buyCount;}
-	inline int GetPosition(int idx = -1) {
-		if (-1 != idx) {
-			if (_subType > idx) {
-				return _subBuyCount[idx];
+	void sellAll(float Price, string StockName = "test", int idx = -1);
+
+	inline int GetPosition(string StockID = "test", int idx = -1) {
+		HoldPosition4Stock *tmpPosition = nullptr;
+		if (nullptr != (tmpPosition = _checkStockId(StockID))) {
+			if (-1 != idx) {
+				if (tmpPosition->subType > idx) {
+					return tmpPosition->subBuyCount[idx];
+				} else {
+					ERRR("idx:%d >= _subType:%d @GetPosition\n", idx, tmpPosition->subType);
+					return 0;
+				}
 			} else {
-				ERRR("idx:%d >= _subType:%d when GetPosition\n", idx, _subType);
-				return -1;
+				return tmpPosition->buyCount;
 			}
+			return tmpPosition->GetMount();
 		} else {
-			return _buyCount;
+			ERRR("StockID:%s doesn't exist @GetPosition\n", StockID.c_str());
+			return 0;
 		}
 	}
 
@@ -79,36 +88,51 @@ public:
 		DYNAMIC_TRACE(POSITION_TRACE, "lastTotal:%.2f, Total:%.2f, %s:%.2f%%\n", _lastTotal, _total
 			, _total>_lastTotal ? "UP" : "DOWN", (_total>_lastTotal ? (_total-_lastTotal) : (_lastTotal-_total))/_lastTotal*100.0f);
 	}
-	inline float getKeeps() {return _keeps;}
-	inline int   getMount() {return _mount;}
+
 	inline float getTotal() {return _total;}
 	inline float getRemain() {return _remain;}
-	inline float updateTotal(float Price) {
+	inline int   getMount(string StockID) {
+		HoldPosition4Stock *tmpPosition = nullptr;
+		if (nullptr != (tmpPosition = _checkStockId(StockID))) {
+			return tmpPosition->GetMount();
+		} else {
+			return 0;
+		}
+	}
+
+	inline float updateTotal(string StockID, float Price) {
 		_lastTotal = _total;
-		_total = _remain + Price*(float)_mount;
+		_total = _remain + Price*(float)getMount(StockID);
 		showUPorDOWN();
 		return _total;
 	}
 
 	inline void getInfo() {
-		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,keeps:%.2f,remain:%.2f,mount:%d\n", _total, _keeps, _remain,_mount);
+		DYNAMIC_TRACE(POSITION_TRACE, "total:%.2f,remain:%.2f\n", _total, _remain);
 	}
 	int ShowThisCmp(HoldPosition *hp);
 
+//////////////////////////////////////////////////////////////////////////
+	bool AddStock(string StockName);
+
 private:
 	void _recordTotal(float Price, int idx = -1);
+	HoldPosition4Stock *_checkStockId(string StockID);
 
 	float _total; // 总资产
-	float _keeps; // 现有市值
 	float _remain; // 可用余额
-	int _mount; // 持有总数
-	int _maxBuyCount; // 最大买入次数
+
+// 	int _maxBuyCount; // 最大买入次数
 	float _lastTotal; // 操作前的总资产
-	int _buyCount; // 买入次数
+// 	int _buyCount; // 买入次数
 //////////////////////////////////////////////////////////////////////////
-	int _subType;
-	vector<int> _subMount;
-	vector<float> _subLastTotal;
-	vector<float> _subTotal;
-	vector<int> _subBuyCount;
+	string _lastStock;
+//////////////////////////////////////////////////////////////////////////
+// 	int _subType;
+// 	vector<int> _subMount;
+// 	vector<float> _subLastTotal;
+// 	vector<float> _subTotal;
+// 	vector<int> _subBuyCount;
+
+	map<string, HoldPosition4Stock> _stockPosition;
 };
