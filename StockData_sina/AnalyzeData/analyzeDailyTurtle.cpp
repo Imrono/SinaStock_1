@@ -310,7 +310,7 @@ vector<TradingPoint> *WayOfTurtle::GetPositionPoint(_in_ vector<sinaDailyData> &
 		// U = (C * 1%) / (N * 每点价值);
 		// 对于A股， it_N->price为每一股的单价波动，_pointValue = 100（1手为单位），_turtleUnit的单位为（股）
 		_turtleUnit = (int)((_position.getTotal()*_riskRatio)/(it_N->price*_pointValue)+g_EPS); // 向下取整
-		if (0 == _turtleUnit) INFO("date:%4d-%2d-%2d, _turtleUnit == 0\n", r_it->date.year, r_it->date.month, r_it->date.day);
+		if (1 > _turtleUnit) INFO("date:%4d-%2d-%2d, _turtleUnit == 0\n", r_it->date.year, r_it->date.month, r_it->date.day);
 // 		printf_s("raw date:%4d-%2d-%2d -> N date:%4d-%2d-%2d, N:%f, unit:%d\n", r_it->date.year, r_it->date.month, r_it->date.day, 
 // 			it_N->date.year, it_N->date.month, it_N->date.day, it_N->price, _turtleUnit*100);
 // 		_position.getInfo();

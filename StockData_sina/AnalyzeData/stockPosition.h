@@ -10,14 +10,12 @@ class HoldPosition4Stock
 {
 public:
 	int subType;
-	int _maxBuyCount;	// 最大买入次数
+	int maxBuyCount;	// 最大买入次数
 	int buyCount;		// 买入次数
 	vector<int> subMount;
 	vector<float> subLastTotal;
 	vector<float> subTotal;
 	vector<int> subBuyCount;
-
-	HoldPosition4Stock();
 
 	bool Buy(int Position, int idx = -1);
 	bool Sell(int Position, int idx = -1);
@@ -30,6 +28,8 @@ public:
 	int addType(int Num = 1);
 	void SetName(string StockName) {_stockName = StockName;}
 	void setMaxLoaded(int MaxBuyCount);
+
+	void Init(string StockName);
 
 private:
 	string _stockName;
