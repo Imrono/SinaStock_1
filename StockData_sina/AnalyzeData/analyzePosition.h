@@ -5,7 +5,7 @@
 using namespace std;
 #include "..//Common//TraceMicro.h"
 #include "..//Common//stockData.h"
-#include "stockPosition.h"
+#include "..//Position//stockPosition.h"
 
 enum stockTrade {
 	// 做多
@@ -122,17 +122,8 @@ private:
 	float _total; // 总资产
 	float _remain; // 可用余额
 
-// 	int _maxBuyCount; // 最大买入次数
 	float _lastTotal; // 操作前的总资产
-// 	int _buyCount; // 买入次数
-//////////////////////////////////////////////////////////////////////////
 	string _lastStock;
 //////////////////////////////////////////////////////////////////////////
-// 	int _subType;
-// 	vector<int> _subMount;
-// 	vector<float> _subLastTotal;
-// 	vector<float> _subTotal;
-// 	vector<int> _subBuyCount;
-
 	map<string, HoldPosition4Stock> _stockPosition;
 };

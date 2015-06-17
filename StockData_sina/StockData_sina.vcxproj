@@ -67,7 +67,6 @@
     <ClCompile Include="AnalyzeData\analyzeDailyTurtle.cpp" />
     <ClCompile Include="AnalyzeData\analyzePosition.cpp" />
     <ClCompile Include="AnalyzeData\PositionEx.cpp" />
-    <ClCompile Include="AnalyzeData\stockPosition.cpp" />
     <ClCompile Include="Common\ErrorCode2String.cpp" />
     <ClCompile Include="Common\GlobalParam.cpp" />
     <ClCompile Include="Common\html.cpp" />
@@ -81,6 +80,8 @@
     <ClCompile Include="Data_sina\DataStruct_sina.cpp" />
     <ClCompile Include="Data_sina\getData_sina.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Position\PositionBase.cpp" />
+    <ClCompile Include="Position\stockPosition.cpp" />
     <ClCompile Include="stockHandler.cpp" />
     <ClCompile Include="test\testAnalyze.cpp" />
     <ClCompile Include="test\testMonitor.cpp" />
@@ -91,7 +92,6 @@
     <ClInclude Include="AnalyzeData\analyzeDailyTurtle.h" />
     <ClInclude Include="AnalyzeData\analyzePosition.h" />
     <ClInclude Include="AnalyzeData\PositionEx.h" />
-    <ClInclude Include="AnalyzeData\stockPosition.h" />
     <ClInclude Include="Common\ErrorCode2String.h" />
     <ClInclude Include="Common\GlobalParam.h" />
     <ClInclude Include="Common\html.h" />
@@ -104,6 +104,8 @@
     <ClInclude Include="Data_sina\DataHistory.h" />
     <ClInclude Include="Data_sina\DataStruct_sina.h" />
     <ClInclude Include="Data_sina\getData_sina.h" />
+    <ClInclude Include="Position\PositionBase.h" />
+    <ClInclude Include="Position\stockPosition.h" />
     <ClInclude Include="stockHandler.h" />
     <ClInclude Include="test\testAnalyze.h" />
     <ClInclude Include="test\testMonitor.h" />

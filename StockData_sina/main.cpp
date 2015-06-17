@@ -22,6 +22,10 @@ using namespace std;
 
 int main()
 {
+	int a = 0, b = 1, c = 2;
+	printf_s("%d\n", a +=b);
+	printf_s("%d\n", a);
+
 	printf_s("######Now @ master branch!!######\n");
 	printf_s("###### start: test Write2Buffer ######\n");
 

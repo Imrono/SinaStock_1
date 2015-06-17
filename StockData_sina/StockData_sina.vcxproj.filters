@@ -37,6 +37,12 @@
     <Filter Include="Source Files\test">
       <UniqueIdentifier>{bf423b76-a951-4826-a62f-2ebca866ca6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Position">
+      <UniqueIdentifier>{8d68e886-1fa3-4e34-9830-8ebad4653c34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Position">
+      <UniqueIdentifier>{f53de95f-5f8e-4968-8a2f-861d4603cb1a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -102,8 +108,11 @@
     <ClCompile Include="AnalyzeData\PositionEx.cpp">
       <Filter>Source Files\AnalyzeData</Filter>
     </ClCompile>
-    <ClCompile Include="AnalyzeData\stockPosition.cpp">
-      <Filter>Source Files\AnalyzeData</Filter>
+    <ClCompile Include="Position\PositionBase.cpp">
+      <Filter>Source Files\Position</Filter>
+    </ClCompile>
+    <ClCompile Include="Position\stockPosition.cpp">
+      <Filter>Source Files\Position</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,8 +176,11 @@
     <ClInclude Include="AnalyzeData\PositionEx.h">
       <Filter>Header Files\AnalyzeData</Filter>
     </ClInclude>
-    <ClInclude Include="AnalyzeData\stockPosition.h">
-      <Filter>Header Files\AnalyzeData</Filter>
+    <ClInclude Include="Position\PositionBase.h">
+      <Filter>Header Files\Position</Filter>
+    </ClInclude>
+    <ClInclude Include="Position\stockPosition.h">
+      <Filter>Header Files\Position</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
