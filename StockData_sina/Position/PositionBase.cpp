@@ -1,4 +1,4 @@
-#include "PositionBase.h"
+﻿#include "PositionBase.h"
 
 void PositionBase::Init(string StockName) {
 	_stockName = StockName;

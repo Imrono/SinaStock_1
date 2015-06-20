@@ -1,4 +1,4 @@
-#include <vector>
+ï»¿#include <vector>
 #include <map>
 #include <utility>
 #include <string>
@@ -11,8 +11,8 @@ class HoldPosition4Stock : public PositionBase
 {
 public:
 	int subType;
-	int maxBuyCount;	// ×î´óÂòÈë´ÎÊı
-	int buyCount;		// ÂòÈë´ÎÊı
+	int maxBuyCount;	// æœ€å¤§ä¹°å…¥æ¬¡æ•°
+	int buyCount;		// ä¹°å…¥æ¬¡æ•°
 	vector<int> subMount;
 	vector<float> subLastTotal;
 	vector<float> subTotal;
@@ -21,7 +21,7 @@ public:
 	bool Buy(int Position, int idx = -1);
 	bool Sell(int Position, int idx = -1);
 
-	// ²åÈëÒ»ÖÖÀàĞÍ
+	// æ’å…¥ä¸€ç§ç±»å‹
 	int addType(int Num = 1);
 	void setMaxLoaded(int MaxBuyCount);
 

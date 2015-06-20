@@ -1,4 +1,4 @@
-#ifndef POSITION_BASE_H
+﻿#ifndef POSITION_BASE_H
 #define POSITION_BASE_H
 
 #include <string>

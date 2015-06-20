@@ -1,8 +1,8 @@
-#include "stockPosition.h"
+ï»¿#include "stockPosition.h"
 
 bool HoldPosition4Stock::Buy(int Position, int idx) {
 	if (buyCount > maxBuyCount) {
-		INFO("³¬¹ı×î´óÂòÈë´ÎÊı%d @HoldPosition4Stock\n", maxBuyCount);
+		INFO("è¶…è¿‡æœ€å¤§ä¹°å…¥æ¬¡æ•°%d @HoldPosition4Stock\n", maxBuyCount);
 		return false;
 	}
 	if (-1 != idx) {
@@ -20,13 +20,13 @@ bool HoldPosition4Stock::Buy(int Position, int idx) {
 }
 bool HoldPosition4Stock::Sell(int Position, int idx) {
 	if (_mount < Position) {
-		ERRR("Âô³öÁ¿%d´óÓÚÊ£ÓàÁ¿ @HoldPosition4Stock::Sell%d\n", Position, _mount);
+		ERRR("å–å‡ºé‡%då¤§äºå‰©ä½™é‡ @HoldPosition4Stock::Sell%d\n", Position, _mount);
 		return false;
 	}
 	if (-1 != idx) {
 		if (subType > idx) {
 			if (subMount[idx] < Position) {
-				ERRR("(StockID:%s) idx:%d Âô³öÁ¿%d´óÓÚÊ£ÓàÁ¿%d @HoldPosition4Stock::Sell\n", _stockName.c_str(), idx, Position, _mount);
+				ERRR("(StockID:%s) idx:%d å–å‡ºé‡%då¤§äºå‰©ä½™é‡%d @HoldPosition4Stock::Sell\n", _stockName.c_str(), idx, Position, _mount);
 				return false;
 			} else {
 				subMount[idx] -= Position;
@@ -50,9 +50,9 @@ int HoldPosition4Stock::addType(int Num){
 }
 
 void HoldPosition4Stock::setMaxLoaded(int MaxBuyCount) {
-	if (MaxBuyCount >= buyCount) {	// Ôö´ó
+	if (MaxBuyCount >= buyCount) {	// å¢å¤§
 		maxBuyCount = MaxBuyCount;
-	} else {						// ¼õĞ¡
+	} else {						// å‡å°
 		maxBuyCount = MaxBuyCount;
 	}
 }
