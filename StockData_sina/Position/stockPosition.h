@@ -7,7 +7,7 @@ using namespace std;
 #include "..//Common//TraceMicro.h"
 #include "PositionBase.h"
 
-class HoldPosition4Stock : public PositionBase
+class stockPosition : public PositionBase
 {
 public:
 	int subType;

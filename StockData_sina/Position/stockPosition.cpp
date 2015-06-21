@@ -1,6 +1,6 @@
 ﻿#include "stockPosition.h"
 
-bool HoldPosition4Stock::Buy(int Position, int idx) {
+bool stockPosition::Buy(int Position, int idx) {
 	if (buyCount > maxBuyCount) {
 		INFO("超过最大买入次数%d @HoldPosition4Stock\n", maxBuyCount);
 		return false;
@@ -18,7 +18,7 @@ bool HoldPosition4Stock::Buy(int Position, int idx) {
 	buyCount ++;
 	return true;
 }
-bool HoldPosition4Stock::Sell(int Position, int idx) {
+bool stockPosition::Sell(int Position, int idx) {
 	if (_mount < Position) {
 		ERRR("卖出量%d大于剩余量 @HoldPosition4Stock::Sell%d\n", Position, _mount);
 		return false;
@@ -38,7 +38,7 @@ bool HoldPosition4Stock::Sell(int Position, int idx) {
 	PositionBase::Sell(Position);
 	return true;
 }
-int HoldPosition4Stock::addType(int Num){
+int stockPosition::addType(int Num){
 	for (int i = 0; i < Num; i++) {
 		subBuyCount.push_back(0);
 		subMount.push_back(0);
@@ -49,7 +49,7 @@ int HoldPosition4Stock::addType(int Num){
 	return subType;
 }
 
-void HoldPosition4Stock::setMaxLoaded(int MaxBuyCount) {
+void stockPosition::setMaxLoaded(int MaxBuyCount) {
 	if (MaxBuyCount >= buyCount) {	// 增大
 		maxBuyCount = MaxBuyCount;
 	} else {						// 减小
@@ -57,7 +57,7 @@ void HoldPosition4Stock::setMaxLoaded(int MaxBuyCount) {
 	}
 }
 
-void HoldPosition4Stock::Init(string StockName) {
+void stockPosition::Init(string StockName) {
 	PositionBase::Init(StockName);
 
 	maxBuyCount = 0;

@@ -105,13 +105,13 @@
     <ClCompile Include="Common\html.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="AnalyzeData\PositionEx.cpp">
-      <Filter>Source Files\AnalyzeData</Filter>
-    </ClCompile>
     <ClCompile Include="Position\PositionBase.cpp">
       <Filter>Source Files\Position</Filter>
     </ClCompile>
     <ClCompile Include="Position\stockPosition.cpp">
+      <Filter>Source Files\Position</Filter>
+    </ClCompile>
+    <ClCompile Include="Position\RecordPosition.cpp">
       <Filter>Source Files\Position</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,13 +173,13 @@
     <ClInclude Include="Common\html.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="AnalyzeData\PositionEx.h">
-      <Filter>Header Files\AnalyzeData</Filter>
-    </ClInclude>
     <ClInclude Include="Position\PositionBase.h">
       <Filter>Header Files\Position</Filter>
     </ClInclude>
     <ClInclude Include="Position\stockPosition.h">
+      <Filter>Header Files\Position</Filter>
+    </ClInclude>
+    <ClInclude Include="Position\RecordPosition.h">
       <Filter>Header Files\Position</Filter>
     </ClInclude>
   </ItemGroup>

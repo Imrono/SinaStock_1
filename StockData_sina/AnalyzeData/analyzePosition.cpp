@@ -41,7 +41,7 @@ bool HoldPosition::setRemain(float Remain) {
 }
 
 int HoldPosition::setMaxLoaded(string StockID, int MaxBuyCount) {
-	HoldPosition4Stock *tmpPosition = nullptr;
+	stockPosition *tmpPosition = nullptr;
 	if (nullptr != (tmpPosition = _checkStockId(StockID))) {
 		if (MaxBuyCount >= tmpPosition->buyCount) {	// 增大
 			tmpPosition->maxBuyCount = MaxBuyCount;
@@ -55,7 +55,7 @@ int HoldPosition::setMaxLoaded(string StockID, int MaxBuyCount) {
 }
 
 int HoldPosition::addType(string StockID, int Num){
-	HoldPosition4Stock *tmpPosition = nullptr;
+	stockPosition *tmpPosition = nullptr;
 	if (nullptr != (tmpPosition = _checkStockId(StockID))) {
 		for (int i = 0; i < Num; i++) {
 			tmpPosition->subBuyCount.push_back(0);
@@ -73,7 +73,7 @@ int HoldPosition::addType(string StockID, int Num){
 void HoldPosition::_recordTotal(float Price, int idx) {
 	_lastTotal = _total;
 	float tmp = 0.0f;
-	for (map<string, HoldPosition4Stock>::iterator iter = _stockPosition.begin(); iter != _stockPosition.end(); ++iter) {
+	for (map<string, stockPosition>::iterator iter = _stockPosition.begin(); iter != _stockPosition.end(); ++iter) {
 		tmp += Price*iter->second.GetMount();
 		if (-1 != idx) {
 			if (iter->second.subType > idx) {
@@ -118,13 +118,13 @@ int HoldPosition::ShowThisCmp(HoldPosition *hp) {
 	return ans;
 }
 
-bool HoldPosition::buy(float Price, int Position, string StockName, int idx) {
+bool HoldPosition::Buy(float Price, int Position, string StockName, int idx) {
 	float BuyPosition = Price*(float)Position;
 	if (_remain < BuyPosition) {
 		INFO("买入量%.2f大于剩余量%.2f @HoldPosition::buy\n", BuyPosition, _remain);
 		return false;
 	}
-	HoldPosition4Stock *tmpPosition;
+	stockPosition *tmpPosition;
 	if (nullptr == (tmpPosition = _checkStockId(StockName))) {
 		ERRR("StockName:%s not exist @HoldPosition::buy\n", StockName.c_str());
 		return false;
@@ -138,9 +138,9 @@ bool HoldPosition::buy(float Price, int Position, string StockName, int idx) {
 	}
 }
 // 什么价卖多少
-bool HoldPosition::sell(float Price, int Position, string StockName, int idx) {
+bool HoldPosition::Sell(float Price, int Position, string StockName, int idx) {
 	float SellPosition = Price*(float)Position;
-	HoldPosition4Stock *tmpPosition;
+	stockPosition *tmpPosition;
 	if (nullptr == (tmpPosition = _checkStockId(StockName))) {
 		ERRR("StockName:%s not exist @HoldPosition::sell\n", StockName.c_str());
 		return false;
@@ -155,9 +155,9 @@ bool HoldPosition::sell(float Price, int Position, string StockName, int idx) {
 }
 // 全部卖出
 void HoldPosition::sellAll(float Price, string StockName, int idx) {
-	HoldPosition4Stock *tmpPosition;
+	stockPosition *tmpPosition;
 	if (nullptr != (tmpPosition = _checkStockId(StockName))) {
-		sell(Price, tmpPosition->subMount[idx], StockName, idx);
+		Sell(Price, tmpPosition->subMount[idx], StockName, idx);
 		tmpPosition->subBuyCount[idx] = 0;
 		tmpPosition->buyCount = 0;
 	}
@@ -165,19 +165,38 @@ void HoldPosition::sellAll(float Price, string StockName, int idx) {
 }
 
 bool HoldPosition::AddStock(string StockName) {
-	HoldPosition4Stock tmpPosition;
+	stockPosition tmpPosition;
 	tmpPosition.Init(StockName);
-	pair<map<string, HoldPosition4Stock>::iterator, bool> Insert_Pair;
-	Insert_Pair = _stockPosition.insert(map<string, HoldPosition4Stock>::value_type(StockName, tmpPosition));
+	pair<map<string, stockPosition>::iterator, bool> Insert_Pair;
+	Insert_Pair = _stockPosition.insert(map<string, stockPosition>::value_type(StockName, tmpPosition));
 	return Insert_Pair.second;
 }
-HoldPosition4Stock *HoldPosition::_checkStockId(string StockID) {
+stockPosition *HoldPosition::_checkStockId(string StockID) {
 	if (_stockPosition.count(StockID) > 0) {
 		return &_stockPosition[StockID];
 	} else {
 		ERRR("Stock ID %s not exist in map @HoldPosition::_checkStockId\n", StockID.c_str());
 		return nullptr;
 	}
+}
+
+int HoldPosition::GetPosition(string StockID, int idx) {
+	stockPosition *tmpPosition = _checkStockId(StockID);
+	if (nullptr == tmpPosition) {
+		ERRR("StockID:%s doesn't exist @GetPosition\n", StockID.c_str());
+		return 0;
+	}
+	if (-1 != idx) {
+		if (tmpPosition->subType > idx) {
+			return tmpPosition->subBuyCount[idx];
+		} else {
+			ERRR("idx:%d >= _subType:%d @GetPosition\n", idx, tmpPosition->subType);
+			return 0;
+		}
+	} else {
+		return tmpPosition->buyCount;
+	}
+	return tmpPosition->GetMount();
 }
 
 //////////////////////////////////////////////////////////////////////////

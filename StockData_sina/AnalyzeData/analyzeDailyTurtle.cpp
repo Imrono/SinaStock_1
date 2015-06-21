@@ -377,7 +377,7 @@ bool WayOfTurtle::_CreatePosition(vector<turtleAvgTopButtomData>::iterator *it_T
 					Trade.trade = BUY_UP;
 					Trade.tmpData = _avgTopButtomCreate[i];
 					Trade.amount = _turtleUnit*100;
-					if (_position.buy(Trade.price, Trade.amount, _stockID, i)) { // 有剩余头寸，买入成功
+					if (_position.Buy(Trade.price, Trade.amount, _stockID, i)) { // 有剩余头寸，买入成功
 						// 显示
 						Trade.ShowThisTradeInfo("建仓");
 						_position.getInfo();
@@ -458,7 +458,7 @@ int WayOfTurtle::_AddPosition(vector<turtleAvgTRData>::iterator it_N, const sina
 				Trade.trade = BUY_UP;
 				Trade.tmpData = i;
 				Trade.amount = _turtleUnit*100;
-				if (_position.buy(Trade.price, Trade.amount, _stockID, i)) { // 有剩余头寸，买入成功
+				if (_position.Buy(Trade.price, Trade.amount, _stockID, i)) { // 有剩余头寸，买入成功
 					// 显示
 					Trade.ShowThisTradeInfo("加仓");
 					_position.getInfo();

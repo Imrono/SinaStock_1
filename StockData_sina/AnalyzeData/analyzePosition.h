@@ -58,46 +58,25 @@ public:
 	int addType(string StockID, int Num = 1);
 
 	// 什么价买多少
-	bool buy(float Price, int Position, string StockName = "test", int idx = -1);
+	bool Buy(float Price, int Position, string StockName = "test", int idx = -1);
 	// 什么价卖多少
-	bool sell(float Price, int Position, string StockName = "test", int idx = -1);
+	bool Sell(float Price, int Position, string StockName = "test", int idx = -1);
 	// 全部卖出
 	void sellAll(float Price, string StockName = "test", int idx = -1);
 
-	inline int GetPosition(string StockID = "test", int idx = -1) {
-		HoldPosition4Stock *tmpPosition = nullptr;
-		if (nullptr != (tmpPosition = _checkStockId(StockID))) {
-			if (-1 != idx) {
-				if (tmpPosition->subType > idx) {
-					return tmpPosition->subBuyCount[idx];
-				} else {
-					ERRR("idx:%d >= _subType:%d @GetPosition\n", idx, tmpPosition->subType);
-					return 0;
-				}
-			} else {
-				return tmpPosition->buyCount;
-			}
-			return tmpPosition->GetMount();
-		} else {
-			ERRR("StockID:%s doesn't exist @GetPosition\n", StockID.c_str());
-			return 0;
-		}
-	}
+	int GetPosition(string StockID = "test", int idx = -1);
 
 	void showUPorDOWN() {
 		DYNAMIC_TRACE(POSITION_TRACE, "lastTotal:%.2f, Total:%.2f, %s:%.2f%%\n", _lastTotal, _total
 			, _total>_lastTotal ? "UP" : "DOWN", (_total>_lastTotal ? (_total-_lastTotal) : (_lastTotal-_total))/_lastTotal*100.0f);
 	}
 
-	inline float getTotal() {return _total;}
+	inline float getTotal()  {return _total;}
 	inline float getRemain() {return _remain;}
 	inline int   getMount(string StockID) {
-		HoldPosition4Stock *tmpPosition = nullptr;
-		if (nullptr != (tmpPosition = _checkStockId(StockID))) {
-			return tmpPosition->GetMount();
-		} else {
-			return 0;
-		}
+		stockPosition *tmpPosition = _checkStockId(StockID);
+		if (tmpPosition)	return tmpPosition->GetMount();
+		else				return 0;
 	}
 
 	inline float updateTotal(string StockID, float Price) {
@@ -117,13 +96,13 @@ public:
 
 private:
 	void _recordTotal(float Price, int idx = -1);
-	HoldPosition4Stock *_checkStockId(string StockID);
+	stockPosition *_checkStockId(string StockID);
 
-	float _total; // 总资产
-	float _remain; // 可用余额
+	float _total;		// 总资产
+	float _remain;		// 可用余额
 
-	float _lastTotal; // 操作前的总资产
+	float _lastTotal;	// 操作前的总资产
 	string _lastStock;
 //////////////////////////////////////////////////////////////////////////
-	map<string, HoldPosition4Stock> _stockPosition;
+	map<string, stockPosition> _stockPosition;
 };

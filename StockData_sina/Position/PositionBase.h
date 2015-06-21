@@ -15,7 +15,7 @@ public:
 		return _keeps;
 	}
 
-	inline int GetMount() {return _mount;}
+	inline int   GetMount() {return _mount;}
 	inline float GetKeeps() {return _keeps;}
 
 	inline void SetName(string StockName) {_stockName = StockName;}

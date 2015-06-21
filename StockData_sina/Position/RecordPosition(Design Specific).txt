@@ -1,0 +1,57 @@
+﻿* 每天只记录一次数据
+* 数据可以手动输入也可以从某个数据源读取
+* 有写入和读取的方法
+* 读取后可以做分析
+* 格式可以导入Excel的格式转换
+* 较新的数据放在下端
+* 若交易日没有更新，在更新时加上之前的更新
+* 可以在之前的日期上补加上交易数据
+
+##INPUT
+* 生成的历史资产数据
+* 今日的输入数据
+* 持仓股的收盘价数据
+** 图形化界面输入
+
+##OUTPUT
+* txt资产数据
+** 分析后的图表
+
+##ANALYZE
+* Excel资产数据转换
+* 写文件功能
+* 股票收盘价获取函数
+** 图形化界面
+
+
+可读的txt格式如下：
+================================================================
+ Date: xxxx-xx-xx                                            
+----------------------------------------------------------------
+ *Total: xxxxxx
+ *Keeps: xxxxxx
+ *Remains: xxxxxx
+----------------------------------------------------------------
+ *Stocks & Changes: (follow time line)
+ $XXXX(xxxxxx)$ -> Remain: Mount, Keeps: Mount | ±mount @price
+                                               | ±mount @price
+                                               | ±mount @price
+ $XXXX(xxxxxx)$ -> Remain: Mount, Keeps: Mount | ±mount @price
+                                               | ±mount @price
+ $XXXX(xxxxxx)$ -> Remain: Mount, Keeps: Mount |
+================================================================
+
+Excel/csv的格式
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Date: xxxx-xx-xx
+总资产,xxxxxx
+总市值,xxxxxx
+可用额,xxxxxx
+$XXXX(xxxxxx)$,Remain_Mount,±change_mount,@price
+,,±change_mount,@price
+,,±change_mount,@price
+$XXXX(xxxxxx)$,Remain_Mount,±change_mount,@price
+,,±change_mount,@price
+,,±change_mount,@price
+$XXXX(xxxxxx)$,Remain_Mount,±change_mount,@price
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
