@@ -1,5 +1,6 @@
 ﻿File Operation in C++
 
+1. Class relationship of streams in C++
 +--------------+---------------+------------------+--------------+------------------+
 |    <ios>     |               |   <iostream>     |  <fstream>   |    <sstream>     |
 +--------------+---------------+------------------+--------------+------------------+
@@ -17,7 +18,84 @@
 |              |  <streambuf>  |                  |              |                  |
 |              |       └-------+------------------+--------------+->  stringbuf     |
 +--------------+---------------+------------------+--------------+------------------+
-|
+
+2. function prototype
+-------------------------------------------------------------------------------------
+* void open (const char * filename, openmode mode);
+filename：打开的文件名，mode：以下标志符的一个组合：
+ios::in     为输入(读)而打开文件 
+ios::out    为输出(写)而打开文件 
+ios::ate    初始位置：文件尾 
+ios::app    所有输出附加在文件末尾 
+ios::trunc  如果文件已存在则先删除该文件 
+ios::binary 二进制方式
+不同类中默认参数不同:
+ofstream ios::out | ios::trunc 
+ifstream ios::in 
+fstream  ios::in | ios::out
+-------------------------------------------------------------------------------------
+* bool is_open();
+它返回bool值，为true代表文件已经被顺利打开，false则相反。
+-------------------------------------------------------------------------------------
+* void close ();
+这个函数一旦被调用，原先的流对象(stream object)就可以被用来打开其它的文件了，这个文件也可以重新被其它的进程(process)所有访问了。
+为防止流对象被销毁时还联系着打开的文件，析构函数(destructor)将会自动调用关闭函数close。
+-------------------------------------------------------------------------------------
+验证流的状态：
+* bool bad();
+如果在读写过程中出错，返回 true 。例如：当我们要对一个不是打开为写状态的文件进行写入时，或者我们要写入的设备没有剩余空间的时候。
+* bool fail();
+除了与bad() 同样的情况下会返回 true 以外，加上格式错误时也返回true ，例如当想要读入一个整数，而获得了一个字母的时候。
+* bool eof();
+如果读文件到达文件末尾，返回true。
+* bool good();
+这是最通用的：如果调用以上任何一个函数返回true的话，返回false。
+* bool clear();
+重置以上成员函数所检查的状态标志
+-------------------------------------------------------------------------------------
+获得和设置流指针：
+所有输入/输出流对象(i/o streams objects)都有至少一个流指针：
+ifstream， 类似istream, 有一个被称为get pointer的指针，指向下一个将被读取的元素。 
+ofstream, 类似 ostream, 有一个指针 put pointer ，指向写入下一个元素的位置。 
+fstream, 类似 iostream, 同时继承了get 和 put 
+
+* pos_type tellg();
+* pos_type tellp() ;
+返回pos_type类型的值就是一个整数，tellg代表当前get流指针的位置，tellp代表当前pu 流指针的位置。
+* seekg ( pos_type position );
+* seekp ( pos_type position );
+使用这个原型，流指针被改变为指向从文件开始计算的一个绝对位置。要求传入的参数类型与函数tellg和tellp的返回值类型相同。
+* seekg ( off_type offset, seekdir direction );
+* seekp ( off_type offset, seekdir direction );
+使用这个原型可以指定由参数direction决定的一个具体的指针开始计算的一个位移(offset)。它可以是：
+ios::beg 从流开始位置计算的位移 
+ios::cur 从流指针当前位置开始计算的位移 
+ios::end 从流末尾处开始计算的位移
+流指针get和put的值对文本文件(text file)和二进制文件(binary file)的计算方法都是不同的，因为文本模式的文件中某些特殊字符可能被修改。
+由于这个原因，建议对以文本文件模式打开的文件总是使用seekg和seekp的第一种原型，而且不要对tellg或tellp的返回值进行修改。对二进制文件，你可以任意使用这些函数，应该不会有任何意外的行为产生。
+-------------------------------------------------------------------------------------
+* <<
+* >>
+只能进行文本文件的读写操作，用于二进制文件可能会产生错误。
+-------------------------------------------------------------------------------------
+二进制文件(Binary files)：
+* write ( char * buffer, streamsize size );
+* read ( char * buffer, streamsize size );
+buffer 是一块内存的地址，用来存储或读出数据。参数size 是一个整数值，表示要从缓存（buffer）中读出或写入的字符数。
+在二进制文件中，使用<<和>>，以及函数（如getline）来操作符输入和输出数据，没有什么实际意义，虽然它们是符合语法的。
+write是ostream的成员函数，被ofstream所继承
+read是istream的成员函数，被ifstream所继承。
+类 fstream 的对象同时拥有这两个函数。
+-------------------------------------------------------------------------------------
+* istream &getline (istream& is, string& str, char delim); 
+* istream &getline (istream& is, string& str);
+其中：delim  为终结符，第二种形式 delim默认为 '\n'（换行符）。
+* istream &getline(char *buffer, streamsize num);   
+* istream &getline(char *buffer, streamsize num, char delim);
+buffer及buffer的大小num，delim 终结符。
+-------------------------------------------------------------------------------------
+
+
 
 
 ←↑→↓↖↙↗↘┌└ ┐┘├╲
