@@ -43,6 +43,12 @@
     <Filter Include="Source Files\Position">
       <UniqueIdentifier>{f53de95f-5f8e-4968-8a2f-861d4603cb1a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Trading">
+      <UniqueIdentifier>{3a35d1bc-4424-4174-b74e-edff2c44d491}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Trading">
+      <UniqueIdentifier>{a692bf2e-28dd-4b3b-a659-9caf36a45fbc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -114,6 +120,12 @@
     <ClCompile Include="Position\RecordPosition.cpp">
       <Filter>Source Files\Position</Filter>
     </ClCompile>
+    <ClCompile Include="Trading\Trading.cpp">
+      <Filter>Source Files\Trading</Filter>
+    </ClCompile>
+    <ClCompile Include="Position\stockHold.cpp">
+      <Filter>Source Files\Position</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stockData.h">
@@ -180,6 +192,12 @@
       <Filter>Header Files\Position</Filter>
     </ClInclude>
     <ClInclude Include="Position\RecordPosition.h">
+      <Filter>Header Files\Position</Filter>
+    </ClInclude>
+    <ClInclude Include="Trading\Trading.h">
+      <Filter>Header Files\Trading</Filter>
+    </ClInclude>
+    <ClInclude Include="Position\stockHold.h">
       <Filter>Header Files\Position</Filter>
     </ClInclude>
   </ItemGroup>

@@ -81,10 +81,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Position\PositionBase.cpp" />
     <ClCompile Include="Position\RecordPosition.cpp" />
+    <ClCompile Include="Position\stockHold.cpp" />
     <ClCompile Include="Position\stockPosition.cpp" />
     <ClCompile Include="stockHandler.cpp" />
     <ClCompile Include="test\testAnalyze.cpp" />
     <ClCompile Include="test\testMonitor.cpp" />
+    <ClCompile Include="Trading\Trading.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnalyzeData\analyzeDailyData.h" />
@@ -105,10 +107,12 @@
     <ClInclude Include="Data_sina\getData_sina.h" />
     <ClInclude Include="Position\PositionBase.h" />
     <ClInclude Include="Position\RecordPosition.h" />
+    <ClInclude Include="Position\stockHold.h" />
     <ClInclude Include="Position\stockPosition.h" />
     <ClInclude Include="stockHandler.h" />
     <ClInclude Include="test\testAnalyze.h" />
     <ClInclude Include="test\testMonitor.h" />
+    <ClInclude Include="Trading\Trading.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
